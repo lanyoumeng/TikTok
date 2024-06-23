@@ -1,0 +1,26 @@
+# 节点名称
+name: "etcdnode0"
+# 数据存储目录
+data-dir: "/etcd-data/data"
+# 预写式日志存储目录
+wal-dir: "/etcd-data/wal"
+# 集群成员之间通讯使用URL
+listen-peer-urls: "http://0.0.0.0:2380"
+# 集群提供给外部客户端访问的URL，即外部客户端必须通过指定的IP加端口访问etcd
+listen-client-urls: "http://192.168.0.0:2379"
+
+# 集群配置
+initial-advertise-peer-urls: "http://192.168.239.161:2380"
+# 集群初始成员配置，是etcd静态部署的核心初始化配置，它说明了当前集群由哪些URLs组成，此处默认为节点名称
+initial-cluster: "etcdnode0=http://192.168.239.161:2380,etcdnode1=http://192.168.239.161:12380,etcdnode2=http://192.168.239.161:2230,etcdnode3=http://192.168.239.162:2230"
+# 初始化集群状态(new或existing)
+initial-cluster-state: "existing"
+# 引导期间etcd集群的初始集群令牌，防止不同集群之间产生交互
+initial-cluster-token: "etcd-cluster"
+# 向客户端发布的服务端点
+advertise-client-urls: "http://192.168.239.161:2379"
+# 配置日志级别，仅支持debug, info, warn, error, panic, or fatal
+log-level: "warn"
+# 配置日志输出到stderr
+log-outputs:
+  - "stderr"

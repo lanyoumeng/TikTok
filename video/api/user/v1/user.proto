@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "user/api/user/v1;v1";
+
+
+service UserService {
+    rpc Register (UserRegisterRequest) returns (UserRegisterResponse);
+    //有 redis
+    rpc Login (UserLoginRequest) returns (UserLoginResponse );
+
+    //有redis user+cnt  注意is_follow字段一直都是默认，需要其他服务调用 favorite服务取得
+    rpc UserInfo (UserRequest) returns (UserResponse);
+
+    //更新计数
+    //WorkCount
+    rpc UpdateWorkCnt(UpdateWorkCntRequest) returns(UpdateWorkCntResponse);
+    //FavoriteCount TotalFavorited
+    rpc UpdateFavoriteCnt(UpdateFavoriteCntRequest) returns(UpdateFavoriteCntResponse);
+    //FollowCount FollowerCount
+    rpc UpdateFollowCnt(UpdateFollowCntRequest) returns(UpdateFollowCntResponse);
+
+    //用户信息列表 uIds
+    rpc UserInfoList (UserInfoListrRequest) returns (UserInfoListResponse);
+
+}
+
+message User {
+    int64 id = 1; // 用户id
+    string name = 2; // 用户名称
+    int64 follow_count = 3; // 关注总数
+    int64 follower_count = 4; // 粉丝总数
+    bool is_follow = 5; // true-已关注，false-未关注
+    string avatar = 6; //用户头像
+    string background_image = 7; //用户个人页顶部大图
+    string signature = 8; //个人简介
+    int64 total_favorited = 9; //获赞数量
+    int64 work_count = 10; //作品数量
+    int64 favorite_count = 11; //点赞数量
+}
+
+
+message UserRegisterRequest {
+    string username = 1; // 注册用户名，最长32个字符
+    string password = 2; // 密码，最长32个字符
+}
+
+message UserRegisterResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+    string status_msg = 2; // 返回状态描述
+    int64 user_id = 3; // 用户id
+    string token = 4; // 用户鉴权token
+}
+
+message UserLoginRequest {
+    string username = 1; // 登录用户名
+    string password = 2; // 登录密码
+}
+
+message UserLoginResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+    string status_msg = 2; // 返回状态描述
+    int64 user_id = 3; // 用户id
+    string token = 4; // 用户鉴权token
+}
+message UserRequest {
+    string user_id = 1; // 用户id
+    string token = 2; // 用户鉴权token
+}
+
+message UserResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+    string status_msg = 2; // 返回状态描述
+    User user = 3; // 用户信息
+}
+
+message UpdateWorkCntRequest {
+    string user_id = 1; // 用户id
+    int64 work_count = 2; // 作品数量
+}
+
+message UpdateWorkCntResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+    string status_msg = 2; // 返回状态描述
+}
+
+message UpdateFavoriteCntRequest {
+    string favorite_user_id = 1; // 点赞用户id
+    string favorited_user_id = 2; // 获赞用户id
+    int64 favorite_count = 3; // 点赞数量
+    int64 total_favorited = 4; // 获赞数量
+}
+
+message UpdateFavoriteCntResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+    string status_msg = 2; // 返回状态描述
+}
+
+message UpdateFollowCntRequest {
+    string follow_user_id = 1; // 执行关注用户id
+    string followed_user_id = 2; // 被关注用户id
+    int64 follow_count = 3; // 关注数量
+    int64 follower_count = 4; // 粉丝数量
+}
+
+message UpdateFollowCntResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+    string status_msg = 2; // 返回状态描述
+}
+
+message UserInfoListrRequest {
+    repeated int64 userId = 1; // 用户id列表
+}
+
+message UserInfoListResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+    string status_msg = 2; // 返回状态描述
+    repeated User users = 3; // 用户信息列表
+}

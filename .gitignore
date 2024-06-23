@@ -1,0 +1,33 @@
+# 忽略 MySQL 数据目录
+deploy/mysql/data
+
+# 忽略 etcd 数据目录
+deply/etcd/etcd-data
+
+# 忽略所有 .log 文件
+*.log
+
+
+deply/es
+
+deply/logstash/logstash
+
+deply/nacos/logs
+
+deply/redis/data
+
+user/deply/nacos/cache
+
+user/deply/nacos/logs
+
+.idea
+
+flink/flink-1.18.0/*
+
+video/configs/config.yaml
+user/configs/config.yaml
+relation/configs/config.yaml
+message/configs/config.yaml
+favorite/configs/config.yaml
+comment/configs/config.yaml
+

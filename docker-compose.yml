@@ -1,0 +1,264 @@
+services:
+
+  etcd-node:
+    image: quay.io/coreos/etcd:v3.5.0
+    container_name: etcd-node
+    restart: always
+    ports:
+      - "2379:2379"
+    volumes:
+      - ./deply/etcd/etcd-data:/etcd-data
+    environment:
+      ETCD_ENABLE_V2: "true"
+      ALLOW_NONE_AUTHENTICATION: "yes"
+      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd-node:2379"
+      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
+    networks:
+      - TikTok-net
+
+
+  nacos:
+    image: nacos/nacos-server:latest
+    container_name: nacos
+    restart: always
+    environment:
+      - MODE=standalone
+    ports:
+      - "8848:8848"  # web 界面访问端口
+      - "9848:9848"  # 程序使用 grpc 连接的端口
+      - "9849:9849"
+    volumes:
+      - ./deply/nacos/logs:/home/nacos/logs
+    networks:
+      - TikTok-net
+
+  apisix:
+    image: apache/apisix:${APISIX_IMAGE_TAG:-3.5.0-debian}
+    container_name: apisix
+    restart: always
+    volumes:
+      - ./deply/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    depends_on:
+      - etcd-node
+    # network_mode: host #开启host模式
+    ports:
+      - "9180:9180"
+      - "9080:9080"  #代理访问端口
+      - "9091:9091"
+      - "9443:9443"
+      - "7092:9092"
+      - "7777:80" #开启apisix 80 443端口映射
+      - "8080:8080"
+      - "443:443"
+    networks:
+      - TikTok-net
+
+  dashboard:
+    image: apache/apisix-dashboard:latest
+    container_name: dashboard
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./deply/dashboard/conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
+    depends_on:
+      - apisix
+      - etcd-node
+    links:
+      - "apisix:apisix"
+    networks:
+      - TikTok-net
+
+  # Jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "16686:16686" # Jaeger UI port
+      - "6831:6831/udp" # Jaeger compact Thrift port
+      - "6832:6832/udp" # Jaeger binary Thrift port
+      - 5775:5775/udp
+      - 7654:5778
+      - 14268:14268
+      - 14250:14250
+      - 9411:9411
+    networks:
+      - TikTok-net
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    volumes:
+      - ./deply/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - TikTok-net
+
+  # Grafana
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3000:3000"
+    networks:
+      - TikTok-net
+
+  flink:
+    image: lanmengyou/my-flink:v1
+    container_name: flink
+    volumes:
+      - ./deply/flink/job/yaml:/opt/flink/job
+    ports:
+      - "8081:8081"
+      - "6123:6123"
+      - "6124:6124"
+    networks:
+      - TikTok-net
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: "PLAINTEXT://:9094,EXTERNAL://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9094,EXTERNAL://127.0.0.1:9092"  # 修改Kafka Advertised Listeners
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"  # 更新ZooKeeper连接信息
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
+      KAFKA_RESTART_ATTEMPTS: "10"
+      KAFKA_RESTART_DELAY: "5"
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zoo
+    networks:
+        - TikTok-net
+
+  zoo:
+    image: confluentinc/cp-zookeeper:7.3.2
+    hostname: zoo
+    container_name: zoo
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zoo:2888:3888
+    networks:
+      - TikTok-net
+
+  es:
+    container_name: es
+    image: elasticsearch:8.6.0
+    volumes:
+      - ./deply/es/data:/usr/share/elasticsearch/data
+      - ./deply/es/logs:/usr/share/elasticsearch/logs
+      - ./deply/es/plugins:/usr/share/elasticsearch/plugins #装 ik分词器
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - node.name=es
+      - cluster.name=elasticsearch
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - TAKE_FILE_OWNERSHIP=true
+    privileged: true
+    networks:
+      - TikTok-net
+
+  logstash:
+    image: logstash:8.6.0
+    container_name: logstash
+    volumes:
+      - ./deply/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./deply/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./deply/logstash/logstash/log/:/home/public/
+    ports:
+      - '5044:5044'
+      - '50000:50000'
+      - '50000:50000'
+      - '9600:9600'
+    environment:
+      LS_JAVA_OPTS: -Xms1024m -Xmx1024m
+      TZ: Asia/Shanghai
+      MONITORING_ENABLED: false
+    depends_on:
+      - es
+      - kafka
+    networks:
+      - TikTok-net
+
+  kibana:
+    image: kibana:8.6.0
+    container_name: kibana
+    depends_on:
+      - es
+    environment:
+      SERVER_NAME: kibana
+      SERVER_HOST: "0.0.0.0"
+      ELASTICSEARCH_HOSTS: http://es:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - TikTok-net
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.20
+    restart: always
+    ports:
+      - "7500:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123456
+      # MYSQL_DATABASE: user,video,comment,message,favorite
+    volumes:
+      # - ./deply/mysql/data:/var/lib/mysql
+      # - ./deply/mysql/conf:/etc/mysql/conf.d/
+      # - ./deply/mysql/logs:/logs
+      - ./deply/mysql:/docker-entrypoint-initdb.d
+    command:
+     --default-authentication-plugin=mysql_native_password 
+     --character-set-server=utf8mb4 
+     --collation-server=utf8mb4_general_ci 
+     --explicit_defaults_for_timestamp=true 
+     --lower_case_table_names=1
+     --log-bin=mysql-bin
+     --binlog-format=ROW
+     --server-id=1
+    networks:
+      - TikTok-net
+
+  Redis:
+    container_name: redis
+    image: redis:6.2.7
+    restart: always
+    volumes:
+      - ./deply/redis/data:/data
+      - ./deply/redis/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - TikTok-net
+
+networks:
+  TikTok-net:
+    driver: bridge
+

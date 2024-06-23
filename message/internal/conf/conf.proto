@@ -1,0 +1,154 @@
+syntax = "proto3";
+package kratos.api;
+
+option go_package = "user/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+
+message Bootstrap {
+  Server server = 1;
+  Service service = 2;
+  Data data = 3;
+  Trace trace = 4;
+  Auth auth = 5;
+  Etcd etcd = 6;
+  Prometheus prometheus = 7;
+  Kafka kafka = 8;
+  AliyunOSS aliyunOSS=9;
+}
+
+message Server {
+  message HTTP {
+    string addr = 1;
+    google.protobuf.Duration timeout = 2;
+  }
+  message GRPC {
+    string addr = 1;
+    google.protobuf.Duration timeout = 2;
+  }
+  HTTP http = 1;
+  GRPC grpc = 2;
+}
+
+message Service {
+  message Endpoint {
+    string endpoint = 1;
+  }
+
+  Endpoint user = 1;
+  Endpoint favorite = 2;
+  Endpoint video = 3;
+  Endpoint comment = 4;
+  Endpoint relation = 5;
+  Endpoint message = 6;
+}
+
+message Data {
+  message Database {
+    string driver = 1;
+    string source = 2;
+  }
+  message Redis {
+    string addr = 2;
+    string password = 3;
+    int32 db = 4;
+    google.protobuf.Duration dial_timeout = 5;
+    google.protobuf.Duration read_timeout = 6;
+    google.protobuf.Duration write_timeout = 7;
+  }
+  Database database = 1;
+  Redis redis = 2;
+}
+
+message Trace {
+  string endpoint = 1;
+}
+
+message Auth {
+  string jwt_key = 1;
+}
+
+message Etcd {
+  string address = 1;
+}
+
+message Prometheus {
+  string addr = 1;
+  string path = 2;
+}
+
+
+message Kafka {
+  string broker = 1;
+
+  message Log {
+    string topic = 1;
+    string groupId = 2;
+  }
+
+  message Video {
+    message Video {
+      string topic = 1;
+      string groupId = 2;
+    }
+    Video video = 1;
+  }
+
+  message User {
+    message User {
+      string topic = 1;
+      string groupId = 2;
+    }
+    User user = 1;
+  }
+
+  message Comment {
+    message Comment {
+      string topic = 1;
+      string groupId = 2;
+    }
+    Comment comment = 1;
+  }
+
+  message Favorite {
+    message Favorite {
+      string topic = 1;
+      string groupId = 2;
+    }
+    Favorite favorite = 1;
+  }
+
+  message Relation {
+    message Relation {
+      string topic = 1;
+      string groupId = 2;
+    }
+    Relation relation = 1;
+  }
+
+  message Message {
+    message Message {
+      string topic = 1;
+      string groupId = 2;
+    }
+    Message chat = 1;
+  }
+
+  Log log = 2;
+  Video video = 3;
+  User user = 4;
+  Comment comment = 5;
+  Favorite favorite = 6;
+  Relation relation = 7;
+  Message message = 8;
+}
+
+
+
+message AliyunOSS {
+  string endpoint = 1;
+  string accessKeyId = 2;
+  string accessKeySecret = 3;
+  string bucketName = 4;
+}

@@ -1,0 +1,42 @@
+apisix:
+  node_listen:
+    - 9080
+    - 8080
+    - 80
+  ssl:
+    enable: true
+    listen:
+      - port: 443
+  enable_ipv6: false
+  enable_control: true
+  control:
+    ip: "0.0.0.0"
+    port: 9092
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+  admin:
+    allow_admin:
+      - 0.0.0.0/0 # Please set it to the subnet address you obtained.
+        # If not set, by default all IP access is allowed.
+  etcd:
+    host:
+      - "http://etcd-node:2379"
+      # - "http://127.0.0.1:2379"
+    prefix: "/apisix"
+    timeout: 30
+
+  # 允许嵌入
+  allow_embedding: true
+
+plugin_attr:
+  prometheus:
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091
+    export_uri: /apisix/prometheus/metrics
+    # "/apisix/prometheus/metrics" 默认
+# plugins:
+#   - ...
+#   - server-info
