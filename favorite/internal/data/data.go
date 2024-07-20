@@ -84,8 +84,6 @@ func NewData(c *conf.Data,
 // NewDB .
 func NewDB(data *conf.Data) *gorm.DB {
 
-	log.Debug("db:::::", data.Database.Source)
-
 	db, err := gorm.Open(mysql.Open(data.Database.Source), &gorm.Config{})
 	if err != nil {
 
@@ -108,9 +106,6 @@ func NewRedis(conf *conf.Data) *redis.Client {
 		ReadTimeout:  conf.Redis.ReadTimeout.AsDuration(),
 	})
 	rdb.AddHook(redisotel.TracingHook{})
-	if err := rdb.Close(); err != nil {
-		log.Error(err)
-	}
 	return rdb
 }
 

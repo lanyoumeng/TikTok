@@ -83,15 +83,18 @@ func (v *VideoService) PublishList(ctx context.Context, req *pb.DouyinPublishLis
 	}, nil
 }
 
-func (v *VideoService) WorkCount(ctx context.Context, req *pb.WorkCntRequest) (*pb.WorkCntResponse, error) {
+func (v *VideoService) WorkCnt(ctx context.Context, req *pb.WorkCntRequest) (*pb.WorkCntResponse, error) {
+
 	workCount, err := v.vc.WorkCnt(ctx, req.UserId)
 	if err != nil {
+		log.Debug("workCount", workCount, "err", err)
 		return nil, err
 	}
 	return &pb.WorkCntResponse{
 		WorkCount: workCount,
 	}, nil
 }
+
 func (v *VideoService) FavoriteListByVId(ctx context.Context, req *pb.FavoriteListReq) (*pb.FavoriteListResp, error) {
 
 	videoList, err := v.vc.FavoriteListByVId(ctx, req.VideoIdList)

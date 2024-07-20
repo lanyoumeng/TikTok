@@ -98,8 +98,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
 
-	whiteList["/user.v1.UserService/Register"] = struct{}{}
-	whiteList["/user.v1.UserService/Login"] = struct{}{}
+	whiteList["/message.api.message.v1.GetNewMessages"] = struct{}{}
 
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {

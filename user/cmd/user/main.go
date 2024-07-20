@@ -178,7 +178,15 @@ func main() {
 		"span_id", tracing.SpanID(),
 	)
 
-	app, cleanup, err := wireApp(bc.Kafka, bc.Prometheus, bc.Etcd, bc.Auth, bc.Service, bc.Server, bc.Data, logger)
+	app, cleanup, err := wireApp(
+		bc.Kafka,
+		bc.Prometheus,
+		bc.Etcd,
+		bc.Auth,
+		bc.Service,
+		bc.Server,
+		bc.Data,
+		logger)
 	if err != nil {
 		panic(err)
 	}

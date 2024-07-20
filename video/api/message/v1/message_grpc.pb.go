@@ -32,7 +32,7 @@ type MessageServiceClient interface {
 	MessageSend(ctx context.Context, in *DouyinMessageSendRequest, opts ...grpc.CallOption) (*DouyinMessageSendResponse, error)
 	//  string message = 2; // 和该好友的最新聊天消息
 	//  int64 msgType = 3; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
-	//}
+	//获得用户和每个好友的最新一条消息
 	GetNewMessages(ctx context.Context, in *GetNewMessagesRequest, opts ...grpc.CallOption) (*GetNewMessagesResponse, error)
 }
 
@@ -82,7 +82,7 @@ type MessageServiceServer interface {
 	MessageSend(context.Context, *DouyinMessageSendRequest) (*DouyinMessageSendResponse, error)
 	//  string message = 2; // 和该好友的最新聊天消息
 	//  int64 msgType = 3; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
-	//}
+	//获得用户和每个好友的最新一条消息
 	GetNewMessages(context.Context, *GetNewMessagesRequest) (*GetNewMessagesResponse, error)
 	mustEmbedUnimplementedMessageServiceServer()
 }

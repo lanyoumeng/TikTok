@@ -13,7 +13,7 @@ import (
 )
 
 type FavoriteService struct {
-	pb.UnimplementedFavoriteServer
+	pb.UnimplementedFavoriteServiceServer
 	fc     *biz.FavoriteUsecase
 	JwtKey string
 	log    *log.Helper

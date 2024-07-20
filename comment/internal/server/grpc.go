@@ -98,9 +98,8 @@ func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
 
-	whiteList["/comment.v1.CommentService/CommentList"] = struct{}{}
-	whiteList["/comment.v1.CommentService/GetCommentCntByVId"] = struct{}{}
-	whiteList["/comment.v1.CommentService/GetCommentCntByVId"] = struct{}{}
+	whiteList["/comment.api.comment.v1.CommentService/CommentList"] = struct{}{}
+	whiteList["/comment.api.comment.v1.CommentService/GetCommentCntByVId"] = struct{}{}
 
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {

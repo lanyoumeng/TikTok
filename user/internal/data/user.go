@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 	favoriteV1 "user/api/favorite/v1"
 	"user/internal/biz"
 
@@ -96,6 +97,7 @@ func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount
 	followCntRes := &relationV1.FollowCntResponse{}
 	followCntRes, err := r.data.relationc.FollowCnt(ctx, &relationV1.FollowCntRequest{UserId: id})
 	if err != nil {
+		println("111888888888888888888888888888888888888888888888888")
 		return nil, err
 	}
 	count.FollowCount = followCntRes.FollowCnt
@@ -105,6 +107,7 @@ func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount
 	workCntRes := &videov1.WorkCntResponse{}
 	workCntRes, err = r.data.videoc.WorkCnt(ctx, &videov1.WorkCntRequest{UserId: id})
 	if err != nil {
+		fmt.Printf("workCntRes err:%v\n", err)
 		return nil, err
 	}
 	count.WorkCount = workCntRes.WorkCount
@@ -113,6 +116,7 @@ func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount
 	favoriteCntRes := &favoriteV1.GetFavoriteCntByUIdResponse{}
 	favoriteCntRes, err = r.data.favc.GetFavoriteCntByUId(ctx, &favoriteV1.GetFavoriteCntByUIdRequest{UserId: id})
 	if err != nil {
+		println("333888888888888888888888888888888888888888888888888")
 		return nil, err
 	}
 	count.FavoriteCount = favoriteCntRes.FavoriteCount

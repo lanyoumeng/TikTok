@@ -139,7 +139,7 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
-	log.Info(bc)
+	//log.Info(bc)
 
 	// 加入链路追踪的配置
 	if err := initTracer(bc.Trace.Endpoint); err != nil {
@@ -171,8 +171,10 @@ func main() {
 		bc.Auth,
 		bc.Server,
 		bc.Service,
-		bc.Data, logger)
+		bc.Data,
+		logger)
 	if err != nil {
+
 		panic(err)
 	}
 	defer cleanup()

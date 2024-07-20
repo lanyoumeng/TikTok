@@ -8,7 +8,7 @@ service CommentService {
 	rpc Comment (douyin_comment_send_request) returns(douyin_comment_send_response);
 	rpc CommentList(douyin_comment_list_request) returns (douyin_comment_list_response);
 
-    rpc GetCommentCntByVId(GetCommentCntByVIdReq) returns (GetCommentCntByVIdResp);
+  rpc GetCommentCntByVId(GetCommentCntByVIdReq) returns (GetCommentCntByVIdResp);
 }
 
 message Comment {

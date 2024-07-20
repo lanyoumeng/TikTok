@@ -14,13 +14,13 @@ scrape_configs:
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
     static_configs:
-      - targets: ["192.168.0.121:9090"]
+      - targets: ["172.26.71.21:9090"]
 
   - job_name: "apisix"
     scrape_interval: 5s
     metrics_path: "/apisix/prometheus/metrics"
     static_configs:
-      - targets: ["192.168.0.121:9091"]
+      - targets: ["172.26.71.21:9091"]
 
   - job_name: "TikTok-user"
     scrape_interval: 5s

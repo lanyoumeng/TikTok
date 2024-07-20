@@ -64,18 +64,13 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 
 	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
+
 		return nil, err
 
 	}
 	user, err := s.uc.UserInfo(ctx, userId)
-
-	// 获取jwt claim
-	//claim,ok:= jwt.FromContext(ctx)
-	//if ok {
-	//	s.log.Infof("jwt claim: %v", claim)
-	//}
-
 	if err != nil {
+
 		return nil, err
 	}
 
@@ -200,8 +195,8 @@ func (s *UserService) UpdateFollowCnt(ctx context.Context, req *pb.UpdateFollowC
 	}, nil
 }
 
-//用户信息列表 uIds
-//rpc UserInfoList (UserInfoListrRequest) returns (UserInfoListResponse);
+// 用户信息列表 uIds
+// rpc UserInfoList (UserInfoListrRequest) returns (UserInfoListResponse);
 func (s *UserService) UserInfoList(ctx context.Context, req *pb.UserInfoListrRequest) (*pb.UserInfoListResponse, error) {
 
 	//获取用户信息列表

@@ -158,16 +158,21 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 
 	count, err := uc.repo.RGetCountById(ctx, id)
 	if err == errno.ErrUserNotFound {
+
 		count, err = uc.repo.GetCountById(ctx, id)
 		if err != nil {
+
+			println("999999999999999999999999999999999999999999999999999")
 			return nil, err
 		}
+
 		//将用户计数信息存入redis
 		err = uc.repo.RSaveCount(ctx, count)
 		if err != nil {
 			return nil, err
 		}
 	} else if err != nil {
+		println("77777777777777777777777777777777777777777777")
 		return nil, err
 	}
 	_ = copier.Copy(&userinfo, count)

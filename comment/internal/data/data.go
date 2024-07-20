@@ -115,9 +115,6 @@ func NewRedis(conf *conf.Data) *redis.Client {
 	})
 	rdb.AddHook(redisotel.TracingHook{})
 
-	//if err := rdb.Close(); err != nil {
-	//	log.Error(err)
-	//}
 	return rdb
 }
 

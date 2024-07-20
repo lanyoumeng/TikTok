@@ -83,9 +83,6 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, video 
 	}()
 
 	if c.Grpc.Addr != "" {
-		opts = append(opts, grpc.Network(c.Grpc.Addr))
-	}
-	if c.Grpc.Addr != "" {
 		opts = append(opts, grpc.Address(c.Grpc.Addr))
 	}
 	if c.Grpc.Timeout != nil {
@@ -99,12 +96,12 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, video 
 func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
-	whiteList["/video.v1.VideoService/Feed"] = struct{}{}
+	whiteList["/video.api.video.v1.VideoService/Feed"] = struct{}{}
 
-	whiteList["/video.v1.VideoService/WorkCnt"] = struct{}{}
-	whiteList["/video.v1.VideoService/FavoriteListByVId"] = struct{}{}
-	whiteList["/video.v1.VideoService/PublishVidsByAId"] = struct{}{}
-	whiteList["/video.v1.VideoService/GetAIdByVId"] = struct{}{}
+	whiteList["/video.api.video.v1.VideoService/WorkCnt"] = struct{}{}
+	whiteList["/video.api.video.v1.VideoService/FavoriteListByVId"] = struct{}{}
+	whiteList["/video.api.video.v1.VideoService/PublishVidsByAId"] = struct{}{}
+	whiteList["/video.api.video.v1.VideoService/GetAIdByVId"] = struct{}{}
 
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {

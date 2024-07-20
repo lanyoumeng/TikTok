@@ -94,7 +94,7 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, favori
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterFavoriteServer(srv, favorite)
+	v1.RegisterFavoriteServiceServer(srv, favorite)
 
 	return srv
 }
@@ -102,10 +102,9 @@ func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
 
-	whiteList["/favorite.v1.FavoriteService/FavoriteList"] = struct{}{}
-	whiteList["/favorite.v1.FavoriteService/GetFavoriteCntByVId"] = struct{}{}
-	whiteList["/favorite.v1.FavoriteService/GetIsFavorite"] = struct{}{}
-	whiteList["/favorite.v1.FavoriteService/GetFavoriteCntByUId"] = struct{}{}
+	whiteList["/favorite.api.favorite.v1.FavoriteService/GetFavoriteCntByVId"] = struct{}{}
+	whiteList["/favorite.api.favorite.v1.FavoriteService/GetIsFavorite"] = struct{}{}
+	whiteList["/favorite.api.favorite.v1.FavoriteService/GetFavoriteCntByUId"] = struct{}{}
 
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {

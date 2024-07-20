@@ -93,20 +93,18 @@ func NewData(
 	}
 
 	return &Data{
-			db:  db,
-			rdb: rdb,
+		db:  db,
+		rdb: rdb,
 
-			userc:     userc,
-			favc:      favc,
-			commentc:  commentc,
-			relationc: relationc,
+		userc:     userc,
+		favc:      favc,
+		commentc:  commentc,
+		relationc: relationc,
 
-			kafakProducer:      kafakProducer,
-			VideoKafkaConsumer: VideoKafkaConsumer,
-			bucket:             bucket,
-		},
-		cleanup,
-		nil
+		kafakProducer:      kafakProducer,
+		VideoKafkaConsumer: VideoKafkaConsumer,
+		bucket:             bucket,
+	}, cleanup, nil
 }
 
 // NewDB .
@@ -133,9 +131,7 @@ func NewRedis(conf *conf.Data) *redis.Client {
 		ReadTimeout:  conf.Redis.ReadTimeout.AsDuration(),
 	})
 	rdb.AddHook(redisotel.TracingHook{})
-	if err := rdb.Close(); err != nil {
-		log.Error(err)
-	}
+
 	return rdb
 }
 

@@ -2,7 +2,6 @@ package token
 
 import (
 	"errors"
-	"github.com/golang-jwt/jwt/v5"
 	"reflect"
 	"time"
 
