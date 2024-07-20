@@ -103,6 +103,7 @@ func (v *videoRepo) RPublishVidsByAuthorId(ctx context.Context, authorId int64) 
 
 // redis 该用户发布视频ID列表存入redis
 func (v *videoRepo) RSavePublishVids(ctx context.Context, authorId int64, videoIds []int64) error {
+
 	key := "publishVids::" + strconv.FormatInt(authorId, 10)
 	strVideoIds := tool.Int64SliceToStrSlice(videoIds)
 
@@ -112,6 +113,10 @@ func (v *videoRepo) RSavePublishVids(ctx context.Context, authorId int64, videoI
 		interfaces[i] = v
 	}
 
+	// 假如为空，不存入redis
+	if len(interfaces) == 0 {
+		return nil
+	}
 	err := v.data.rdb.SAdd(ctx, key, interfaces...).Err()
 	if err != nil {
 		return err
@@ -121,6 +126,6 @@ func (v *videoRepo) RSavePublishVids(ctx context.Context, authorId int64, videoI
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }

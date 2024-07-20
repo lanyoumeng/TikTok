@@ -111,25 +111,18 @@ func NewRedis(conf *conf.Data) *redis.Client {
 
 func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, func(), error) {
 
-	log.Debug("etcdpoint1111111111111111", etcdpoint)
 	// ETCD源地址
 	endpoint := []string{etcdpoint.Address}
-	log.Debug("endpoint", endpoint)
-
 	// ETCD配置信息
 	etcdCfg := clientv3.Config{
 		Endpoints:   endpoint,
 		DialTimeout: 5 * time.Second,
-		// DialOptions: []grpcx.DialOption{grpcx.WithBlock()},
+		DialOptions: []grpcx.DialOption{grpcx.WithBlock()},
 	}
-
-	log.Debug("etcdCfg", etcdCfg)
 
 	// 创建ETCD客户端
 	client, err := clientv3.New(etcdCfg)
 	if err != nil {
-		log.Debug("client::::::", client)
-
 		panic(err)
 	}
 	clean := func() {
@@ -146,7 +139,6 @@ func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, 
 func NewDiscovery(etcdpoint *conf.Etcd) registry.Discovery {
 	// ETCD源地址
 	endpoint := []string{etcdpoint.Address}
-
 	// ETCD配置信息
 	etcdCfg := clientv3.Config{
 		Endpoints:   endpoint,

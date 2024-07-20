@@ -60,16 +60,18 @@ func (uc *UserUsecase) Create(ctx context.Context, u *model.User) (int64, string
 	user, err := uc.repo.UserByName(ctx, u.Name)
 	// 如果查询出错，且不是记录不存在的错误，则返回错误
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		uc.log.Debug("biz.Create/!errors.Is(err, gorm.ErrRecordNotFound)-err:", err)
 		return 0, "", err
 	}
 
 	if user != nil {
+		uc.log.Debug("biz.Create/user!=nil-err:", err)
 		return 0, "", errno.ErrUserAlreadyExist
 	}
 
 	// 验证输入数据
 	if _, err := govalidator.ValidateStruct(u); err != nil {
-
+		uc.log.Debug("biz.Create/govalidator.ValidateStruct(u)-err:", err)
 		return 0, "", err
 	}
 	// 创建一个新的用户对象，并从输入的 u 复制数据
@@ -79,12 +81,14 @@ func (uc *UserUsecase) Create(ctx context.Context, u *model.User) (int64, string
 	// 加密密码
 	newUser.Password, err = auth.Encrypt(u.Password)
 	if err != nil {
+		uc.log.Debug("biz.Create/auth.Encrypt(u.Password)-err:", err)
 		return 0, "", err
 	}
 
 	// 创建用户
 	userId, err := uc.repo.CreateUser(ctx, newUser)
 	if err != nil {
+		uc.log.Debug("biz.Create/CreateUser-err:", err)
 		return 0, "", err
 	}
 	newUser.Id = userId
@@ -95,6 +99,7 @@ func (uc *UserUsecase) Create(ctx context.Context, u *model.User) (int64, string
 
 	token, err := token.Sign(userinfo, uc.JwtKey)
 	if err != nil {
+		uc.log.Debug("biz.Create/Sign-err:", err)
 		return 0, "", errno.ErrSignToken
 	}
 
@@ -105,11 +110,14 @@ func (uc *UserUsecase) Login(ctx context.Context, u *model.User) (int64, string,
 	// 获取登录用户的所有信息
 	user, err := uc.repo.UserByName(ctx, u.Name)
 	if err != nil {
+		uc.log.Debug("biz.Login/UserByName-err:", err)
+
 		return 0, "", err
 	}
 
 	// 对比传入的明文密码和数据库中已加密过的密码是否匹配
 	if err := auth.Compare(user.Password, u.Password); err != nil {
+		uc.log.Debug("biz.Login/auth.Compare-err:", err)
 		return 0, "", errno.ErrPasswordIncorrect
 	}
 
@@ -118,6 +126,7 @@ func (uc *UserUsecase) Login(ctx context.Context, u *model.User) (int64, string,
 	_ = copier.Copy(userinfo, user)
 	token, err := token.Sign(userinfo, uc.JwtKey)
 	if err != nil {
+		uc.log.Debug("biz.Login/Sign-err:", err)
 		return 0, "", errno.ErrSignToken
 	}
 
@@ -144,14 +153,17 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 	if err == errno.ErrUserNotFound {
 		user, err = uc.repo.GetUserById(ctx, id)
 		if err != nil {
+			uc.log.Debug("biz.UserInfo/GetUserById-err:", err)
 			return nil, err
 		}
 		//将用户注册信息存入redis
 		err = uc.repo.RSaveUser(ctx, user)
 		if err != nil {
+			uc.log.Debug("biz.UserInfo/RSaveUser-err:", err)
 			return nil, err
 		}
 	} else if err != nil {
+		uc.log.Debug("biz.UserInfo/RGetUserById-err:", err)
 		return nil, err
 	}
 	_ = copier.Copy(&userinfo, user)
@@ -161,8 +173,7 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 
 		count, err = uc.repo.GetCountById(ctx, id)
 		if err != nil {
-
-			println("999999999999999999999999999999999999999999999999999")
+			uc.log.Debug("biz.UserInfo/GetCountById-err:", err)
 			return nil, err
 		}
 
@@ -172,7 +183,7 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 			return nil, err
 		}
 	} else if err != nil {
-		println("77777777777777777777777777777777777777777777")
+		uc.log.Debug("biz.UserInfo/RGetCountById-err:", err)
 		return nil, err
 	}
 	_ = copier.Copy(&userinfo, count)
@@ -195,6 +206,7 @@ func (uc *UserUsecase) UserInfoList(ctx context.Context, ids []int64) ([]*v1.Use
 	for _, id := range ids {
 		userInfo, err := uc.UserInfo(ctx, id)
 		if err != nil {
+			uc.log.Debug("biz.UserInfoList/UserInfo-err:", err)
 			return nil, err
 		}
 		userInfos = append(userInfos, userInfo)

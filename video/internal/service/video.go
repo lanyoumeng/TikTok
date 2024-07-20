@@ -106,6 +106,19 @@ func (v *VideoService) FavoriteListByVId(ctx context.Context, req *pb.FavoriteLi
 	}, nil
 }
 
+// //通过作者id 获取作者的发布视频id列表
+// rpc PublishVidsByAId(PublishVidsByAId_req) returns (PublishVidsByAIdResp);
+func (v *VideoService) PublishVidsByAId(ctx context.Context, req *pb.PublishVidsByAIdReq) (*pb.PublishVidsByAIdResp, error) {
+	videoIds, err := v.vc.PublishVidsByAId(ctx, req.AuthorId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.PublishVidsByAIdResp{
+		VideoIdList: videoIds,
+	}, nil
+
+}
+
 // 通过视频id获取作者id
 func (v *VideoService) GetAIdByVId(ctx context.Context, req *pb.GetAIdByVIdReq) (*pb.GetAIdByVIdResp, error) {
 	authorId, err := v.vc.GetAIdByVId(ctx, req.VideoId)

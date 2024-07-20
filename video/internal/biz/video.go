@@ -257,7 +257,7 @@ func (v *VideoUsecase) WorkCnt(ctx context.Context, userId int64) (int64, error)
 		//存入redis
 		err = v.repo.RSavePublishVids(ctx, userId, videoIds)
 		if err != nil {
-			v.log.Debug("biz.WorkCnt/RSavePublishVids", err)
+			v.log.Debug("biz.WorkCnt/RSavePublishVids:", err)
 			return 0, err
 
 		}
@@ -305,6 +305,35 @@ func (v *VideoUsecase) FavoriteListByVId(ctx context.Context, VideoIdList []int6
 	}
 	return respVideo, nil
 
+}
+
+func (v *VideoUsecase) PublishVidsByAId(ctx context.Context, authorId int64) ([]int64, error) {
+	videoIds, err := v.repo.RPublishVidsByAuthorId(ctx, authorId)
+	if err == errno.ErrRedisPublishVidsNotFound {
+		//  获取该用户发布视频列表
+		videos, err := v.repo.GetVideoListByAuthorId(ctx, authorId)
+		if err != nil {
+			v.log.Debug("biz.PublishVidsByAId/GetVideoListByAuthorId", err)
+			return nil, err
+		}
+		for _, video := range videos {
+			videoIds = append(videoIds, video.Id)
+
+		}
+		//存入redis
+		err = v.repo.RSavePublishVids(ctx, authorId, videoIds)
+		if err != nil {
+			v.log.Debug("biz.PublishVidsByAId/RSavePublishVids", err)
+			return nil, err
+
+		}
+
+	} else if err != nil {
+		v.log.Debug("biz.PublishVidsByAId/RPublishVidsByAuthorId", err)
+		return nil, err
+
+	}
+	return videoIds, nil
 }
 
 func (v *VideoUsecase) GetAIdByVId(ctx context.Context, videoId int64) (int64, error) {
