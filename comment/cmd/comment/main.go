@@ -168,7 +168,7 @@ func main() {
 
 	// 创建 Logger
 	logger := log.With(log.NewStdLogger(kafkaWriter),
-
+		//logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
 		"service.id", id,

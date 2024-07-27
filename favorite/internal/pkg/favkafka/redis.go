@@ -68,16 +68,15 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 	for { //消息队列里随时可能有新消息进来，所以这里是死循环，类似于读Channel
 		if message, err := reader.ReadMessage(ctx); err != nil {
-			log.Debug("read message from kafka failed: %v", err)
+			log.Errorf("read message from kafka failed: %v", err)
 			break
 		} else {
-			log.Debug("message::::::::::::", message)
 
 			// fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
 			redisKafkaMessage := RedisKafkaMessage{}
 
-			if err := json.Unmarshal(message.Value, redisKafkaMessage); err != nil {
-				log.Debug("json.Unmarshal failed: %v", err)
+			if err := json.Unmarshal(message.Value, &redisKafkaMessage); err != nil {
+				log.Errorf("json.Unmarshal failed: %v", err)
 			}
 			videoId := redisKafkaMessage.Before.VideoId
 			userId := redisKafkaMessage.Before.UserId
@@ -93,7 +92,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 						//1.string fav::<videoId>::<userId> true/false
 						key := fmt.Sprintf("fav::%d::%d", videoId, userId)
 						if err := rdb.Set(ctx, key, "true", tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
@@ -102,12 +101,12 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					g.Go(func() error {
 						key := fmt.Sprintf("userFavList::%d", userId)
 						if err := rdb.SAdd(ctx, key, videoId).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						//过期时间
 						if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
@@ -116,11 +115,11 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 						//3.string  videoFavCnt::<videoId> int64
 						key := fmt.Sprintf("videoFavCnt::%d", videoId)
 						if err := rdb.Incr(ctx, key).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
@@ -133,17 +132,17 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 						resp, err := vc.GetAIdByVId(ctx, &videoV1.GetAIdByVIdReq{VideoId: videoId})
 						if err != nil {
 							return err
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 						}
 						authorId := resp.AuthorId
 
 						key := fmt.Sprintf("userTotalFavorited::%d", authorId)
 						if err := rdb.Incr(ctx, key).Err(); err != nil {
 							return err
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 						}
 						if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
@@ -164,7 +163,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 						//1.string fav::<videoId>::<userId> true/false
 						key := fmt.Sprintf("fav::%d::%d", videoId, userId)
 						if err := rdb.Set(ctx, key, "false", tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
@@ -173,12 +172,12 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					g.Go(func() error {
 						key := fmt.Sprintf("userFavList::%d", userId)
 						if err := rdb.SRem(ctx, key, videoId).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						//过期时间
 						if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
@@ -187,11 +186,11 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 						//3.string  videoFavCnt::<videoId> int64
 						key := fmt.Sprintf("videoFavCnt::%d", videoId)
 						if err := rdb.Decr(ctx, key).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
@@ -201,24 +200,26 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 						//获取作者id
 						resp, err := vc.GetAIdByVId(ctx, &videoV1.GetAIdByVIdReq{VideoId: videoId})
 						if err != nil {
+
+							log.Errorf("set redis failed: %v", err)
 							return err
-							log.Debug("set redis failed: %v", err)
 						}
 						authorId := resp.AuthorId
 						key := fmt.Sprintf("userTotalFavorited::%d", authorId)
 						if err := rdb.Decr(ctx, key).Err(); err != nil {
+
+							log.Errorf("set redis failed: %v", err)
 							return err
-							log.Debug("set redis failed: %v", err)
 						}
 						if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-							log.Debug("set redis failed: %v", err)
+							log.Errorf("set redis failed: %v", err)
 							return err
 						}
 						return nil
 					})
 
 					if err := g.Wait(); err != nil {
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 					}
 
 				}
@@ -235,7 +236,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					//1.string fav::<videoId>::<userId> true/false
 					key := fmt.Sprintf("fav::%d::%d", videoId, userId)
 					if err := rdb.Del(ctx, key).Err(); err != nil {
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 						return err
 					}
 					return nil
@@ -244,12 +245,12 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 				g.Go(func() error {
 					key := fmt.Sprintf("userFavList::%d", userId)
 					if err := rdb.SRem(ctx, key, videoId).Err(); err != nil {
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 						return err
 					}
 					//过期时间
 					if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 						return err
 					}
 					return nil
@@ -258,11 +259,11 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					//3.string  videoFavCnt::<videoId> int64
 					key := fmt.Sprintf("videoFavCnt::%d", videoId)
 					if err := rdb.Decr(ctx, key).Err(); err != nil {
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 						return err
 					}
 					if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 						return err
 					}
 					return nil
@@ -272,17 +273,17 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					key := fmt.Sprintf("userTotalFavorited::%d", userId)
 					if err := rdb.Decr(ctx, key).Err(); err != nil {
 						return err
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 					}
 					if err := rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Err(); err != nil {
-						log.Debug("set redis failed: %v", err)
+						log.Errorf("set redis failed: %v", err)
 						return err
 					}
 					return nil
 				})
 
 				if err := g.Wait(); err != nil {
-					log.Debug("set redis failed: %v", err)
+					log.Errorf("set redis failed: %v", err)
 				}
 
 			}

@@ -99,7 +99,11 @@ func NewDB(conf *conf.Data) *gorm.DB {
 	}
 
 	// 自动迁移模型，将模型的结构映射到数据库表中
-	db.AutoMigrate(&model.Comment{})
+	err = db.AutoMigrate(&model.Comment{})
+	if err != nil {
+		log.Errorf("AutoMigrate model.Comment failed: %v", err)
+		return nil
+	}
 
 	return db
 }

@@ -29,6 +29,7 @@ func (s *UserService) Register(ctx context.Context, req *pb.UserRegisterRequest)
 	//s.log.Debug("user:", user)
 	userId, token, err := s.uc.Create(ctx, user)
 	if err != nil {
+		s.log.Error("service.Register/Create-err:", err)
 		return &pb.UserRegisterResponse{
 			StatusCode: -1,
 			StatusMsg:  "创建用户失败/用户已存在",
@@ -43,15 +44,21 @@ func (s *UserService) Register(ctx context.Context, req *pb.UserRegisterRequest)
 	}, nil
 }
 func (s *UserService) Login(ctx context.Context, req *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
+
 	// var user *biz.User
 	user := &model.User{} // 初始化 user
 	user.Name = req.Username
 	user.Password = req.Password
 
 	userId, token, err := s.uc.Login(ctx, user)
-
 	if err != nil {
-		return nil, err
+		s.log.Error("service.Login/Login-err:", err)
+
+		return &pb.UserLoginResponse{
+			StatusCode: -1,
+			StatusMsg:  "登录失败",
+		}, err
+
 	}
 	return &pb.UserLoginResponse{
 		StatusCode: 0,
@@ -64,14 +71,20 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 
 	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
-
-		return nil, err
+		s.log.Error("err:", err)
+		return &pb.UserResponse{
+			StatusCode: -1,
+			StatusMsg:  "ParseInt函数失败",
+		}, err
 
 	}
 	user, err := s.uc.UserInfo(ctx, userId)
 	if err != nil {
-
-		return nil, err
+		s.log.Error("err:", err)
+		return &pb.UserResponse{
+			StatusCode: -1,
+			StatusMsg:  "获取用户信息失败",
+		}, err
 	}
 
 	return &pb.UserResponse{
@@ -86,18 +99,21 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 func (s *UserService) UpdateWorkCnt(ctx context.Context, req *pb.UpdateWorkCntRequest) (*pb.UpdateWorkCntResponse, error) {
 	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
 	count := &model.UserCount{}
 	count, err = s.uc.RGetCountById(ctx, userId)
 	if err != nil {
+		s.log.Errorf("err:%v  userId:%v", err, userId)
 		return nil, err
 	}
 	count.WorkCount = req.WorkCount
 
 	err = s.uc.RSaveCount(ctx, count)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 
 	}
@@ -114,28 +130,33 @@ func (s *UserService) UpdateFavoriteCnt(ctx context.Context, req *pb.UpdateFavor
 	//更新点赞用户的计数信息 FavoriteUserId
 	FavoriteUserId, err := strconv.ParseInt(req.FavoriteUserId, 10, 64)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 	count := &model.UserCount{}
 	count, err = s.uc.RGetCountById(ctx, FavoriteUserId)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 	count.FavoriteCount = req.FavoriteCount
 
 	err = s.uc.RSaveCount(ctx, count)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
 	//更新被点赞用户的计数信息 FavoritedUserId
 	FavoritedUserId, err := strconv.ParseInt(req.FavoritedUserId, 10, 64)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 
 	}
 	count, err = s.uc.RGetCountById(ctx, FavoritedUserId)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 
 	}
@@ -143,6 +164,7 @@ func (s *UserService) UpdateFavoriteCnt(ctx context.Context, req *pb.UpdateFavor
 
 	err = s.uc.RSaveCount(ctx, count)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
@@ -156,29 +178,34 @@ func (s *UserService) UpdateFollowCnt(ctx context.Context, req *pb.UpdateFollowC
 	//更新执行关注的 用户的计数信息 FollowUserId
 	userId, err := strconv.ParseInt(req.FollowUserId, 10, 64)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
 	count := &model.UserCount{}
 	count, err = s.uc.RGetCountById(ctx, userId)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 	count.FollowCount = req.FollowCount
 
 	err = s.uc.RSaveCount(ctx, count)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
 	//更新被关注用户的计数信息 FollowedUserId
 	followedUserId, err := strconv.ParseInt(req.FollowedUserId, 10, 64)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
 	count, err = s.uc.RGetCountById(ctx, followedUserId)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
@@ -186,6 +213,7 @@ func (s *UserService) UpdateFollowCnt(ctx context.Context, req *pb.UpdateFollowC
 
 	err = s.uc.RSaveCount(ctx, count)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 
@@ -203,6 +231,7 @@ func (s *UserService) UserInfoList(ctx context.Context, req *pb.UserInfoListrReq
 	userInfoList := make([]*pb.User, 5)
 	userInfoList, err := s.uc.UserInfoList(ctx, req.UserId)
 	if err != nil {
+		s.log.Error("err:", err)
 		return nil, err
 	}
 

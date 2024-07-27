@@ -4,7 +4,6 @@ import (
 	"favorite/internal/conf"
 	"favorite/internal/pkg/favkafka"
 	"flag"
-	"fmt"
 	knacos "github.com/go-kratos/kratos/contrib/config/nacos/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
@@ -55,10 +54,9 @@ func initTracer(url string) error {
 	// 创建 Jaeger exporter
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
 	if err != nil {
-		log.Debug("666666666")
 		return err
 	}
-	log.Debug("7777777777")
+
 	tp := tracesdk.NewTracerProvider(
 		// 将基于父span的采样率设置为100%
 		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(1.0))),
@@ -129,24 +127,15 @@ func main() {
 		),
 	)
 	defer c.Close()
-	log.Debug("3333333333:", c)
 
 	if err := c.Load(); err != nil {
 		log.Debug("c.Load():", c)
 		panic(err)
 	}
-	// acquire config value
-	foo, err := c.Value("/TikTok-config/favorite").String()
-	if err != nil {
-		log.Debug(err)
-	}
-	log.Debug("123456" + foo)
-
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
-	fmt.Printf("config: %+v", bc)
 
 	// 加入链路追踪的配置
 	if err := initTracer(bc.Trace.Endpoint); err != nil {

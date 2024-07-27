@@ -6,13 +6,13 @@ import (
 )
 
 type Message struct {
-	Id         int64     `json:"id,omitempty" gorm:"primary_key;autoIncrement:true"`
-	ToUserId   int64     `json:"to_user_id,omitempty"`
-	FromUserId int64     `json:"from_user_id,omitempty"`
-	Content    string    `json:"content,omitempty"`
-	CreatedAt  time.Time `json:"create_time" gorm:"column:create_at;autoCreateTime"`
+	Id         int64     `json:"id,omitempty" gorm:"column:id;primaryKey;autoIncrement"`
+	ToUserId   int64     `json:"to_user_id,omitempty" gorm:"column:to_user_id"`
+	FromUserId int64     `json:"from_user_id,omitempty" gorm:"column:from_user_id"`
+	Content    string    `json:"content,omitempty" gorm:"column:content"`
+	CreateTime time.Time `json:"create_time" gorm:"column:create_time;autoCreateTime"`
 
-	UpdatedAt time.Time `gorm:"column:update_at;autoUpdateTime"`
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
 	DeletedAt gorm.DeletedAt
 }
 

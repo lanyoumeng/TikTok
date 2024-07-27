@@ -15,8 +15,8 @@ type Video struct {
 	PlayUrl  string `json:"play_url" gorm:"column:play_url;not null;comment:视频播放地址"`
 	CoverUrl string `json:"cover_url" gorm:"column:cover_url;not null;comment:视频封面地址"`
 
-	CreatedAt time.Time      `gorm:"column:create_at;autoCreateTime"`
-	UpdatedAt time.Time      `gorm:"column:update_at;autoUpdateTime"`
+	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime"`
 	DeletedAt gorm.DeletedAt // 软删除 删除时间
 }
 

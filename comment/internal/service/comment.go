@@ -26,6 +26,7 @@ func NewCommentService(uc *biz.CommentUsecase, auth *conf.Auth, logger log.Logge
 func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendRequest) (*pb.DouyinCommentSendResponse, error) {
 	user, err := token.ParseToken(req.Token, c.JwtKey)
 	if err != nil {
+		c.log.Errorf("token.ParseToken error: %v", err)
 		return nil, err
 	}
 	// 1-发布评论，2-删除评论
@@ -38,6 +39,7 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 
 		comment, err := c.uc.SendComment(ctx, comment)
 		if err != nil {
+			c.log.Errorf("SendComment error: %v", err)
 			return nil, err
 		}
 
@@ -47,6 +49,7 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 		// getuserinfoByUIdVIdAId
 		userinfo, err = c.uc.GetUserinfoByUIdVIdAId(ctx, user.UserId, req.VideoId)
 		if err != nil {
+			c.log.Errorf("GetUserinfoByUIdVIdAId error: %v", err)
 			return nil, err
 		}
 		commentresp.Id = comment.Id
@@ -67,6 +70,7 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 
 		err := c.uc.DelComment(ctx, req.CommentId)
 		if err != nil {
+			c.log.Errorf("DelComment error: %v", err)
 			return nil, err
 		}
 
@@ -86,6 +90,7 @@ func (c *CommentService) CommentList(ctx context.Context, req *pb.DouyinCommentL
 	// 获取评论列表
 	commentList, err := c.uc.CommentList(ctx, req.VideoId)
 	if err != nil {
+		c.log.Errorf("CommentList error: %v", err)
 		return nil, err
 	}
 
@@ -101,6 +106,7 @@ func (c *CommentService) GetCommentCntByVId(ctx context.Context, req *pb.GetComm
 	//GetCommentCntByVId
 	cnt, err := c.uc.GetCommentCntByVId(ctx, req.VideoId)
 	if err != nil {
+		c.log.Errorf("GetCommentCntByVId error: %v", err)
 		return nil, err
 	}
 

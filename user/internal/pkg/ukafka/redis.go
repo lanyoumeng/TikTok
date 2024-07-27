@@ -65,16 +65,14 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 	for { //消息队列里随时可能有新消息进来，所以这里是死循环，类似于读Channel
 		if message, err := reader.ReadMessage(ctx); err != nil {
-			fmt.Printf("read message from kafka failed: %v", err)
+			log.Errorf("read message from kafka failed: %v", err)
 			break
 		} else {
-			log.Debug("message::::::::::::", message)
-
 			// fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
 			redisKafkaMessage := RedisKafkaMessage{}
 			var id int64
-			if err := json.Unmarshal(message.Value, redisKafkaMessage); err != nil {
-				fmt.Printf("json.Unmarshal failed: %v", err)
+			if err := json.Unmarshal(message.Value, &redisKafkaMessage); err != nil {
+				log.Errorf("json.Unmarshal failed: %v", err)
 			}
 			if redisKafkaMessage.Op == "u" || redisKafkaMessage.Op == "d" {
 				id = redisKafkaMessage.Before.Id
@@ -84,7 +82,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 				//删除缓存
 				err = rdb.Del(ctx, fmt.Sprintf("user::%d", id)).Err()
 				if err != nil {
-					fmt.Printf("delete cache failed: %v", err)
+					log.Errorf("delete cache failed: %v", err)
 				}
 
 			}

@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	"strconv"
 	"video/internal/pkg/errno"
@@ -18,9 +19,10 @@ func (v *videoRepo) RZSetVideoIds(c context.Context, key string, latestTime int6
 		Max:    strconv.FormatInt(latestTime, 10),
 		Offset: 0,
 		Count:  30}).Result()
-	if err == redis.Nil || len(videoStr) == 0 {
+	if errors.Is(err, redis.Nil) || len(videoStr) == 0 {
 		return 0, nil, errno.ErrRedisVIdNotFound
 	} else if err != nil {
+		v.log.Errorf("get cache failed: %v", err)
 		return 0, nil, err
 	}
 	videoIds := make([]int64, len(videoStr))
@@ -39,8 +41,13 @@ func (v *videoRepo) RZSetSaveVIds(ctx context.Context, value []int64, scores []f
 	for i, val := range value {
 		z[i] = &redis.Z{Score: scores[i], Member: strconv.FormatInt(val, 10)}
 	}
+
+	if len(z) == 0 {
+		return nil
+	}
 	err := v.data.rdb.ZAdd(ctx, "videoAll", z...).Err()
 	if err != nil {
+		v.log.Errorf("add cache failed: %v", err)
 		return err
 	}
 	return nil
@@ -50,10 +57,11 @@ func (v *videoRepo) RGetVideoInfo(ctx context.Context, videoId int64) (*model.Vi
 	//HGet(c context.Context, key string, filed string) (string, error)
 	key := "videoInfo::" + strconv.FormatInt(videoId, 10)
 	video, err := v.data.rdb.HGetAll(ctx, key).Result()
-	if err == redis.Nil || len(video) == 0 {
+	if errors.Is(err, redis.Nil) || len(video) == 0 {
 		return nil, errno.ErrRedisVInfoNotFound
 
 	} else if err != nil {
+		v.log.Errorf("get cache failed: %v", err)
 		return nil, err
 	}
 	videoInfo := &model.Video{}
@@ -76,12 +84,14 @@ func (v *videoRepo) RSaveVideoInfo(ctx context.Context, video *model.Video) erro
 		"play_url":  video.PlayUrl,
 	}).Err()
 	if err != nil {
+		v.log.Errorf("add cache failed: %v", err)
 		return err
 	}
 
 	//过期时间
 	_, err = v.data.rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Result()
 	if err != nil {
+		v.log.Errorf("add cache failed: %v", err)
 		return err
 	}
 
@@ -92,9 +102,10 @@ func (v *videoRepo) RSaveVideoInfo(ctx context.Context, video *model.Video) erro
 func (v *videoRepo) RPublishVidsByAuthorId(ctx context.Context, authorId int64) ([]int64, error) {
 	key := "publishVids::" + strconv.FormatInt(authorId, 10)
 	videoIds, err := v.data.rdb.SMembers(ctx, key).Result()
-	if err == redis.Nil || len(videoIds) == 0 {
+	if errors.Is(err, redis.Nil) || len(videoIds) == 0 {
 		return nil, errno.ErrRedisPublishVidsNotFound
 	} else if err != nil {
+		v.log.Errorf("get cache failed: %v", err)
 		return nil, err
 	}
 
@@ -119,11 +130,13 @@ func (v *videoRepo) RSavePublishVids(ctx context.Context, authorId int64, videoI
 	}
 	err := v.data.rdb.SAdd(ctx, key, interfaces...).Err()
 	if err != nil {
+		v.log.Errorf("add cache failed: %v", err)
 		return err
 	}
 	//过期时间
 	_, err = v.data.rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Result()
 	if err != nil {
+		v.log.Errorf("add cache failed: %v", err)
 		return err
 	}
 

@@ -9,8 +9,8 @@ import (
 // name索引
 type User struct {
 	Id              int64  `json:"id" gorm:"column:id;primaryKey;autoIncrement;comment:用户id"`
-	Name            string `json:"name" gorm:" column:name;uniqueIndex;;type:varchar(32);not null;comment:用户名称" valid:"required,stringlength(6|32)"`
-	Password        string `json:"password" gorm:"column:password;not null;;comment:用户密码"  valid:"required,stringlength(6|32)"`
+	Name            string `json:"name" gorm:" column:name;uniqueIndex;type:varchar(32);not null;comment:用户名称" valid:"required,stringlength(6|32)"`
+	Password        string `json:"password" gorm:"column:password;not null;comment:用户密码"  valid:"required,stringlength(6|32)"`
 	Avatar          string `json:"avatar" gorm:"column:avatar;omitempty;comment:用户头像"`
 	BackgroundImage string `json:"background_image" gorm:"column:background_image;omitempty;comment:用户个人页顶部大图"`
 	Signature       string `json:"signature" gorm:"column:signature;omitempty;comment:个人简介"`

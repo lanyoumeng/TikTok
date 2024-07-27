@@ -4,9 +4,16 @@ package video.api.video.v1;
 
 option go_package = "/video/api/video/v1;v1";
 
+import "google/api/annotations.proto";
+
 service VideoService {
 	rpc Feed(douyin_feed_request)returns (douyin_feed_response);
-  rpc Publish(douyin_publish_action_request)returns (douyin_publish_action_response);
+  rpc Publish(douyin_publish_action_request)returns (douyin_publish_action_response){
+    option (google.api.http) = {
+      post: "/douyin/publish/action"
+      body: "*"
+    };
+  };
   rpc PublishList(douyin_publish_list_request)returns (douyin_publish_list_response);
 
   rpc WorkCnt (WorkCnt_request)returns (WorkCnt_response);

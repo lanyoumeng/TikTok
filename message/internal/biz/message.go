@@ -32,6 +32,7 @@ func (m *MessageUsecase) SendMessage(ctx context.Context, message model.Message)
 
 	err := m.repo.SaveMessage(ctx, message)
 	if err != nil {
+		m.log.Error("SaveMessage err:", err)
 		return err
 	}
 	return nil
@@ -43,13 +44,14 @@ func (m *MessageUsecase) GetMessageRecord(ctx context.Context, userId, toUserId,
 	// 1. 查询mysql消息记录
 	messageList, err := m.repo.GetMessageRecord(ctx, userId, toUserId, preMsgTime)
 	if err != nil {
+		m.log.Error("GetMessageRecord err:", err)
 		return nil, err
 	}
 	// 2. 转换为pb.Message
 	var pbMessageList []*pb.Message
 	for _, message := range messageList {
-		// 将 CreatedAt 转换为字符串
-		createdAtStr := message.CreatedAt.Format(time.RFC3339)
+		// 将 CreateTime 转换为字符串
+		createdAtStr := message.CreateTime.Format(time.RFC3339)
 		pbMessage := &pb.Message{
 			Id:         message.Id,
 			FromUserId: message.FromUserId,
@@ -73,6 +75,7 @@ func (m *MessageUsecase) GetLatestMessage(ctx context.Context, userId int64, fri
 		//看是用户发的，还是好友发的
 		latestMessage, err := m.repo.GetLatestMessage(ctx, userId, friendId)
 		if err != nil {
+			m.log.Error("GetLatestMessage err:", err)
 			return nil, err
 		}
 

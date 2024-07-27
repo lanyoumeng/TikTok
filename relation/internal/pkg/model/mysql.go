@@ -6,12 +6,12 @@ import (
 )
 
 type Relation struct {
-	Id       int64 `json:"id,omitempty" gorm:"primaryKey;autoIncrement"`
-	UserId   int64 `json:"user_id,omitempty" gorm:"primaryKey;foreignKey"`
-	ToUserId int64 `json:"to_user_id,omitempty" gorm:"primaryKey;foreignKey"`
+	Id       int64 `json:"id,omitempty" gorm:"column:id;primaryKey;autoIncrement"`
+	UserId   int64 `json:"user_id,omitempty" gorm:"column:user_id"`
+	ToUserId int64 `json:"to_user_id,omitempty" gorm:"column:to_user_id"`
 
-	CreatedAt time.Time `gorm:"column:create_at;autoCreateTime"`
-	UpdatedAt time.Time `gorm:"column:update_at;autoUpdateTime"`
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
 	DeletedAt gorm.DeletedAt
 }
 

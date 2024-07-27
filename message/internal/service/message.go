@@ -34,12 +34,14 @@ func (s *MessageService) MessageRecord(ctx context.Context, req *pb.DouyinMessag
 	//获取user
 	user, err := token.ParseToken(req.Token, s.JwtKey)
 	if err != nil {
+		s.log.Errorf("token.ParseToken error: %v", err)
 		return nil, err
 
 	}
 	//获取消息记录
 	messageRecord, err := s.uc.GetMessageRecord(ctx, user.UserId, req.ToUserId, req.PreMsgTime)
 	if err != nil {
+		s.log.Errorf("GetMessageRecord error: %v", err)
 		return nil, err
 
 	}
@@ -52,6 +54,7 @@ func (s *MessageService) MessageRecord(ctx context.Context, req *pb.DouyinMessag
 func (s *MessageService) MessageSend(ctx context.Context, req *pb.DouyinMessageSendRequest) (*pb.DouyinMessageSendResponse, error) {
 	user, err := token.ParseToken(req.Token, s.JwtKey)
 	if err != nil {
+		s.log.Errorf("token.ParseToken error: %v", err)
 		return nil, err
 	}
 	message := model.Message{
@@ -63,6 +66,7 @@ func (s *MessageService) MessageSend(ctx context.Context, req *pb.DouyinMessageS
 	err = s.uc.SendMessage(ctx, message)
 
 	if err != nil {
+		s.log.Errorf("SendMessage error: %v", err)
 		return nil, err
 
 	}
@@ -81,11 +85,13 @@ func (s *MessageService) MessageSend(ctx context.Context, req *pb.DouyinMessageS
 func (s *MessageService) GetNewMessages(ctx context.Context, req *pb.GetNewMessagesRequest) (*pb.GetNewMessagesResponse, error) {
 	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
+		s.log.Errorf("strconv.ParseInt error: %v", err)
 		return nil, err
 
 	}
 	latestMessageList, err := s.uc.GetLatestMessage(ctx, userId, req.ToUserId)
 	if err != nil {
+		s.log.Errorf("GetLatestMessage error: %v", err)
 		return nil, err
 	}
 

@@ -66,15 +66,14 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 	for { //消息队列里随时可能有新消息进来，所以这里是死循环，类似于读Channel
 		if message, err := reader.ReadMessage(ctx); err != nil {
-			fmt.Printf("read message from kafka failed: %v", err)
+			log.Errorf("read message from kafka failed: %v", err)
 			break
 		} else {
-			log.Debug("message::::::::::::", message)
 
 			// fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
 			redisKafkaMessage := RedisKafkaMessage{}
-			if err := json.Unmarshal(message.Value, redisKafkaMessage); err != nil {
-				fmt.Printf("json.Unmarshal failed: %v", err)
+			if err := json.Unmarshal(message.Value, &redisKafkaMessage); err != nil {
+				log.Errorf("json.Unmarshal failed: %v", err)
 			}
 
 			//关注用户的id  set  follow::user_id 关注用户的ids
@@ -97,21 +96,21 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 				err := rdb.SAdd(ctx, "follow::"+strconv.FormatInt(userId, 10), redisKafkaMessage.After.ToUserId).Err()
 				if err != nil {
-					fmt.Printf("SAdd failed: %v", err)
+					log.Errorf("SAdd failed: %v", err)
 				}
 				//过期时间
 				err = rdb.Expire(ctx, "follow::"+strconv.FormatInt(userId, 10), 24*time.Hour).Err()
 				if err != nil {
-					fmt.Printf("Expire failed: %v", err)
+					log.Errorf("Expire failed: %v", err)
 				}
 				err = rdb.SAdd(ctx, "follower::"+strconv.FormatInt(toUserId, 10), redisKafkaMessage.After.UserId).Err()
 				if err != nil {
-					fmt.Printf("SAdd failed: %v", err)
+					log.Errorf("SAdd failed: %v", err)
 				}
 				//过期时间
 				err = rdb.Expire(ctx, "follower::"+strconv.FormatInt(toUserId, 10), 24*time.Hour).Err()
 				if err != nil {
-					fmt.Printf("Expire failed: %v", err)
+					log.Errorf("Expire failed: %v", err)
 				}
 			}
 
@@ -121,21 +120,21 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 				err := rdb.SRem(ctx, "follow::"+strconv.FormatInt(userId, 10), redisKafkaMessage.Before.ToUserId).Err()
 				if err != nil {
-					fmt.Printf("SRem failed: %v", err)
+					log.Errorf("SRem failed: %v", err)
 				}
 				//过期时间
 				err = rdb.Expire(ctx, "follow::"+strconv.FormatInt(userId, 10), 24*time.Hour).Err()
 				if err != nil {
-					fmt.Printf("Expire failed: %v", err)
+					log.Errorf("Expire failed: %v", err)
 				}
 				err = rdb.SRem(ctx, "follower::"+strconv.FormatInt(toUserId, 10), redisKafkaMessage.Before.UserId).Err()
 				if err != nil {
-					fmt.Printf("SRem failed: %v", err)
+					log.Errorf("SRem failed: %v", err)
 				}
 				//过期时间
 				err = rdb.Expire(ctx, "follower::"+strconv.FormatInt(toUserId, 10), 24*time.Hour).Err()
 				if err != nil {
-					fmt.Printf("Expire failed: %v", err)
+					log.Errorf("Expire failed: %v", err)
 				}
 			}
 

@@ -34,31 +34,26 @@ func NewBucket(aliyun *conf.AliyunOSS) (*oss.Bucket, error) {
 	if err != nil {
 		log.Fatalf("Error obtaining bucket: %s", err)
 	}
-	log.Debug("init oss success:++++++++++++++++++++", bucket)
-
 	return bucket, nil
 
 }
 
 func UploadFile(bucket *oss.Bucket, videoKafkaMessage *model.VideoKafkaMessage) (string, string, error) {
 
-	//currentDir, _ := os.Getwd()
-	//fmt.Println(" UploadFile工作目录:", currentDir)
+	currentDir, _ := os.Getwd()
+	log.Debug(" UploadFile工作目录:", currentDir, "  videoKafkaMessage.VideoPath:", videoKafkaMessage.VideoPath)
 
 	// 上传文件
 	//log.Debug("begin upload file to oss")
 	err := bucket.PutObjectFromFile("videos/"+videoKafkaMessage.VideoFileName, videoKafkaMessage.VideoPath, oss.ObjectACL(oss.ACLPublicRead))
 	if err != nil {
-		fmt.Printf("\n上传文件失败,发生错误：%v\n", err)
+		log.Debugf("upload file failed: %v", err)
 		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
 	}
-
-	//log.Debug("upload file to oss success")
 
 	// 获取可播放的视频 URL
 	playURL := fmt.Sprintf("https://%s.%s/%s", bucket.BucketName, bucket.GetConfig().Endpoint, "videos/"+videoKafkaMessage.VideoFileName)
 
-	//log.Debug("url :", playURL)
 	// 获取视频封面 URL	buf := bytes.NewBuffer(nil)
 	buf := bytes.NewBuffer(nil)
 	err = ffmpeg.Input(playURL).
@@ -67,12 +62,14 @@ func UploadFile(bucket *oss.Bucket, videoKafkaMessage *model.VideoKafkaMessage) 
 		WithOutput(buf, os.Stdout).
 		Run()
 	if err != nil {
+		log.Debugf("get video cover failed: %v", err)
 		return "", "", err
 	}
 	coverFilename := strings.TrimSuffix(videoKafkaMessage.VideoPath, ".mp4") + "_cover.jpeg"
 	// 上传封面
 	err = bucket.PutObject("covers/"+coverFilename, buf)
 	if err != nil {
+		log.Debugf("upload cover failed: %v", err)
 		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
 	}
 	coverURL := fmt.Sprintf("https://%s.%s/%s", bucket.BucketName, bucket.GetConfig().Endpoint, "covers/"+coverFilename)

@@ -90,6 +90,8 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, video 
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterVideoServiceServer(srv, video)
+
+	//log.Debug(" grpc.NewServer", srv)
 	return srv
 }
 

@@ -25,11 +25,13 @@ func (s *RelationService) Relation(ctx context.Context, req *pb.DouyinRelationAc
 
 	user, err := token.ParseToken(req.Token, s.JwtKey)
 	if err != nil {
+		s.log.Errorf("token.ParseToken error: %v", err)
 		return nil, err
 	}
 
 	err = s.uc.Follow(ctx, user.UserId, req.ToUserId, int64(req.ActionType))
 	if err != nil {
+		s.log.Errorf("Follow error: %v", err)
 		return nil, err
 
 	}
@@ -46,6 +48,7 @@ func (s *RelationService) RelationFollowList(ctx context.Context, req *pb.Douyin
 
 	userInfoList, err := s.uc.FollowList(ctx, req.UserId)
 	if err != nil {
+		s.log.Errorf("FollowList error: %v", err)
 		return nil, err
 	}
 
@@ -62,7 +65,7 @@ func (s *RelationService) RelationFollowerList(ctx context.Context, req *pb.Douy
 
 	userInfoList, err := s.uc.FollowerList(ctx, req.UserId)
 	if err != nil {
-
+		s.log.Errorf("FollowerList error: %v", err)
 		return nil, err
 	}
 
@@ -88,7 +91,7 @@ func (s *RelationService) FriendList(ctx context.Context, req *pb.DouyinRelation
 
 	friendList, err := s.uc.FriendList(ctx, req.UserId)
 	if err != nil {
-
+		s.log.Errorf("FriendList error: %v", err)
 		return nil, err
 	}
 
@@ -102,12 +105,15 @@ func (s *RelationService) FriendList(ctx context.Context, req *pb.DouyinRelation
 // 获取关注数和粉丝数
 func (s *RelationService) FollowCnt(ctx context.Context, req *pb.FollowCntRequest) (*pb.FollowCntResponse, error) {
 
+	s.log.Debugf("FollowCnt request: %v", req)
 	//获取user
 	followCnt, followerCnt, err := s.uc.FollowCnt(ctx, req.UserId)
 	if err != nil {
+		s.log.Errorf("FollowCnt error: %v", err)
 		return nil, err
 
 	}
+	s.log.Debugf("followCnt response: %v followerCnt :%v", followCnt, followerCnt)
 	return &pb.FollowCntResponse{
 		FollowCnt:   followCnt,
 		FollowerCnt: followerCnt,
@@ -120,6 +126,7 @@ func (s *RelationService) IsFollow(ctx context.Context, req *pb.IsFollowRequest)
 
 	flag, err := s.uc.IsFollow(ctx, req.UserId, req.AuthorId)
 	if err != nil {
+		s.log.Errorf("IsFollow error: %v", err)
 		return nil, err
 	}
 	return &pb.IsFollowResponse{

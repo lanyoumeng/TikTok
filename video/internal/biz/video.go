@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -79,7 +78,7 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 	// 从Redis中获取30视频id 列表
 	key := "videoAll"
 	earliestTime, videoIds, err := v.repo.RZSetVideoIds(ctx, key, latestTime.Unix())
-	if err == errno.ErrRedisVIdNotFound {
+	if errors.Is(err, errno.ErrRedisVIdNotFound) {
 		// 从数据库中获取30视频Id列表
 		video30s := make([]*model.Video, 0, 30)
 		scores := make([]float64, 30)
@@ -87,7 +86,7 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 
 		video30s, nextTime, err = v.repo.GetVideoListByLatestTime(ctx, latestTime)
 		if err != nil {
-			v.log.Debug("biz.Feed/GetVideoListByLatestTime", err)
+			v.log.Error("biz.Feed/GetVideoListByLatestTime", err)
 			return nil, time.Now().Unix(), nil
 		}
 		earliestTime = nextTime.Unix()
@@ -100,13 +99,12 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 		//存入redis
 		err = v.repo.RZSetSaveVIds(ctx, videoIds, scores)
 		if err != nil {
-
-			v.log.Debug("biz.Feed/RZSetSaveVIds", err)
+			v.log.Error("biz.Feed/RZSetSaveVIds", err)
 			return nil, time.Now().Unix(), nil
 		}
 
 	} else if err != nil {
-		v.log.Debug("biz.Feed/RZSetVideoIds", err)
+		v.log.Error("biz.Feed/RZSetVideoIds", err)
 		return nil, time.Now().Unix(), err
 	}
 
@@ -114,22 +112,22 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 	videos := make([]*model.Video, len(videoIds))
 	for i, videoId := range videoIds {
 		RGetVideoInfo, err := v.repo.RGetVideoInfo(ctx, videoId)
-		if err == errno.ErrRedisVInfoNotFound {
+		if errors.Is(err, errno.ErrRedisVInfoNotFound) {
 			// 从数据库中获取视频信息
 			RGetVideoInfo, err = v.repo.GetvideoByVId(ctx, videoId)
 			if err != nil {
-				v.log.Debug("biz.Feed/GetvideoByVId", err)
+				v.log.Error("biz.Feed/GetvideoByVId", err)
 				return nil, time.Now().Unix(), err
 			}
 			// 存入redis
 			err = v.repo.RSaveVideoInfo(ctx, RGetVideoInfo)
 			if err != nil {
-				v.log.Debug("biz.Feed/RSaveVideoInfo", err)
+				v.log.Error("biz.Feed/RSaveVideoInfo", err)
 				return nil, time.Now().Unix(), err
 			}
 
 		} else if err != nil {
-			v.log.Debug("biz.Feed/RGetVideoInfo", err)
+			v.log.Error("biz.Feed/RGetVideoInfo", err)
 			return nil, time.Now().Unix(), err
 
 		}
@@ -138,7 +136,7 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 
 	respVideo, err := v.GetRespVideo(ctx, videos, userId)
 	if err != nil {
-		v.log.Debug("biz.Feed/GetRespVideo", err)
+		v.log.Error("biz.Feed/GetRespVideo", err)
 		return nil, time.Now().Unix(), err
 	}
 
@@ -148,7 +146,7 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]byte, userId int64) error {
 
 	currentDir, _ := os.Getwd()
-	fmt.Println(" Publish工作目录:", currentDir)
+	v.log.Debug(" Publish工作目录:", currentDir)
 
 	// 设置存储路径和文件名
 	storagePath := "../../store/video"       // 设置存储目录
@@ -156,6 +154,7 @@ func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]b
 
 	// 创建存储目录（如果不存在）
 	if err := os.MkdirAll(storagePath, 0755); err != nil {
+		v.log.Error("biz.Publish/MkdirAll", err)
 		return err
 	}
 
@@ -164,6 +163,7 @@ func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]b
 
 	// 写入视频数据到文件
 	if err := os.WriteFile(filePath, *videoData, 0644); err != nil {
+		v.log.Error("biz.Publish/WriteFile", err)
 		return err
 	}
 
@@ -181,11 +181,11 @@ func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]b
 
 func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Video, error) {
 	videoIds, err := v.repo.RPublishVidsByAuthorId(ctx, userId)
-	if err == errno.ErrRedisPublishVidsNotFound {
+	if errors.Is(err, errno.ErrRedisPublishVidsNotFound) {
 		//  获取该用户发布视频列表
 		videos, err := v.repo.GetVideoListByAuthorId(ctx, userId)
 		if err != nil {
-			v.log.Debug("biz.PublishList/GetVideoListByAuthorId", err)
+			v.log.Error("biz.PublishList/GetVideoListByAuthorId", err)
 			return nil, err
 		}
 		for _, video := range videos {
@@ -195,13 +195,13 @@ func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Vi
 		//存入redis
 		err = v.repo.RSavePublishVids(ctx, userId, videoIds)
 		if err != nil {
-			v.log.Debug("biz.PublishList/RSavePublishVids", err)
+			v.log.Error("biz.PublishList/RSavePublishVids", err)
 			return nil, err
 
 		}
 
 	} else if err != nil {
-		v.log.Debug("biz.PublishList/RPublishVidsByAuthorId", err)
+		v.log.Error("biz.PublishList/RPublishVidsByAuthorId", err)
 		return nil, err
 
 	}
@@ -210,22 +210,22 @@ func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Vi
 	videoList := make([]*model.Video, len(videoIds))
 	for i, videoId := range videoIds {
 		RGetVideoInfo, err := v.repo.RGetVideoInfo(ctx, videoId)
-		if err == errno.ErrRedisVInfoNotFound {
+		if errors.Is(err, errno.ErrRedisVInfoNotFound) {
 			// 从数据库中获取视频信息
 			RGetVideoInfo, err = v.repo.GetvideoByVId(ctx, videoId)
 			if err != nil {
-				v.log.Debug("biz.PublishList/GetvideoByVId", err)
+				v.log.Error("biz.PublishList/GetvideoByVId", err)
 				return nil, err
 			}
 			// 存入redis
 			err = v.repo.RSaveVideoInfo(ctx, RGetVideoInfo)
 			if err != nil {
-				v.log.Debug("biz.PublishList/RSaveVideoInfo", err)
+				v.log.Error("biz.PublishList/RSaveVideoInfo", err)
 				return nil, err
 			}
 
 		} else if err != nil {
-			v.log.Debug("biz.PublishList/RGetVideoInfo", err)
+			v.log.Error("biz.PublishList/RGetVideoInfo", err)
 			return nil, err
 
 		}
@@ -234,7 +234,7 @@ func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Vi
 
 	respVideo, err := v.GetRespVideo(ctx, videoList, userId)
 	if err != nil {
-		v.log.Debug("biz.PublishList/GetRespVideo", err)
+		v.log.Error("biz.PublishList/GetRespVideo", err)
 		return nil, err
 	}
 	return respVideo, nil
@@ -243,11 +243,11 @@ func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Vi
 
 func (v *VideoUsecase) WorkCnt(ctx context.Context, userId int64) (int64, error) {
 	videoIds, err := v.repo.RPublishVidsByAuthorId(ctx, userId)
-	if err == errno.ErrRedisPublishVidsNotFound {
+	if errors.Is(err, errno.ErrRedisPublishVidsNotFound) {
 		//  获取该用户发布视频列表
 		videos, err := v.repo.GetVideoListByAuthorId(ctx, userId)
 		if err != nil {
-			v.log.Debug("biz.WorkCnt/GetVideoListByAuthorId", err)
+			v.log.Error("biz.WorkCnt/GetVideoListByAuthorId", err)
 			return 0, err
 		}
 		for _, video := range videos {
@@ -257,13 +257,13 @@ func (v *VideoUsecase) WorkCnt(ctx context.Context, userId int64) (int64, error)
 		//存入redis
 		err = v.repo.RSavePublishVids(ctx, userId, videoIds)
 		if err != nil {
-			v.log.Debug("biz.WorkCnt/RSavePublishVids:", err)
+			v.log.Error("biz.WorkCnt/RSavePublishVids:", err)
 			return 0, err
 
 		}
 
 	} else if err != nil {
-		v.log.Debug("biz.WorkCnt/RPublishVidsByAuthorId", err)
+		v.log.Error("biz.WorkCnt/RPublishVidsByAuthorId", err)
 		return 0, err
 
 	}
@@ -276,7 +276,7 @@ func (v *VideoUsecase) FavoriteListByVId(ctx context.Context, VideoIdList []int6
 	videoList := make([]*model.Video, len(VideoIdList))
 	for i, videoId := range VideoIdList {
 		RGetVideoInfo, err := v.repo.RGetVideoInfo(ctx, videoId)
-		if err == errno.ErrRedisVInfoNotFound {
+		if errors.Is(err, errno.ErrRedisVInfoNotFound) {
 			// 从数据库中获取视频信息
 			RGetVideoInfo, err = v.repo.GetvideoByVId(ctx, videoId)
 			if err != nil {
@@ -286,12 +286,12 @@ func (v *VideoUsecase) FavoriteListByVId(ctx context.Context, VideoIdList []int6
 			// 存入redis
 			err = v.repo.RSaveVideoInfo(ctx, RGetVideoInfo)
 			if err != nil {
-				v.log.Debug("biz.FavoriteListByVId/RSaveVideoInfo", err)
+				v.log.Error("biz.FavoriteListByVId/RSaveVideoInfo", err)
 				return nil, err
 			}
 
 		} else if err != nil {
-			v.log.Debug("biz.FavoriteListByVId/RGetVideoInfo", err)
+			v.log.Error("biz.FavoriteListByVId/RGetVideoInfo", err)
 			return nil, err
 
 		}
@@ -300,7 +300,7 @@ func (v *VideoUsecase) FavoriteListByVId(ctx context.Context, VideoIdList []int6
 
 	respVideo, err := v.GetRespVideo(ctx, videoList, 0)
 	if err != nil {
-		v.log.Debug("biz.FavoriteListByVId/GetRespVideo", err)
+		v.log.Error("biz.FavoriteListByVId/GetRespVideo", err)
 		return nil, err
 	}
 	return respVideo, nil
@@ -309,11 +309,11 @@ func (v *VideoUsecase) FavoriteListByVId(ctx context.Context, VideoIdList []int6
 
 func (v *VideoUsecase) PublishVidsByAId(ctx context.Context, authorId int64) ([]int64, error) {
 	videoIds, err := v.repo.RPublishVidsByAuthorId(ctx, authorId)
-	if err == errno.ErrRedisPublishVidsNotFound {
+	if errors.Is(err, errno.ErrRedisPublishVidsNotFound) {
 		//  获取该用户发布视频列表
 		videos, err := v.repo.GetVideoListByAuthorId(ctx, authorId)
 		if err != nil {
-			v.log.Debug("biz.PublishVidsByAId/GetVideoListByAuthorId", err)
+			v.log.Error("biz.PublishVidsByAId/GetVideoListByAuthorId", err)
 			return nil, err
 		}
 		for _, video := range videos {
@@ -323,13 +323,13 @@ func (v *VideoUsecase) PublishVidsByAId(ctx context.Context, authorId int64) ([]
 		//存入redis
 		err = v.repo.RSavePublishVids(ctx, authorId, videoIds)
 		if err != nil {
-			v.log.Debug("biz.PublishVidsByAId/RSavePublishVids", err)
+			v.log.Error("biz.PublishVidsByAId/RSavePublishVids", err)
 			return nil, err
 
 		}
 
 	} else if err != nil {
-		v.log.Debug("biz.PublishVidsByAId/RPublishVidsByAuthorId", err)
+		v.log.Error("biz.PublishVidsByAId/RPublishVidsByAuthorId", err)
 		return nil, err
 
 	}
@@ -339,7 +339,7 @@ func (v *VideoUsecase) PublishVidsByAId(ctx context.Context, authorId int64) ([]
 func (v *VideoUsecase) GetAIdByVId(ctx context.Context, videoId int64) (int64, error) {
 	video, err := v.repo.GetvideoByVId(ctx, videoId)
 	if err != nil {
-		v.log.Debug("biz.GetAIdByVId/GetvideoByVId", err)
+		v.log.Error("biz.GetAIdByVId/GetvideoByVId", err)
 		return 0, err
 	}
 	return video.AuthorId, nil

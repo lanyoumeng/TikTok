@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"video/pkg/token"
 
@@ -45,6 +46,13 @@ func (v *VideoService) Feed(ctx context.Context, req *pb.DouyinFeedRequest) (*pb
 		return nil, err
 	}
 
+	////将feedVideo转换为feed
+	//feed := make([]pb.Video, len(feedVideo))
+	//
+	//for k, v := range feedVideo {
+	//	feed[k] = *v
+	//}
+
 	return &pb.DouyinFeedResponse{
 		StatusCode: 0,
 		StatusMsg:  "返回视频流成功",
@@ -53,12 +61,20 @@ func (v *VideoService) Feed(ctx context.Context, req *pb.DouyinFeedRequest) (*pb
 	}, nil
 }
 func (v *VideoService) Publish(ctx context.Context, req *pb.DouyinPublishActionRequest) (*pb.DouyinPublishActionResponse, error) {
+
+	fmt.Printf("title:%v ,data:%v, token:%v", req.Title, req.Data, req.Token)
 	//获取user
 	user, err := token.ParseToken(req.Token, v.JwtKey)
 	if err != nil {
+		log.Debug("service.Publish/ParseToken", err)
 		return nil, err
 	}
 	err = v.vc.Publish(ctx, req.Title, &req.Data, user.UserId)
+	if err != nil {
+		log.Debug("service.Publish/Publish", err)
+		return nil, err
+
+	}
 
 	return &pb.DouyinPublishActionResponse{
 		StatusCode: 0,

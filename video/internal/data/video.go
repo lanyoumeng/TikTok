@@ -3,7 +3,7 @@ package data
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"strconv"
 	"time"
 
@@ -34,17 +34,10 @@ func NewBizVideoRepo(data *Data, logger log.Logger) biz.VideoRepo {
 	}
 }
 
-// func NewvideoRepo(data *Data, logger log.Logger) biz.VideoRepo {
-// 	return &videoRepo{
-// 		data: data,
-// 		log:  log.NewHelper(log.With(logger)),
-// 	}
-// }
-
 func (v *videoRepo) Save(ctx context.Context, video *model.Video) error {
 
 	if err := v.data.db.Model(&model.Video{}).Save(&video).Error; err != nil {
-		v.log.Info("Error creating user1:", err)
+		v.log.Error("Error creating user1:", err)
 	}
 	return nil
 }
@@ -55,19 +48,21 @@ func (v *videoRepo) PublishKafka(ctx context.Context, videoKafkaMessage *model.V
 	videoByte, _ := json.Marshal(videoKafkaMessage)
 
 	for i := 0; i < 3; i++ { //允许重试3次
-		if err := v.data.kafakProducer.WriteMessages(ctx, //批量写入消息，原子操作，要么全写成`功，要么全写失败
-			kafka.Message{Value: []byte(videoByte)},
+		if err := v.data.kafakProducer.WriteMessages(context.Background(), //批量写入消息，原子操作，要么全写成`功，要么全写失败
+			kafka.Message{Value: videoByte},
 		); err != nil {
 			// if err == kafka.LeaderNotAvailable || errors.Is(err, context.DeadlineExceeded) {
-			if err == kafka.LeaderNotAvailable { //首次写一个新的Topic时，会发生LeaderNotAvailable错误，重试一次就好了
+			if errors.Is(err, kafka.LeaderNotAvailable) { //首次写一个新的Topic时，会发生LeaderNotAvailable错误，重试一次就好了
 				time.Sleep(500 * time.Millisecond)
 				continue
 			} else {
-				fmt.Printf("batch write message failed: %v", err)
+				v.log.Errorf("batch write message failed: %v", err)
 			}
 		} else {
+			v.log.Debug("write message to kafka success")
 			break //只要成功一次就不再尝试下一次了
 		}
+
 	}
 
 }
@@ -75,26 +70,24 @@ func (v *videoRepo) GetvideoByVId(ctx context.Context, videoId int64) (*model.Vi
 	video := &model.Video{}
 	err := v.data.db.Model(&model.Video{}).Where("id = ?", videoId).First(&video).Error
 	if err != nil {
+		v.log.Error("GetvideoByVId-err:", err)
 		return nil, err
 	}
 	return video, nil
 }
 func (v *videoRepo) GetVideoListByLatestTime(ctx context.Context, latestTime time.Time) ([]*model.Video, time.Time, error) {
 	videos := make([]*model.Video, 10)
-	v.log.Debug(latestTime, "上一次时间")
-	err := v.data.db.Model(&model.Video{}).Where("created_at < ?", latestTime).Order("create_at desc").Limit(30).Find(&videos).Error
-
+	err := v.data.db.Model(&model.Video{}).Where("created_at < ?", latestTime).Order("created_at desc").Limit(30).Find(&videos).Error
 	if err != nil {
+		v.log.Error("GetVideoListByLatestTime-err:", err)
 		return nil, time.Now(), err
 
 	}
 
 	if len(videos) == 0 {
-		log.Debug("no videos")
 		return videos, time.Now(), nil
 	} else {
 		return videos, videos[len(videos)-1].CreatedAt, nil
-
 	}
 
 }
@@ -105,6 +98,7 @@ func (v *videoRepo) GetVideoListByAuthorId(ctx context.Context, userId int64) ([
 	err := v.data.db.Model(&model.Video{}).Where("author_id = ?", userId).Find(&videos).Error
 
 	if err != nil {
+		v.log.Error("GetVideoListByAuthorId-err:", err)
 		return nil, err
 	}
 
@@ -115,6 +109,7 @@ func (v *videoRepo) GetVideoListByAuthorId(ctx context.Context, userId int64) ([
 func (v *videoRepo) GetAuthorInfoById(ctx context.Context, authorId int64) (*vpb.User, error) {
 	userrepo, err := v.data.userc.UserInfo(ctx, &upb.UserRequest{UserId: strconv.FormatInt(authorId, 10)})
 	if err != nil {
+		v.log.Error("GetAuthorInfoById-err:", err)
 		return nil, err
 	}
 	var user *vpb.User
@@ -127,6 +122,7 @@ func (v *videoRepo) GetAuthorInfoById(ctx context.Context, authorId int64) (*vpb
 func (v *videoRepo) GetFavoriteCntByVId(ctx context.Context, videoId int64) (int64, error) {
 	favorepo, err := v.data.favc.GetFavoriteCntByVId(ctx, &fpb.GetFavoriteCntByVIdRequest{Id: videoId})
 	if err != nil {
+		v.log.Error("GetFavoriteCntByVId-err:", err)
 		return 0, err
 	}
 	return favorepo.FavoriteCount, nil
@@ -135,6 +131,7 @@ func (v *videoRepo) GetFavoriteCntByVId(ctx context.Context, videoId int64) (int
 func (v *videoRepo) GetCommentCntByVId(ctx context.Context, videoId int64) (int64, error) {
 	commentrepo, err := v.data.commentc.GetCommentCntByVId(ctx, &cpb.GetCommentCntByVIdReq{VideoId: videoId})
 	if err != nil {
+		v.log.Error("GetCommentCntByVId-err:", err)
 		return 0, err
 	}
 	return commentrepo.CommentCount, nil
@@ -143,6 +140,7 @@ func (v *videoRepo) GetCommentCntByVId(ctx context.Context, videoId int64) (int6
 func (v *videoRepo) GetIsFavorite(ctx context.Context, videoId int64, userId int64) (bool, error) {
 	favorepo, err := v.data.favc.GetIsFavorite(ctx, &fpb.GetIsFavoriteRequest{VideoId: videoId, UserId: userId})
 	if err != nil {
+		v.log.Error("GetIsFavorite-err:", err)
 		return false, err
 	}
 	return favorepo.Favorite, nil

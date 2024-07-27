@@ -10,6 +10,7 @@ import (
 	"comment/pkg/tool"
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	"strconv"
 	"time"
@@ -36,6 +37,7 @@ func (r *commentRepo) SaveComment(ctx context.Context, comment *model.Comment) (
 	comment.CreateDate = time.Now().Format("01-02")
 	err := r.data.db.Save(comment).Error
 	if err != nil {
+		r.log.Errorf("SaveComment-err: %v", err)
 		return nil, err
 	}
 
@@ -45,6 +47,7 @@ func (r *commentRepo) SaveComment(ctx context.Context, comment *model.Comment) (
 func (r *commentRepo) DelComment(ctx context.Context, commentId int64) error {
 	err := r.data.db.Delete(&model.Comment{}, commentId).Error
 	if err != nil {
+		r.log.Errorf("DelComment-err: %v", err)
 		return err
 	}
 	return nil
@@ -55,6 +58,7 @@ func (r *commentRepo) GetUserinfoByUId(ctx context.Context, userId int64) (*pb.U
 
 	resp, err := r.data.userc.UserInfo(ctx, &userV1.UserRequest{UserId: strconv.FormatInt(userId, 10)})
 	if err != nil {
+		r.log.Errorf("Error getting user info: %v", err)
 		return nil, err
 
 	}
@@ -79,6 +83,7 @@ func (r *commentRepo) GetAuthorIdByVId(ctx context.Context, videoId int64) (int6
 
 	resp, err := r.data.videoc.GetAIdByVId(ctx, &videoV1.GetAIdByVIdReq{VideoId: videoId})
 	if err != nil {
+		r.log.Errorf("Error getting author info: %v", err)
 		return 0, err
 
 	}
@@ -90,6 +95,7 @@ func (r *commentRepo) GetAuthorIdByVId(ctx context.Context, videoId int64) (int6
 func (r *commentRepo) GetFollowByUIdAId(ctx context.Context, userId, authorId int64) (bool, error) {
 	resp, err := r.data.relationc.IsFollow(ctx, &relationV1.IsFollowRequest{UserId: userId, AuthorId: authorId})
 	if err != nil {
+		r.log.Errorf("Error getting follow info: %v", err)
 		return false, err
 	}
 	return resp.IsFollow, nil
@@ -105,10 +111,11 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 
 	//从缓存获取
 	commentSet, err := r.data.rdb.ZRangeWithScores(ctx, "comment::"+strconv.FormatInt(videoId, 10), 0, -1).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) || len(commentSet) == 0 {
 		//从数据库获取
 		err := r.data.db.Where("video_id = ?", videoId).Find(&commentList).Error
 		if err != nil {
+			r.log.Errorf("CommentList-err: %v", err)
 			return nil, err
 		}
 
@@ -117,6 +124,7 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 			//序列化
 			commentJson, err := json.Marshal(comment)
 			if err != nil {
+				r.log.Errorf("json.Marshal failed: %v", err)
 				return nil, err
 			}
 			//member
@@ -124,7 +132,8 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 			//score
 			score, err := strconv.ParseFloat(comment.CreateDate, 64)
 			if err != nil {
-				log.Fatalf("strconv.ParseFloat failed: %v", err)
+
+				r.log.Fatalf("strconv.ParseFloat failed: %v", err)
 			}
 
 			//key
@@ -132,7 +141,7 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 			//存入缓存
 			err = r.data.rdb.ZAdd(ctx, key, &redis.Z{Score: score, Member: member}).Err()
 			if err != nil {
-				log.Debug("add cache failed: %v", err)
+				r.log.Errorf("add cache failed: %v", err)
 			}
 
 		}
@@ -140,12 +149,14 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 		//过期时间
 		err = r.data.rdb.Expire(ctx, "comment::"+strconv.FormatInt(videoId, 10), tool.GetRandomExpireTime()).Err()
 		if err != nil {
+			r.log.Errorf("set redis failed: %v", err)
 			return nil, err
 		}
 
 		//格式对 直接返回
 		return commentList, nil
 	} else if err != nil {
+		r.log.Errorf("get cache failed: %v", err)
 		return nil, err
 	}
 
@@ -154,6 +165,7 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 		comment := &model.Comment{}
 		err := json.Unmarshal([]byte(z.Member.(string)), &comment)
 		if err != nil {
+			r.log.Errorf("json.Unmarshal failed: %v", err)
 			return nil, err
 		}
 		// 使用 score 作为 CreateDate
@@ -172,15 +184,17 @@ func (r *commentRepo) GetCommentCntByVId(ctx context.Context, videoId int64) (in
 	//score: 评论发布时间戳 member: id+user_id+content
 	//从缓存获取
 	count, err := r.data.rdb.ZCard(ctx, "comment::"+strconv.FormatInt(videoId, 10)).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) || count == 0 {
 
 		//从数据库获取
 		err := r.data.db.Model(&model.Comment{}).Where("video_id = ?", videoId).Count(&count).Error
 		if err != nil {
+			r.log.Errorf("GetCommentCntByVId-err: %v", err)
 			return 0, err
 		}
 
 	} else if err != nil {
+		r.log.Errorf("get cache failed: %v", err)
 		return 0, err
 	}
 

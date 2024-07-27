@@ -36,6 +36,7 @@ func NewFavoriteUsecase(repo FavoriteRepo, logger log.Logger) *FavoriteUsecase {
 func (f *FavoriteUsecase) GetAuthorIdByVideoId(ctx context.Context, videoId int64) (int64, error) {
 	authorId, err := f.repo.GetAuthorIdByVideoId(ctx, videoId)
 	if err != nil {
+		f.log.Error("GetAuthorIdByVideoId err:", err)
 		return 0, err
 	}
 	return authorId, nil
@@ -45,6 +46,7 @@ func (f *FavoriteUsecase) Favorite(ctx context.Context, authorId int64, videoId 
 
 	//1点赞 2取消点赞
 	if err := f.repo.FavoriteAction(ctx, authorId, videoId, userId, actionType); err != nil {
+		f.log.Error("FavoriteAction err:", err)
 		return err
 	}
 
@@ -55,6 +57,7 @@ func (f *FavoriteUsecase) FavoriteList(ctx context.Context, userId int64) ([]*vp
 	// var videoList []*vpb.Video
 	videoList, err := f.repo.FavoriteList(ctx, userId)
 	if err != nil {
+		f.log.Error("FavoriteList err:", err)
 		return nil, err
 	}
 	return videoList, nil
@@ -63,6 +66,7 @@ func (f *FavoriteUsecase) FavoriteList(ctx context.Context, userId int64) ([]*vp
 func (f *FavoriteUsecase) GetFavoriteCntByVId(ctx context.Context, videoId int64) (int64, error) {
 	favoriteCnt, err := f.repo.GetFavoriteCntByVId(ctx, videoId)
 	if err != nil {
+		f.log.Error("GetFavoriteCntByVId err:", err)
 		return 0, err
 	}
 
@@ -72,6 +76,7 @@ func (f *FavoriteUsecase) GetFavoriteCntByVId(ctx context.Context, videoId int64
 func (f *FavoriteUsecase) GetIsFavorite(ctx context.Context, videoId int64, userId int64) (bool, error) {
 	flag, err := f.repo.IsFavorite(ctx, videoId, userId)
 	if err != nil {
+		f.log.Error("GetIsFavorite err:", err)
 		return false, err
 	}
 	return flag, nil
@@ -82,6 +87,7 @@ func (f *FavoriteUsecase) GetFavoriteCntByUId(ctx context.Context, userId int64)
 
 	favedCnt, favCnt, err := f.repo.GetFavoriteCntByUId(ctx, userId)
 	if err != nil {
+		f.log.Error("GetFavoriteCntByUId err:", err)
 		return 0, 0, err
 	}
 

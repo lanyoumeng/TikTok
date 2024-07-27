@@ -68,30 +68,35 @@ func NewVdKafkaReader(log *log.Helper, k *conf.Kafka, bucket *oss.Bucket, db *go
 	})
 
 	//协程启动消费者
-	go InitVideoKafkaConsumer(context.Background(), log, reader, bucket, db, rdb, uc)
+	go InitVideoKafkaConsumer(log, reader, bucket, db, rdb, uc)
 
 	return reader
 }
 
 // 初始化视频消息消费者
-func InitVideoKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.Reader, bucket *oss.Bucket, db *gorm.DB, rdb *redis.Client, uc userv1.UserServiceClient) {
+func InitVideoKafkaConsumer(log *log.Helper, reader *kafka.Reader, bucket *oss.Bucket, db *gorm.DB, rdb *redis.Client, uc userv1.UserServiceClient) {
 	go func() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM) //注册信号2和15
 		sig := <-c                                        //阻塞，直到信号的到来
 		fmt.Printf("receive signal %s\n", sig.String())
 		if reader != nil {
-			reader.Close()
+			err := reader.Close()
+			if err != nil {
+				return
+			}
 		}
 		os.Exit(0) //进程退出
 	}()
 
+	ctx := context.Background()
+	var cnt int
 	for { //消息队列里随时可能有新消息进来，所以这里是死循环，类似于读Channel
 		if message, err := reader.ReadMessage(ctx); err != nil {
-			fmt.Printf("read message from kafka failed: %v", err)
+			log.Debug("read message from kafka failed: %v", err)
 			break
 		} else {
-			//log.Debug("message::::::::::::", message)
+
 			//1.kafka接收到视频信息后上传到阿里云oss
 			// fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
 			videoKafkaMessage := &model.VideoKafkaMessage{}
@@ -99,15 +104,18 @@ func InitVideoKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 				fmt.Printf("json.Unmarshal failed: %v", err)
 
 			}
-			//log.Debug("videoKafkaMessage::::::::::::", videoKafkaMessage)
+
+			cnt++
+			log.Debug("vkafka/Message::::::::::::", videoKafkaMessage, " 		", cnt)
 			if bucket == nil {
-				fmt.Printf("bucket is nil")
+				log.Debugf("bucket is nil")
+				continue
 			}
 			//log.Debug("bucket--------------", bucket)
 
 			playURL, coverURL, err := aliyun.UploadFile(bucket, videoKafkaMessage)
 			if err != nil {
-				fmt.Printf("UploadFile failed: %v", err)
+				log.Debugf("upload file failed: %v", err)
 			}
 
 			//存储的video

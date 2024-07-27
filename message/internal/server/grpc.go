@@ -89,7 +89,7 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, messag
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterMessageServiceServer(srv, message)
-	log.NewHelper(logger).Debug(" grpc.NewServer", srv)
+	//log.NewHelper(logger).Debug(" grpc.NewServer", srv)
 
 	return srv
 }

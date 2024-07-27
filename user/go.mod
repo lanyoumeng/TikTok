@@ -4,7 +4,6 @@ go 1.21.3
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kratos/kratos/contrib/config/nacos/v2 v2.0.0-20240606021638-ba5a651b8252
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-20231209151259-7e2edecabf32
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20231207053122-69268c573be1

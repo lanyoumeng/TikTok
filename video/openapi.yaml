@@ -3,8 +3,46 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: VideoService API
     version: 0.0.1
-paths: {}
+paths:
+    /douyin/publish/action:
+        post:
+            tags:
+                - VideoService
+            operationId: VideoService_Publish
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.api.video.v1.Douyin_publish_action_request'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.Douyin_publish_action_response'
 components:
-    schemas: {}
+    schemas:
+        video.api.video.v1.Douyin_publish_action_request:
+            type: object
+            properties:
+                token:
+                    type: string
+                data:
+                    type: string
+                    format: bytes
+                title:
+                    type: string
+        video.api.video.v1.Douyin_publish_action_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+tags:
+    - name: VideoService

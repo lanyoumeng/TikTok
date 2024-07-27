@@ -91,7 +91,11 @@ func NewDB(data *conf.Data) *gorm.DB {
 	}
 
 	// 自动迁移模型，将模型的结构映射到数据库表中
-	db.AutoMigrate(&model.Favorite{})
+	err = db.AutoMigrate(&model.Favorite{})
+	if err != nil {
+		log.Errorf("AutoMigrate model.Favorite failed: %v", err)
+		return nil
+	}
 
 	return db
 }

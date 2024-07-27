@@ -68,12 +68,10 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 			fmt.Printf("read message from kafka failed: %v", err)
 			break
 		} else {
-			log.Debug("message::::::::::::", message)
-
 			// fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
 			redisKafkaMessage := RedisKafkaMessage{}
 			var id int64
-			if err := json.Unmarshal(message.Value, redisKafkaMessage); err != nil {
+			if err := json.Unmarshal(message.Value, &redisKafkaMessage); err != nil {
 				fmt.Printf("json.Unmarshal failed: %v", err)
 			}
 			if redisKafkaMessage.Op == "u" || redisKafkaMessage.Op == "d" {

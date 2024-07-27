@@ -55,8 +55,6 @@ func initTracer(url string) error {
 	if err != nil {
 		return err
 	}
-	log.Debug("jaeger exporter:", exp)
-
 	tp := tracesdk.NewTracerProvider(
 		// 将基于父span的采样率设置为100%
 		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(1.0))),
@@ -167,8 +165,9 @@ func main() {
 	defer kafkaWriter.Writer.Close()
 
 	// 创建 Logger
-	logger := log.With(log.NewStdLogger(kafkaWriter),
 
+	logger := log.With(log.NewStdLogger(kafkaWriter),
+		//logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
 		"service.id", id,

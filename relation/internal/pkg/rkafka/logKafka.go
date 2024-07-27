@@ -2,9 +2,8 @@ package rkafka
 
 import (
 	"context"
-	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/segmentio/kafka-go"
-	"log"
 	"relation/internal/conf"
 	"time"
 )
@@ -31,14 +30,14 @@ func (kw *KafkaWriter) Write(p []byte) (n int, err error) {
 				time.Sleep(500 * time.Millisecond)
 				continue
 			} else {
-				fmt.Printf("batch write message failed: %v", err)
+				log.Errorf("batch write message failed: %v", err)
 			}
 		} else {
 			break //只要成功一次就不再尝试下一次了
 		}
 	}
 
-	log.Printf("Successfully wrote message: %s", string(p))
+	//log.Printf("Successfully wrote message: %s", string(p))
 	return len(p), nil
 }
 

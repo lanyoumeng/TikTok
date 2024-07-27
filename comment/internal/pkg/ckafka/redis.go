@@ -57,7 +57,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM) //注册信号2和15
 		sig := <-c                                        //阻塞，直到信号的到来
-		log.Debug("receive signal %s\n", sig.String())
+		log.Debugf("receive signal %s\n", sig.String())
 		if reader != nil {
 			reader.Close()
 		}
@@ -66,17 +66,15 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 	for { //消息队列里随时可能有新消息进来，所以这里是死循环，类似于读Channel
 		if message, err := reader.ReadMessage(ctx); err != nil {
-			log.Debug("read message from kafka failed: %v", err)
+			log.Errorf("read message from kafka failed: %v", err)
 			break
 		} else {
-			log.Debug("message::::::::::::", message)
-
 			// fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
 			redisKafkaMessage := RedisKafkaMessage{}
 
 			var id int64 = -1
-			if err := json.Unmarshal(message.Value, redisKafkaMessage); err != nil {
-				fmt.Printf("json.Unmarshal failed: %v", err)
+			if err := json.Unmarshal(message.Value, &redisKafkaMessage); err != nil {
+				log.Errorf("json.Unmarshal failed: %v", err)
 			}
 			if redisKafkaMessage.Op == "d" {
 				id = redisKafkaMessage.Before.Id
@@ -99,7 +97,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 				//序列化
 				rcommentJson, err := json.Marshal(rcomment)
 				if err != nil {
-					log.Debug("json.Marshal failed: %v", err)
+					log.Errorf("json.Marshal failed: %v", err)
 				}
 				//member
 				member := string(rcommentJson)
@@ -108,7 +106,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 				err = rdb.ZRem(ctx, key, member).Err()
 				if err != nil {
-					log.Debug("delete cache failed: %v", err)
+					log.Errorf("delete cache failed: %v", err)
 				}
 
 			}
@@ -130,7 +128,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 				//序列化
 				rcommentJson, err := json.Marshal(rcomment)
 				if err != nil {
-					log.Debug("json.Marshal failed: %v", err)
+					log.Errorf("json.Marshal failed: %v", err)
 				}
 				//member
 				member := string(rcommentJson)
@@ -145,7 +143,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 
 				err = rdb.ZAdd(ctx, key, &redis.Z{Score: score, Member: member}).Err()
 				if err != nil {
-					log.Debug("add cache failed: %v", err)
+					log.Errorf("add cache failed: %v", err)
 				}
 
 			}

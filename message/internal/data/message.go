@@ -26,6 +26,7 @@ func (r *messageRepo) SaveMessage(ctx context.Context, message model.Message) er
 	// 保存消息
 	err := r.data.db.Create(&message).Error
 	if err != nil {
+		r.log.Error("SaveMessage err:", err)
 		return err
 	}
 
@@ -41,6 +42,7 @@ func (r *messageRepo) GetMessageRecord(ctx context.Context, userId, toUserId, pr
 	err := r.data.db.Where("from_user_id = ? AND to_user_id = ? ", userId, toUserId).Order("create_time desc").Find(&messageList).Error
 
 	if err != nil {
+		r.log.Error("GetMessageRecord err:", err)
 		return nil, err
 	}
 
@@ -58,18 +60,20 @@ func (r *messageRepo) GetLatestMessage(ctx context.Context, userId, friendId int
 	//查询好友发送的消息
 	err := r.data.db.Where("from_user_id = ? AND to_user_id = ? ", friendId, userId).Order("create_time desc").Count(&cnt1).First(&message1).Error
 	if err != nil {
+		r.log.Errorf("GetLatestMessage err: %v", err)
 		return nil, err
 	}
 
 	//查询用户发送的消息
 	err = r.data.db.Where("from_user_id = ? AND to_user_id = ? ", userId, friendId).Order("create_time desc").Count(&cnt2).First(&message2).Error
 	if err != nil {
+		r.log.Errorf("GetLatestMessage err: %v", err)
 		return nil, err
 	}
 
 	//比较两个消息的时间，返回最新的消息
 	if cnt1 > 0 && cnt2 > 0 {
-		if message1.CreatedAt.After(message2.CreatedAt) {
+		if message1.CreateTime.After(message2.CreateTime) {
 			latestMessage.FriendId = friendId
 			latestMessage.Content = message1.Content
 			latestMessage.MsgType = 0 //当前请求用户接收的消息

@@ -3,13 +3,14 @@ package data
 import (
 	"context"
 	favoriteV1 "user/api/favorite/v1"
+	relationV1 "user/api/relation/v1"
 	"user/internal/biz"
+	"user/internal/pkg/errno"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/gorm"
 
-	relationV1 "user/api/relation/v1"
 	videov1 "user/api/video/v1"
 	"user/internal/pkg/model"
 )
@@ -31,21 +32,19 @@ func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
 func (r *userRepo) CreateUser(ctx context.Context, u *model.User) (int64, error) {
 	res := r.data.db.Model(&model.User{}).Create(&u)
 	if res.Error != nil {
+		r.log.Error("CreateUser-err:", res.Error)
 		return 0, res.Error
 	}
 
 	return u.Id, nil
 }
 
-// UserByName
 func (r *userRepo) UserByName(ctx context.Context, name string) (*model.User, error) {
 
 	user := &model.User{}
 	err := r.data.db.Model(&model.User{}).Where("name = ?", name).First(&user).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
-		}
+		r.log.Error("UserByName-err:", err)
 		return nil, err
 	}
 	return user, nil
@@ -56,9 +55,9 @@ func (r *userRepo) GetUserById(ctx context.Context, Id int64) (*model.User, erro
 	user := &model.User{}
 	if err := r.data.db.Model(&model.User{}).Where("id = ?", Id).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, errno.ErrUserNotFound
 		}
-
+		r.log.Error("GetUserById-err:", err)
 		return nil, err
 	}
 
@@ -69,22 +68,12 @@ func (r *userRepo) GetUserById(ctx context.Context, Id int64) (*model.User, erro
 func (r *userRepo) UpdateUser(ctx context.Context, user *model.User) error {
 
 	if err := r.data.db.Model(&model.User{}).Save(&user).Error; err != nil {
+		r.log.Error("UpdateUser-err:", err)
 		return err
 	}
 
 	return nil
 }
-
-//type UserCount struct {
-//	Id             int64 `json:"id" `
-//	FollowCount    int64 `json:"follow_count" `
-//	FollowerCount  int64 `json:"follower_count"`
-
-//	WorkCount      int64 `json:"work_count"`  video
-
-//	FavoriteCount  int64 `json:"favorite_count"`
-//	TotalFavorited int64 `json:"total_favorited"`
-//}
 
 // 调用rpc服务 获取用户计数信息
 func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount, error) {
@@ -93,8 +82,7 @@ func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount
 	count.Id = id
 
 	//FollowCount  FollowerCnt
-	followCntRes := &relationV1.FollowCntResponse{}
-	followCntRes, err := r.data.relationc.FollowCnt(ctx, &relationV1.FollowCntRequest{UserId: id})
+	followCntRes, err := r.data.relationc.FollowCnt(context.Background(), &relationV1.FollowCntRequest{UserId: id})
 	if err != nil {
 		r.log.Errorf("data.GetCountById/FollowCnt-err:%v\n", err)
 		return nil, err
@@ -103,8 +91,8 @@ func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount
 	count.FollowerCount = followCntRes.FollowerCnt
 
 	//WorkCount
-	workCntRes := &videov1.WorkCntResponse{}
-	workCntRes, err = r.data.videoc.WorkCnt(ctx, &videov1.WorkCntRequest{UserId: id})
+
+	workCntRes, err := r.data.videoc.WorkCnt(ctx, &videov1.WorkCntRequest{UserId: id})
 	if err != nil {
 		r.log.Errorf("data.GetCountById/WorkCnt-err:%v\n", err)
 		return nil, err
@@ -112,8 +100,8 @@ func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount
 	count.WorkCount = workCntRes.WorkCount
 
 	//FavoriteCount  TotalFavorited
-	favoriteCntRes := &favoriteV1.GetFavoriteCntByUIdResponse{}
-	favoriteCntRes, err = r.data.favc.GetFavoriteCntByUId(ctx, &favoriteV1.GetFavoriteCntByUIdRequest{UserId: id})
+
+	favoriteCntRes, err := r.data.favc.GetFavoriteCntByUId(ctx, &favoriteV1.GetFavoriteCntByUIdRequest{UserId: id})
 	if err != nil {
 		r.log.Errorf("data.GetCountById/GetFavoriteCntByUId-err:%v\n", err)
 		return nil, err

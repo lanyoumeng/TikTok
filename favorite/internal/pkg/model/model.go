@@ -7,14 +7,14 @@ import (
 )
 
 type Favorite struct {
-	Id      int64 `json:"id" gorm:"primary_key;auto_increment"` // 主键
+	Id      int64 `json:"id" gorm:"primaryKey;autoIncrement"` // 主键
 	UserId  int64 `json:"user_id" gorm:"column:user_id"`
 	VideoId int64 `json:"video_id" gorm:"column:video_id"`
 	Liked   bool  `json:"liked" gorm:"column:liked"`
 
-	CreatedAt time.Time      `gorm:"column:create_at;autoCreateTime"`
-	UpdatedAt time.Time      `gorm:"column:update_at;autoUpdateTime"`
-	DeletedAt gorm.DeletedAt // 软删除 删除时间
+	CreatedAt time.Time      `json:"created_at" gorm:"column:created_at;autoCreateTime"` // 修改列名
+	UpdatedAt time.Time      `json:"updated_at" gorm:"column:updated_at;autoUpdateTime"` // 修改列名
+	DeletedAt gorm.DeletedAt // 软删除时间
 }
 
 func (Favorite) TableName() string {

@@ -28,9 +28,9 @@ data:
     addr: 127.0.0.1:6379
     password: ""
     db: 0
-    dial_timeout: 1s
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    dial_timeout: 5s
+    read_timeout: 3s
+    write_timeout: 3s
 trace:
   endpoint: http://127.0.0.1:14268/api/traces
 

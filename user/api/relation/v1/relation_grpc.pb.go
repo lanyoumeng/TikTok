@@ -8,6 +8,7 @@ package v1
 
 import (
 	context "context"
+	"github.com/go-kratos/kratos/v2/log"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -89,15 +90,17 @@ func (c *relationServiceClient) FriendList(ctx context.Context, in *DouyinRelati
 }
 
 func (c *relationServiceClient) FollowCnt(ctx context.Context, in *FollowCntRequest, opts ...grpc.CallOption) (*FollowCntResponse, error) {
+	log.Debug("FollowCnt")
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(FollowCntResponse)
 	err := c.cc.Invoke(ctx, RelationService_FollowCnt_FullMethodName, in, out, cOpts...)
 	if err != nil {
+		log.Error("FollowCnt", err)
 		return nil, err
 	}
+	log.Debug("FollowCnt", out)
 	return out, nil
 }
-
 func (c *relationServiceClient) IsFollow(ctx context.Context, in *IsFollowRequest, opts ...grpc.CallOption) (*IsFollowResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(IsFollowResponse)
@@ -230,11 +233,14 @@ func _RelationService_FriendList_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _RelationService_FollowCnt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	log.Debug("FollowCnt")
 	in := new(FollowCntRequest)
 	if err := dec(in); err != nil {
+		log.Debug("FollowCnt")
 		return nil, err
 	}
 	if interceptor == nil {
+		log.Debug("FollowCnt")
 		return srv.(RelationServiceServer).FollowCnt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
@@ -242,8 +248,10 @@ func _RelationService_FollowCnt_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: RelationService_FollowCnt_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		log.Debug("FollowCnt")
 		return srv.(RelationServiceServer).FollowCnt(ctx, req.(*FollowCntRequest))
 	}
+	log.Debug("FollowCnt")
 	return interceptor(ctx, in, info, handler)
 }
 

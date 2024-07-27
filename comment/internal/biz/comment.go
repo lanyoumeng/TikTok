@@ -56,6 +56,7 @@ func (uc *CommentUsecase) GetUserinfoByUIdVIdAId(ctx context.Context, userId, vi
 	//1.根据userId查询用户信息
 	userInfo, err := uc.repo.GetUserinfoByUId(ctx, userId)
 	if err != nil {
+		uc.log.Errorf("Error getting user info: %v", err)
 		return nil, err
 
 	}
@@ -63,12 +64,14 @@ func (uc *CommentUsecase) GetUserinfoByUIdVIdAId(ctx context.Context, userId, vi
 	//2.根据videoId查询作者Id
 	vId, err := uc.repo.GetAuthorIdByVId(ctx, videoId)
 	if err != nil {
+		uc.log.Errorf("Error getting author info: %v", err)
 		return nil, err
 
 	}
 	//3.根据userId,authorId查询用户是否关注作者
 	isFollow, err := uc.repo.GetFollowByUIdAId(ctx, userId, vId)
 	if err != nil {
+		uc.log.Errorf("Error getting follow info: %v", err)
 		return nil, err
 	}
 	userInfo.IsFollow = isFollow
@@ -81,6 +84,7 @@ func (uc *CommentUsecase) CommentList(ctx context.Context, videoId int64) ([]*pb
 	// 获取mysql 评论列表
 	comments, err := uc.repo.CommentList(ctx, videoId)
 	if err != nil {
+		uc.log.Errorf("Error getting comment list: %v", err)
 		return nil, err
 	}
 
@@ -96,7 +100,7 @@ func (uc *CommentUsecase) CommentList(ctx context.Context, videoId int64) ([]*pb
 			defer wg.Done()
 			userinfo, err := uc.GetUserinfoByUIdVIdAId(ctx, comment.UserId, videoId)
 			if err != nil {
-				uc.log.Debug("Error getting user info: %v", err)
+				uc.log.Errorf("Error getting user info: %v", err)
 				return
 			}
 			commentresp := &pb.Comment{

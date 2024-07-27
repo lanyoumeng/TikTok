@@ -29,11 +29,13 @@ func (f *FavoriteService) Favorite(ctx context.Context, req *pb.DouyinFavoriteAc
 	//获取user
 	user, err := token.ParseToken(req.Token, f.JwtKey)
 	if err != nil {
+		f.log.Errorf("token.ParseToken error: %v", err)
 		return nil, err
 	}
 	//获取作者id
 	authorId, err := f.fc.GetAuthorIdByVideoId(ctx, req.VideoId)
 	if err != nil {
+		f.log.Errorf("GetAuthorIdByVideoId error: %v", err)
 		return nil, err
 	}
 	if err := f.fc.Favorite(ctx, authorId, req.VideoId, user.UserId, int64(req.ActionType)); err != nil {
@@ -54,6 +56,7 @@ func (f *FavoriteService) FavoriteList(ctx context.Context, req *pb.DouyinFavori
 
 	videoList, err := f.fc.FavoriteList(ctx, req.UserId)
 	if err != nil {
+		f.log.Errorf("FavoriteList error: %v", err)
 		return nil, err
 	}
 	videos := make([]*pb.Video, len(videoList))
@@ -70,6 +73,7 @@ func (f *FavoriteService) GetFavoriteCntByVId(ctx context.Context, req *pb.GetFa
 
 	cnt, err := f.fc.GetFavoriteCntByVId(ctx, req.Id)
 	if err != nil {
+		f.log.Errorf("GetFavoriteCntByVId error: %v", err)
 		return nil, err
 	}
 
@@ -81,6 +85,7 @@ func (f *FavoriteService) GetIsFavorite(ctx context.Context, req *pb.GetIsFavori
 
 	flag, err := f.fc.GetIsFavorite(ctx, req.VideoId, req.UserId)
 	if err != nil {
+		f.log.Errorf("GetIsFavorite error: %v", err)
 		return nil, err
 	}
 
@@ -94,6 +99,7 @@ func (f *FavoriteService) GetFavoriteCntByUId(ctx context.Context, req *pb.GetFa
 
 	TotalFavorited, FavoriteCount, err := f.fc.GetFavoriteCntByUId(ctx, req.UserId)
 	if err != nil {
+		f.log.Errorf("GetFavoriteCntByUId error: %v", err)
 		return nil, err
 	}
 	return &pb.GetFavoriteCntByUIdResponse{
