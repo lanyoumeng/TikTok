@@ -37,6 +37,6 @@ comment/configs/config.yaml
 !/relation/deply/nacos/
 !/user/deply/nacos/
 !/video/deply/nacos/
-!/video/store/video/
 
+!/video/store/video/
 
