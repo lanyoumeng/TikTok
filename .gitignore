@@ -16,9 +16,7 @@ deply/nacos/logs
 
 deply/redis/data
 
-user/deply/nacos/cache
 
-user/deply/nacos/logs
 
 .idea
 

@@ -1,6 +1,6 @@
 module relation
 
-go 1.21.3
+go 1.21
 
 require (
 	github.com/go-kratos/kratos/contrib/config/nacos/v2 v2.0.0-20240615052815-46362d1a360d

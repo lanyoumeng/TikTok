@@ -57,7 +57,8 @@ func wireApp(prometheus *conf.Prometheus, aliyunOSS *conf.AliyunOSS, kafka *conf
 	videoUsecase := biz.NewVideoUsecase(videoRepo, logger)
 	videoService := service.NewVideoService(videoUsecase, auth, logger)
 	grpcServer := server.NewGRPCServer(prometheus, confServer, auth, videoService, logger)
-	app := newApp(registrar, logger, grpcServer)
+	httpServer := server.NewHTTPServer(confServer, videoService, auth, logger)
+	app := newApp(registrar, logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup2()
 		cleanup()
