@@ -29,12 +29,12 @@ message/configs/config.yaml
 favorite/configs/config.yaml
 comment/configs/config.yaml
 
-!/favorite/deply/nacos/
-!/comment/deply/nacos/
-!/message/deply/nacos/
-!/relation/deply/nacos/
-!/user/deply/nacos/
-!/video/deply/nacos/
+!/favorite/deply
+!/comment/deply
+!/message/deply
+!/relation/deply
+!/user/deply
+!/video/deply
 
 !/video/store/video/
 
