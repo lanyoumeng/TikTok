@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserId VideoId liked
+// UserId VideoId index索引
 type Favorite struct {
 	Id      int64 `json:"id" gorm:"primaryKey;autoIncrement"` // 主键
 	UserId  int64 `json:"user_id" gorm:"column:user_id;index"`
