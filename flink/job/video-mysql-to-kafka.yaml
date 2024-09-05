@@ -1,0 +1,24 @@
+source:
+  type: mysql
+  name: Video MySQL Source
+  scan.startup.mode: latest-offset
+  hostname: 127.0.0.1
+  port: 7500
+  username: root
+  password: 123456
+  tables: video.\.*
+  server-id: 5402
+
+
+sink:
+  type: kafka
+  name: Video-Kafka-Sink
+  topic: video-redis
+  properties.bootstrap.servers:  EXTERNAL://127.0.0.1:9092
+
+
+pipeline:
+  name: Video MySQL to Kafka Pipeline
+  parallelism: 1
+
+

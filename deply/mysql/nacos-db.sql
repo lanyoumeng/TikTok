@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /******************************************/
 /*   数据库全名 = nacos_config   */
 /*   表名称 = config_info   */
@@ -38,8 +37,8 @@ CREATE TABLE `config_info` (
   `type` varchar(64) DEFAULT NULL,
   `c_schema` text,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_configinfo_datagrouptenant` (`data_id`,`group_id`,`tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='config_info';
+  UNIQUE KEY `uk_configinfo_datagrouptenant` (`data_id`, `group_id`, `tenant_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = 'config_info';
 
 /******************************************/
 /*   数据库全名 = nacos_config   */
@@ -55,9 +54,8 @@ CREATE TABLE `config_info_aggr` (
   `app_name` varchar(128) DEFAULT NULL,
   `tenant_id` varchar(128) DEFAULT '' COMMENT '租户字段',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_configinfoaggr_datagrouptenantdatum` (`data_id`,`group_id`,`tenant_id`,`datum_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='增加租户字段';
-
+  UNIQUE KEY `uk_configinfoaggr_datagrouptenantdatum` (`data_id`, `group_id`, `tenant_id`, `datum_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = '增加租户字段';
 
 /******************************************/
 /*   数据库全名 = nacos_config   */
@@ -77,8 +75,8 @@ CREATE TABLE `config_info_beta` (
   `src_ip` varchar(20) DEFAULT NULL COMMENT 'source ip',
   `tenant_id` varchar(128) DEFAULT '' COMMENT '租户字段',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_configinfobeta_datagrouptenant` (`data_id`,`group_id`,`tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='config_info_beta';
+  UNIQUE KEY `uk_configinfobeta_datagrouptenant` (`data_id`, `group_id`, `tenant_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = 'config_info_beta';
 
 /******************************************/
 /*   数据库全名 = nacos_config   */
@@ -98,8 +96,8 @@ CREATE TABLE `config_info_tag` (
   `src_user` text COMMENT 'source user',
   `src_ip` varchar(20) DEFAULT NULL COMMENT 'source ip',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_configinfotag_datagrouptenanttag` (`data_id`,`group_id`,`tenant_id`,`tag_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='config_info_tag';
+  UNIQUE KEY `uk_configinfotag_datagrouptenanttag` (`data_id`, `group_id`, `tenant_id`, `tag_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = 'config_info_tag';
 
 /******************************************/
 /*   数据库全名 = nacos_config   */
@@ -114,9 +112,9 @@ CREATE TABLE `config_tags_relation` (
   `tenant_id` varchar(128) DEFAULT '' COMMENT 'tenant_id',
   `nid` bigint(20) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`nid`),
-  UNIQUE KEY `uk_configtagrelation_configidtag` (`id`,`tag_name`,`tag_type`),
+  UNIQUE KEY `uk_configtagrelation_configidtag` (`id`, `tag_name`, `tag_type`),
   KEY `idx_tenant_id` (`tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='config_tag_relation';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = 'config_tag_relation';
 
 /******************************************/
 /*   数据库全名 = nacos_config   */
@@ -135,7 +133,7 @@ CREATE TABLE `group_capacity` (
   `gmt_modified` datetime NOT NULL DEFAULT '2010-05-05 00:00:00' COMMENT '修改时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_group_id` (`group_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='集群、各Group容量信息表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = '集群、各Group容量信息表';
 
 /******************************************/
 /*   数据库全名 = nacos_config   */
@@ -159,8 +157,7 @@ CREATE TABLE `his_config_info` (
   KEY `idx_gmt_create` (`gmt_create`),
   KEY `idx_gmt_modified` (`gmt_modified`),
   KEY `idx_did` (`data_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='多租户改造';
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = '多租户改造';
 
 /******************************************/
 /*   数据库全名 = nacos_config   */
@@ -179,8 +176,7 @@ CREATE TABLE `tenant_capacity` (
   `gmt_modified` datetime NOT NULL DEFAULT '2010-05-05 00:00:00' COMMENT '修改时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_tenant_id` (`tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='租户容量信息表';
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = '租户容量信息表';
 
 CREATE TABLE `tenant_info` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -192,29 +188,39 @@ CREATE TABLE `tenant_info` (
   `gmt_create` bigint(20) NOT NULL COMMENT '创建时间',
   `gmt_modified` bigint(20) NOT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_tenant_info_kptenantid` (`kp`,`tenant_id`),
+  UNIQUE KEY `uk_tenant_info_kptenantid` (`kp`, `tenant_id`),
   KEY `idx_tenant_id` (`tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='tenant_info';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin COMMENT = 'tenant_info';
 
 CREATE TABLE users (
-	username varchar(50) NOT NULL PRIMARY KEY,
-	password varchar(500) NOT NULL,
-	enabled boolean NOT NULL
+  username varchar(50) NOT NULL PRIMARY KEY,
+  password varchar(500) NOT NULL,
+  enabled boolean NOT NULL
 );
 
 CREATE TABLE roles (
-	username varchar(50) NOT NULL,
-	role varchar(50) NOT NULL,
-	constraint uk_username_role UNIQUE (username,role)
+  username varchar(50) NOT NULL,
+  role varchar(50) NOT NULL,
+  constraint uk_username_role UNIQUE (username, role)
 );
 
 CREATE TABLE permissions (
-    role varchar(50) NOT NULL,
-    resource varchar(512) NOT NULL,
-    action varchar(8) NOT NULL,
-    constraint uk_role_permission UNIQUE (role,resource,action)
+  role varchar(50) NOT NULL,
+  resource varchar(512) NOT NULL,
+  action varchar(8) NOT NULL,
+  constraint uk_role_permission UNIQUE (role, resource, action)
 );
 
-INSERT INTO users (username, password, enabled) VALUES ('nacos', '$2a$10$EuWPZHzz32dJN7jexM34MOeYirDdFAZm2kuWj7VEOJhhZkDrxfvUu', TRUE);
+INSERT INTO
+  users (username, password, enabled)
+VALUES
+  (
+    'nacos',
+    '$2a$10$EuWPZHzz32dJN7jexM34MOeYirDdFAZm2kuWj7VEOJhhZkDrxfvUu',
+    TRUE
+  );
 
-INSERT INTO roles (username, role) VALUES ('nacos', 'ROLE_ADMIN');
+INSERT INTO
+  roles (username, role)
+VALUES
+  ('nacos', 'ROLE_ADMIN');

@@ -8,17 +8,14 @@ conf:
   log:
     error_log:
       level: warn
-      file_path:
-        logs/error.log
+      file_path: logs/error.log
     access_log:
-      file_path:
-        logs/access.log
+      file_path: logs/access.log
 authentication:
-  secret:
-    secret              # secret for jwt token generation.
-  expire_time: 3600     # jwt token expire time, in second
-  users:                # yamllint enable rule:comments-indentation
-    - username: admin   # username and password for login <code>manager api</code>
+  secret: secret # secret for jwt token generation.
+  expire_time: 3600 # jwt token expire time, in second
+  users: # yamllint enable rule:comments-indentation
+    - username: admin # username and password for login <code>manager api</code>
       password: admin
     - username: user
       password: user

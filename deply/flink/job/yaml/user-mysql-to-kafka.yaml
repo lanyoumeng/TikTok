@@ -1,25 +1,21 @@
 source:
-   type: mysql
-   name: MySQL Source
-   scan.startup.mode: latest-offset
-   hostname: mysql
-   port: 7500
-   username: root
-   password: 123456
-   tables: user.\.*
-#  user.user
-   server-id: 5401
-
+  type: mysql
+  name: MySQL Source
+  scan.startup.mode: latest-offset
+  hostname: mysql
+  port: 7500
+  username: root
+  password: 123456
+  tables: user.\.*
+  #  user.user
+  server-id: 5401
 
 sink:
   type: kafka
   name: Kafka Sink
   topic: user-redis
-  properties.bootstrap.servers:  EXTERNAL://kafka:9092
-
+  properties.bootstrap.servers: EXTERNAL://kafka:9092
 
 pipeline:
   name: User MySQL to Kafka Pipeline
   parallelism: 2
-
-

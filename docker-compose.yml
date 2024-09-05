@@ -110,7 +110,7 @@ services:
       - TikTok-net
 
   flink:
-    build: ./flink
+    image: lanmengyou/flinkcdc-my:v1.0
     container_name: flink
     ports:
       - "8081:8081"
@@ -260,11 +260,8 @@ services:
   user:
     build: ./user
     container_name: user
-    ports:
-      - "8001:8001"
-      - "8881:8881"
     networks:
-      - TikTok-net
+      - host
     depends_on:
       - mysql
       - Redis
@@ -286,11 +283,8 @@ services:
   video:
     build: ./video
     container_name: video
-    ports:
-      - "8002:8002"
-      - "8882:8882"
     networks:
-      - TikTok-net
+      - host
     depends_on:
         - mysql
         - Redis
@@ -313,11 +307,8 @@ services:
   favorite:
     build: ./favorite
     container_name: favorite
-    ports:
-      - "8003:8003"
-      - "8883:8883"
     networks:
-      - TikTok-net
+      - host
     depends_on:
         - mysql
         - Redis
@@ -338,11 +329,8 @@ services:
   comment:
     build: ./comment
     container_name: comment
-    ports:
-      - "8004:8004"
-      - "8884:8884"
     networks:
-      - TikTok-net
+      - host
     depends_on:
         - mysql
         - Redis
@@ -364,11 +352,8 @@ services:
   relation:
     build: ./relation
     container_name: relation
-    ports:
-      - "8005:8005"
-      - "8885:8885"
     networks:
-      - TikTok-net
+      - host
     depends_on:
       - mysql
       - Redis
@@ -391,11 +376,8 @@ services:
   message:
     build: ./message
     container_name: message
-    ports:
-      - "8006:8006"
-      - "8886:8886"
     networks:
-      - TikTok-net
+      - host
     depends_on:
         - mysql
         - Redis

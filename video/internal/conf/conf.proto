@@ -88,11 +88,16 @@ message Kafka {
   }
 
   message Video {
+    message Publish {
+      string topic = 1;
+      string groupId = 2;
+    }
     message Video {
       string topic = 1;
       string groupId = 2;
     }
-    Video video = 1;
+    Publish publish = 1;
+    Video video = 2;
   }
 
   message User {

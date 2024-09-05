@@ -50,7 +50,7 @@ kafka:
     topic: TikTok-log
     groupId: TikTok-log
   video:
-    video:  #video服务的video数据库
+    video: #video服务的video数据库
       topic: video-redis
       groupId: video-redis
   user:
@@ -73,7 +73,6 @@ kafka:
     message:
       topic: message-redis
       groupId: message-redis
-
 
 aliyunOSS:
   endpoint:

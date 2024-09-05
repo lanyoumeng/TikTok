@@ -44,11 +44,21 @@ func (v *videoRepo) Save(ctx context.Context, video *model.Video) error {
 
 // 发布视频上传信息·到消息队列
 func (v *videoRepo) PublishKafka(ctx context.Context, videoKafkaMessage *model.VideoKafkaMessage) {
-	// videoByte, _ := sonic.Marshal(videoKafkaMessage)
-	videoByte, _ := json.Marshal(videoKafkaMessage)
+	//videoByte, _ := sonic.Marshal(videoKafkaMessage)
+
+	//v.log.Debug("data/PublishKafka:", videoKafkaMessage)
+	videoByte, err := json.Marshal(videoKafkaMessage)
+	if err != nil {
+		v.log.Error("PublishKafka-err:", err)
+		return
+
+	}
 
 	for i := 0; i < 3; i++ { //允许重试3次
-		if err := v.data.kafakProducer.WriteMessages(context.Background(), //批量写入消息，原子操作，要么全写成`功，要么全写失败
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := v.data.kafakProducer.WriteMessages(ctx, //批量写入消息，原子操作，要么全写成`功，要么全写失败
+
 			kafka.Message{Value: videoByte},
 		); err != nil {
 			// if err == kafka.LeaderNotAvailable || errors.Is(err, context.DeadlineExceeded) {

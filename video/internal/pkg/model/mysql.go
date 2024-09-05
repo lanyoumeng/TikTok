@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// id 为索引
+// id 为uniqueIndex索引
 type Video struct {
 	Id       int64 `json:"id" gorm:"column:id;uniqueIndex;primaryKey;autoIncrement;comment:视频id"`
 	AuthorId int64 `json:"author_id" gorm:"column:author_id;not null;comment:作者id"`

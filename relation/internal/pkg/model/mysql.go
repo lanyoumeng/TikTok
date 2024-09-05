@@ -5,10 +5,11 @@ import (
 	"time"
 )
 
+// UserId ToUserId Index索引
 type Relation struct {
 	Id       int64 `json:"id,omitempty" gorm:"column:id;primaryKey;autoIncrement"`
-	UserId   int64 `json:"user_id,omitempty" gorm:"column:user_id"`
-	ToUserId int64 `json:"to_user_id,omitempty" gorm:"column:to_user_id"`
+	UserId   int64 `json:"user_id,omitempty" gorm:"column:user_id;index"`
+	ToUserId int64 `json:"to_user_id,omitempty" gorm:"column:to_user_id;index"`
 
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`

@@ -5,10 +5,11 @@ import (
 	"time"
 )
 
+// ToUserId FromUserId Index索引
 type Message struct {
 	Id         int64     `json:"id,omitempty" gorm:"column:id;primaryKey;autoIncrement"`
-	ToUserId   int64     `json:"to_user_id,omitempty" gorm:"column:to_user_id"`
-	FromUserId int64     `json:"from_user_id,omitempty" gorm:"column:from_user_id"`
+	ToUserId   int64     `json:"to_user_id,omitempty" gorm:"column:to_user_id;index"`
+	FromUserId int64     `json:"from_user_id,omitempty" gorm:"column:from_user_id;index"`
 	Content    string    `json:"content,omitempty" gorm:"column:content"`
 	CreateTime time.Time `json:"create_time" gorm:"column:create_time;autoCreateTime"`
 

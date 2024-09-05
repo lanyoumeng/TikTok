@@ -12,6 +12,7 @@ service VideoService {
     option (google.api.http) = {
       post: "/douyin/publish/action"
       body: "*"
+
     };
   };
   rpc PublishList(douyin_publish_list_request)returns (douyin_publish_list_response);

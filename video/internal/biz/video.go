@@ -173,6 +173,7 @@ func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]b
 	videoKafkaMessage.VideoPath = filePath
 	videoKafkaMessage.VideoFileName = filename
 
+	//v.log.Debug("videoKafkaMessage:", videoKafkaMessage)
 	//存储视频信息到kafka
 	v.repo.PublishKafka(ctx, videoKafkaMessage)
 

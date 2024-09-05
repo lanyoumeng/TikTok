@@ -46,8 +46,6 @@ scrape_configs:
     static_configs:
       - targets: ["172.26.71.21:7274"]
 
-
-
   - job_name: "TikTok-relation"
     scrape_interval: 5s
     metrics_path: "/metrics"

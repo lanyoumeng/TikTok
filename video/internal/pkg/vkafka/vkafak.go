@@ -21,7 +21,7 @@ import (
 )
 
 func NewVdKafkaSender(k *conf.Kafka) (*kafka.Writer, error) {
-	topic := k.Video.Video.Topic
+	topic := k.Video.Publish.Topic
 
 	writer := &kafka.Writer{
 		Addr:  kafka.TCP(k.Broker), //不定长参数，支持传入多个broker的ip:port
@@ -45,8 +45,8 @@ func NewVdKafkaSender(k *conf.Kafka) (*kafka.Writer, error) {
 
 func NewVdKafkaReader(log *log.Helper, k *conf.Kafka, bucket *oss.Bucket, db *gorm.DB, rdb *redis.Client, uc userv1.UserServiceClient) *kafka.Reader {
 	broker := k.Broker
-	topic := k.Video.Video.Topic
-	groupId := k.Video.Video.GroupId
+	topic := k.Video.Publish.Topic
+	groupId := k.Video.Publish.GroupId
 
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{broker}, //支持传入多个broker的ip:port
@@ -98,15 +98,14 @@ func InitVideoKafkaConsumer(log *log.Helper, reader *kafka.Reader, bucket *oss.B
 		} else {
 
 			//1.kafka接收到视频信息后上传到阿里云oss
-			// fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
+			fmt.Printf("topic=%s, partition=%d, offset=%d, key=%s, message content=%s\n", message.Topic, message.Partition, message.Offset, string(message.Key), string(message.Value))
 			videoKafkaMessage := &model.VideoKafkaMessage{}
 			if err := json.Unmarshal(message.Value, &videoKafkaMessage); err != nil {
 				fmt.Printf("json.Unmarshal failed: %v", err)
-
 			}
 
 			cnt++
-			log.Debug("vkafka/Message::::::::::::", videoKafkaMessage, " 		", cnt)
+			log.Debug("vkafka/Message::::::::::::", videoKafkaMessage, " 		cnt:", cnt)
 			if bucket == nil {
 				log.Debugf("bucket is nil")
 				continue

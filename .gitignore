@@ -1,5 +1,5 @@
 # 忽略 MySQL 数据目录
-deploy/mysql/data
+deploy/mysql/
 
 # 忽略 etcd 数据目录
 deply/etcd/etcd-data
@@ -7,7 +7,7 @@ deply/etcd/etcd-data
 # 忽略所有 .log 文件
 *.log
 
-
+/video/deply/
 deply/es
 
 deply/logstash/logstash
@@ -16,11 +16,9 @@ deply/nacos/logs
 
 deply/redis/data
 
-
-
-.idea
-
-flink/flink-1.18.0/*
+*.idea
+/flink/flink-1.18.0/
+flink/flink-1.18.0/
 
 video/configs/config.yaml
 user/configs/config.yaml
@@ -29,12 +27,10 @@ message/configs/config.yaml
 favorite/configs/config.yaml
 comment/configs/config.yaml
 
-!/favorite/deply
-!/comment/deply
-!/message/deply
-!/relation/deply
-!/user/deply
-!/video/deply
+/favorite/deply
+/comment/deply
+/message/deply
+/relation/deply
+/user/deply
 
-!/video/store/video/
-
+/video/store/video/

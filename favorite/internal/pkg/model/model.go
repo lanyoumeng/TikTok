@@ -6,10 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
+// UserId VideoId liked
 type Favorite struct {
 	Id      int64 `json:"id" gorm:"primaryKey;autoIncrement"` // 主键
-	UserId  int64 `json:"user_id" gorm:"column:user_id"`
-	VideoId int64 `json:"video_id" gorm:"column:video_id"`
+	UserId  int64 `json:"user_id" gorm:"column:user_id;index"`
+	VideoId int64 `json:"video_id" gorm:"column:video_id;index"`
 	Liked   bool  `json:"liked" gorm:"column:liked"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"column:created_at;autoCreateTime"` // 修改列名

@@ -10,16 +10,12 @@ source:
   #  user.user
   server-id: 5402
 
-
 sink:
   type: kafka
   name: Kafka Sink
   topic: video-redis
-  properties.bootstrap.servers:  EXTERNAL://kafka:9092
-
+  properties.bootstrap.servers: EXTERNAL://kafka:9092
 
 pipeline:
   name: Video MySQL to Kafka Pipeline
   parallelism: 2
-
-

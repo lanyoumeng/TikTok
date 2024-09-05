@@ -1,15 +1,15 @@
 -- 定义MySQL源表
 CREATE TABLE MySQLSource (
-     id BIGINT,
-     name STRING,
-     password STRING,
-     avatar STRING,
-     background_image STRING,
-     signature STRING,
-     create_at TIMESTAMP,
-     update_at TIMESTAMP,
-     deleted_at TIMESTAMP,
-     PRIMARY KEY (id) NOT ENFORCED
+    id BIGINT,
+    name STRING,
+    password STRING,
+    avatar STRING,
+    background_image STRING,
+    signature STRING,
+    create_at TIMESTAMP,
+    update_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    PRIMARY KEY (id) NOT ENFORCED
 ) WITH (
     'connector' = 'mysql-cdc',
     'hostname' = 'mysql',
@@ -23,15 +23,15 @@ CREATE TABLE MySQLSource (
 
 -- 定义Kafka接收表
 CREATE TABLE KafkaSink (
-   id BIGINT,
-   name STRING,
-   password STRING,
-   avatar STRING,
-   background_image STRING,
-   signature STRING,
-   create_at TIMESTAMP,
-   update_at TIMESTAMP,
-   deleted_at TIMESTAMP
+    id BIGINT,
+    name STRING,
+    password STRING,
+    avatar STRING,
+    background_image STRING,
+    signature STRING,
+    create_at TIMESTAMP,
+    update_at TIMESTAMP,
+    deleted_at TIMESTAMP
 ) WITH (
     'connector' = 'kafka',
     'topic' = 'flink-user',
@@ -40,6 +40,17 @@ CREATE TABLE KafkaSink (
 );
 
 -- 从MySQL源表插入数据到Kafka接收表
-INSERT INTO KafkaSink
-SELECT id, name, password, avatar, background_image, signature, create_at, update_at, deleted_at
-FROM MySQLSource;
+INSERT INTO
+    KafkaSink
+SELECT
+    id,
+    name,
+    password,
+    avatar,
+    background_image,
+    signature,
+    create_at,
+    update_at,
+    deleted_at
+FROM
+    MySQLSource;

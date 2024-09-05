@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// name索引
+// name uniqueIndex索引
 type User struct {
 	Id              int64  `json:"id" gorm:"column:id;primaryKey;autoIncrement;comment:用户id"`
 	Name            string `json:"name" gorm:" column:name;uniqueIndex;type:varchar(32);not null;comment:用户名称" valid:"required,stringlength(6|32)"`

@@ -1,0 +1,25 @@
+source:
+   type: mysql
+   name: Relation MySQL Source
+   scan.startup.mode: latest-offset
+   hostname: 127.0.0.1
+   port: 7500
+   username: root
+   password: 123456
+   tables: relation.\.*
+#  user.user
+   server-id: 5405
+
+
+sink:
+  type: kafka
+  name: Relation-Kafka-Sink
+  topic: relation-redis
+  properties.bootstrap.servers:  EXTERNAL://127.0.0.1:9092
+
+
+pipeline:
+  name: Relation MySQL to Kafka Pipeline
+  parallelism: 1
+
+
