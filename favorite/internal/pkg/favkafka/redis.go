@@ -11,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/segmentio/kafka-go"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"golang.org/x/sync/errgroup"
 	"os"
 	"os/signal"
@@ -24,7 +25,7 @@ type RedisKafkaMessage struct {
 	Op     string         `json:"op"`
 }
 
-func NewRedisKafkaReader(log *log.Helper, k *conf.Kafka, rdb *redis.Client, vc videoV1.VideoServiceClient) *kafka.Reader {
+func NewRedisKafkaReader(log *log.Helper, k *conf.Kafka, client *clientv3.Client, rdb *redis.Client, vc videoV1.VideoServiceClient) *kafka.Reader {
 	broker := k.Broker
 	topic := k.Favorite.Favorite.Topic
 	groupId := k.Favorite.Favorite.GroupId
@@ -49,12 +50,12 @@ func NewRedisKafkaReader(log *log.Helper, k *conf.Kafka, rdb *redis.Client, vc v
 	})
 
 	//协程启动消费者
-	go InitRedisKafkaConsumer(context.Background(), log, reader, rdb, vc)
+	go InitRedisKafkaConsumer(context.Background(), log, reader, client, rdb, vc)
 	return reader
 }
 
 // 初始化缓存消息消费者
-func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.Reader, rdb *redis.Client, vc videoV1.VideoServiceClient) {
+func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.Reader, etcdClient *clientv3.Client, rdb *redis.Client, vc videoV1.VideoServiceClient) {
 	go func() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM) //注册信号2和15
@@ -80,6 +81,21 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 			}
 			videoId := redisKafkaMessage.Before.VideoId
 			userId := redisKafkaMessage.Before.UserId
+
+			//etcd 创建租约并获取锁
+			leaseResp, err := etcdClient.Grant(ctx, 10) // 租约 10 秒
+			if err != nil {
+				log.Fatalf("无法创建租约: %v", err)
+			}
+
+			lockName := fmt.Sprintf("lock_%d", videoId)
+			key := fmt.Sprintf("locks/%s", lockName)
+
+			_, err = etcdClient.Put(ctx, key, "locked", clientv3.WithLease(leaseResp.ID))
+			if err != nil {
+				log.Fatalf("无法获取锁: %v", err)
+			}
+			fmt.Println("成功获取锁")
 
 			//favorite表创建/更新记录，
 			if redisKafkaMessage.Op == "u" || redisKafkaMessage.Op == "c" {
@@ -286,6 +302,12 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					log.Errorf("set redis failed: %v", err)
 				}
 
+			}
+
+			//释放锁
+			_, err = etcdClient.Delete(ctx, key)
+			if err != nil {
+				log.Fatalf("无法释放锁: %v", err)
 			}
 
 		}

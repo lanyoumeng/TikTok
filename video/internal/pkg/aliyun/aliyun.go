@@ -1,17 +1,16 @@
 package aliyun
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
+	"github.com/nacos-group/nacos-sdk-go/common/logger"
 	"os"
+	"os/exec"
 	"strings"
+	"sync"
 	"video/internal/conf"
 	"video/internal/pkg/model"
 
 	"github.com/go-kratos/kratos/v2/log"
-
-	ffmpeg "github.com/u2takey/ffmpeg-go"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
@@ -43,12 +42,50 @@ func UploadFile(bucket *oss.Bucket, videoKafkaMessage *model.VideoKafkaMessage) 
 	currentDir, _ := os.Getwd()
 	log.Debug(" UploadFile工作目录:", currentDir, "  videoKafkaMessage.VideoPath:", videoKafkaMessage.VideoPath)
 
-	// 直接上传文件
-	err := bucket.PutObjectFromFile("videos/"+videoKafkaMessage.VideoFileName, videoKafkaMessage.VideoPath, oss.ObjectACL(oss.ACLPublicRead))
+	//压缩视频
+	VideoPath, err := compressVideo(videoKafkaMessage.VideoPath)
 	if err != nil {
-		log.Debugf("upload file failed: %v", err)
-		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
+		log.Debug("compressVideo false:", err)
+		return "", "", err
 	}
+
+	coverName := strings.TrimSuffix(videoKafkaMessage.VideoFileName, ".mp4") + "_cover.jpg"
+	// 截取视频封面
+	coverPath, err := generateVideoCover(VideoPath)
+	if err != nil {
+		log.Debug("generateVideoCover false:", err)
+		return "", "", err
+	}
+	log.Debug("coverPath:", coverPath)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		// 直接上传文件
+		err := bucket.PutObjectFromFile("videos/"+videoKafkaMessage.VideoFileName, videoKafkaMessage.VideoPath, oss.ObjectACL(oss.ACLPublicRead))
+		if err != nil {
+			log.Debugf("upload file failed: %v", err)
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		// 直接上传文件
+		err := bucket.PutObjectFromFile("covers/"+coverName, coverPath, oss.ObjectACL(oss.ACLPublicRead))
+		if err != nil {
+			log.Debugf("upload file failed: %v", err)
+			return
+		}
+	}()
+
+	// 获取可播放的视频 URL
+	playURL := fmt.Sprintf("https://%s.%s/%s", bucket.BucketName, bucket.GetConfig().Endpoint, "videos/"+videoKafkaMessage.VideoFileName)
+	coverURL := fmt.Sprintf("https://%s.%s/%s", bucket.BucketName, bucket.GetConfig().Endpoint, "covers/"+coverName)
+
+	wg.Wait()
 
 	//分片上传
 	//// 将本地文件分片，且分片数量指定为3。
@@ -110,28 +147,57 @@ func UploadFile(bucket *oss.Bucket, videoKafkaMessage *model.VideoKafkaMessage) 
 	//}
 	//fmt.Println("cmur:", cmur)
 
-	// 获取可播放的视频 URL
-	playURL := fmt.Sprintf("https://%s.%s/%s", bucket.BucketName, bucket.GetConfig().Endpoint, "videos/"+videoKafkaMessage.VideoFileName)
-	//playURL := fmt.Sprintf("https://%s.%s/%s", bucket.BucketName, bucket.GetConfig().Endpoint, videoKafkaMessage.VideoFileName)
-	// 获取视频封面 URL	buf := bytes.NewBuffer(nil)
-	buf := bytes.NewBuffer(nil)
-	err = ffmpeg.Input(playURL).
-		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 3)}).
-		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
-		WithOutput(buf, os.Stdout).
-		Run()
-	if err != nil {
-		log.Debugf("get video cover failed: %v", err)
-		return "", "", err
-	}
-	coverFilename := strings.TrimSuffix(videoKafkaMessage.VideoPath, ".mp4") + "_cover.jpeg"
-	// 上传封面
-	err = bucket.PutObject("covers/"+coverFilename, buf)
-	if err != nil {
-		log.Debugf("upload cover failed: %v", err)
-		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
-	}
-	coverURL := fmt.Sprintf("https://%s.%s/%s", bucket.BucketName, bucket.GetConfig().Endpoint, "covers/"+coverFilename)
-
 	return playURL, coverURL, nil
+}
+
+// 压缩视频
+func compressVideo(inputVideoPath string) (string, error) {
+	outputVideoPath := strings.TrimSuffix(inputVideoPath, ".mp4") + "CMP.mp4"
+	command := []string{
+		"-i", inputVideoPath,
+		"-c:v", "libx264",
+		//"-b:v", "1M", // 使用比特率代替 -crf
+		"-crf", "43", //较高的CRF值会减小文件大小但可能降低视频质量
+		"-y", // This option enables overwriting without asking
+		outputVideoPath,
+	}
+	cmd := exec.Command("ffmpeg", command...)
+
+	//// 打开已存在的日志文件，如果不存在则创建
+	//logFile, err := os.OpenFile("logs/video.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	//if err != nil {
+	//	return outputVideoPath, err
+	//}
+	//defer logFile.Close()
+	//
+	//cmd.Stderr = logFile // 将stderr重定向到指定的日志文件
+	// cmd.Stderr = os.Stderr // 将stderr重定向到控制台以查看错误消息
+
+	err := cmd.Run()
+	if err != nil {
+		logger.Debug("Error compressing video:", err)
+		return outputVideoPath, err
+	}
+
+	return outputVideoPath, nil
+}
+
+// 截取封面
+func generateVideoCover(videoPath string) (string, error) {
+	// 使用 ffmpeg 获取视频的第一帧作为封面
+	coverFilePath := strings.TrimSuffix(videoPath, ".mp4") + "_cover.jpg"
+	command := []string{
+		"-i", videoPath,
+		"-ss", "00:00:01",
+		"-vframes", "1",
+		coverFilePath,
+	}
+	cmd := exec.Command("ffmpeg", command...)
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("Error generating cover:", err)
+		return "", err
+	}
+	return coverFilePath, nil
 }

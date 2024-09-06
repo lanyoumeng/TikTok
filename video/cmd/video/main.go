@@ -143,6 +143,13 @@ func main() {
 	}
 	//log.Info(bc)
 
+	//// watch key 配置文件发生变更时，自动更新配置
+	//if err := c.Watch("service.name", func(key string, value config.Value) {
+	//	log.Info("config changed: %s = %v\n", key, value)
+	//}); err != nil {
+	//	panic(err)
+	//}
+
 	// 加入链路追踪的配置
 	if err := initTracer(bc.Trace.Endpoint); err != nil {
 		panic(err)

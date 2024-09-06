@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/google/wire"
 	"github.com/segmentio/kafka-go"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // ProviderSet is vkafka providers.
@@ -16,12 +17,13 @@ func InitKafkaConsumer(
 	logger log.Logger,
 	k *conf.Kafka,
 	rdb *redis.Client,
+	client *clientv3.Client,
 	vc videoV1.VideoServiceClient,
 ) *kafka.Reader {
 
 	log := log.NewHelper(log.With(logger, "module", "vkafka"))
 
-	reader := NewRedisKafkaReader(log, k, rdb, vc)
+	reader := NewRedisKafkaReader(log, k, client, rdb, vc)
 
 	return reader
 }

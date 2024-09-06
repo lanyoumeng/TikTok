@@ -50,6 +50,9 @@ kafka:
     topic: TikTok-log
     groupId: TikTok-log
   video:
+    publish:
+      topic: publish-tiktok
+      groupId: publish-tiktok
     video: #video服务的video数据库
       topic: video-redis
       groupId: video-redis

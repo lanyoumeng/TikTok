@@ -22,4 +22,4 @@ EXPOSE 8004
 VOLUME /data/conf
 
 #CMD ["./server", "-conf", "/data/conf"]
-CMD ["./*"]
+CMD ["./comment"]

@@ -109,15 +109,15 @@ services:
     networks:
       - TikTok-net
 
-  flink:
-    image: lanmengyou/flinkcdc-my:v1.0
-    container_name: flink
-    ports:
-      - "8081:8081"
-      - "6123:6123"
-      - "6124:6124"
-    networks:
-      - TikTok-net
+#  flink:
+#    image: lanmengyou/flinkcdc-my:v1.0
+#    container_name: flink
+#    ports:
+#      - "8081:8081"
+#      - "6123:6123"
+#      - "6124:6124"
+#    networks:
+#      - TikTok-net
 
   kafka:
     image: wurstmeister/kafka
@@ -260,8 +260,7 @@ services:
   user:
     build: ./user
     container_name: user
-    networks:
-      - host
+    network_mode: host
     depends_on:
       - mysql
       - Redis
@@ -270,7 +269,6 @@ services:
       - jaeger
       - prometheus
       - kafka
-      - flink
       - apisix
       - dashboard
       - logstash
@@ -283,8 +281,7 @@ services:
   video:
     build: ./video
     container_name: video
-    networks:
-      - host
+    network_mode: host
     depends_on:
         - mysql
         - Redis
@@ -293,7 +290,6 @@ services:
         - jaeger
         - prometheus
         - kafka
-        - flink
         - apisix
         - dashboard
         - logstash
@@ -307,8 +303,7 @@ services:
   favorite:
     build: ./favorite
     container_name: favorite
-    networks:
-      - host
+    network_mode: host
     depends_on:
         - mysql
         - Redis
@@ -317,7 +312,6 @@ services:
         - jaeger
         - prometheus
         - kafka
-        - flink
         - apisix
         - dashboard
         - logstash
@@ -329,8 +323,7 @@ services:
   comment:
     build: ./comment
     container_name: comment
-    networks:
-      - host
+    network_mode: host
     depends_on:
         - mysql
         - Redis
@@ -339,7 +332,6 @@ services:
         - jaeger
         - prometheus
         - kafka
-        - flink
         - apisix
         - dashboard
         - logstash
@@ -352,8 +344,7 @@ services:
   relation:
     build: ./relation
     container_name: relation
-    networks:
-      - host
+    network_mode: host
     depends_on:
       - mysql
       - Redis
@@ -362,7 +353,6 @@ services:
       - jaeger
       - prometheus
       - kafka
-      - flink
       - apisix
       - dashboard
       - logstash
@@ -376,8 +366,7 @@ services:
   message:
     build: ./message
     container_name: message
-    networks:
-      - host
+    network_mode: host
     depends_on:
         - mysql
         - Redis
@@ -386,7 +375,6 @@ services:
         - jaeger
         - prometheus
         - kafka
-        - flink
         - apisix
         - dashboard
         - logstash

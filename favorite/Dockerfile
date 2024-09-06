@@ -22,4 +22,4 @@ EXPOSE 8883
 VOLUME /data/conf
 
 #CMD ["./server", "-conf", "/data/conf"]
-CMD ["./*"]
+CMD ["./favorite"]

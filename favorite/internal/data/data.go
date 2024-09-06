@@ -113,7 +113,7 @@ func NewRedis(conf *conf.Data) *redis.Client {
 	return rdb
 }
 
-func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, func(), error) {
+func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, *clientv3.Client, func(), error) {
 
 	// ETCD源地址
 	endpoint := []string{etcdpoint.Address}
@@ -136,7 +136,7 @@ func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, 
 	// 创建服务注册 reg
 	regi := etcd.New(client)
 
-	return regi, clean, nil
+	return regi, client, clean, nil
 }
 
 // 链接用户服务 grpc

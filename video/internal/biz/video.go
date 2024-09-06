@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
+	"github.com/h2non/filetype"
 	"github.com/segmentio/kafka-go"
 	"golang.org/x/sync/errgroup"
 )
@@ -145,8 +147,13 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 
 func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]byte, userId int64) error {
 
-	currentDir, _ := os.Getwd()
-	v.log.Debug(" Publish工作目录:", currentDir)
+	// 检查是否为视频文件
+	if !filetype.IsVideo(*videoData) {
+		return fmt.Errorf("file is not a video")
+	}
+
+	//currentDir, _ := os.Getwd()
+	//v.log.Debug(" Publish工作目录:", currentDir)
 
 	// 设置存储路径和文件名
 	storagePath := "../../store/video"       // 设置存储目录
@@ -175,7 +182,7 @@ func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]b
 
 	//v.log.Debug("videoKafkaMessage:", videoKafkaMessage)
 	//存储视频信息到kafka
-	v.repo.PublishKafka(ctx, videoKafkaMessage)
+	go v.repo.PublishKafka(ctx, videoKafkaMessage)
 
 	return nil
 }
