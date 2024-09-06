@@ -4,9 +4,6 @@ deploy/mysql/
 # 忽略 etcd 数据目录
 deply/etcd/etcd-data
 
-# 忽略所有 .log 文件
-*.log
-
 
 deply/es
 
@@ -34,4 +31,8 @@ relation/deply
 user/deply
 video/deply
 
-video/store/video
+video/store/video/*
+/video/deply/nacos/
+
+# 忽略所有 .log 文件
+*.log
