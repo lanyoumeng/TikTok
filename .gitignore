@@ -7,7 +7,7 @@ deply/etcd/etcd-data
 # 忽略所有 .log 文件
 *.log
 
-video/deply
+
 deply/es
 
 deply/logstash/logstash
@@ -32,5 +32,6 @@ comment/deply
 message/deply
 relation/deply
 user/deply
+video/deply
 
 video/store/video
