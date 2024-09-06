@@ -59,7 +59,7 @@ func (f *FavoriteRepo) FavoriteAction(ctx context.Context, authorId int64, video
 		return nil
 	}
 
-	//先更新用户服务缓存 点赞数和被点赞数  防止缓存变化
+	//更新用户服务的cnt缓存 和 点赞服务的点赞记录
 
 	//用户的点赞数量
 	//FavoriteCount userFavList::<userId>的size

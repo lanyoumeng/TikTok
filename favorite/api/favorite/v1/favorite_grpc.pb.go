@@ -31,15 +31,15 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FavoriteServiceClient interface {
 	// 点赞/取消点赞
-	//登录用户才能点赞
+	// 登录用户才能点赞
 	Favorite(ctx context.Context, in *DouyinFavoriteActionRequest, opts ...grpc.CallOption) (*DouyinFavoriteActionResponse, error)
 	// 获取用户点赞视频列表
 	FavoriteList(ctx context.Context, in *DouyinFavoriteListRequest, opts ...grpc.CallOption) (*DouyinFavoriteListResponse, error)
-	//视频的获赞数
+	// 视频的获赞数
 	GetFavoriteCntByVId(ctx context.Context, in *GetFavoriteCntByVIdRequest, opts ...grpc.CallOption) (*GetFavoriteCntByVIdResponse, error)
-	//是否喜欢
+	// 是否喜欢
 	GetIsFavorite(ctx context.Context, in *GetIsFavoriteRequest, opts ...grpc.CallOption) (*GetIsFavoriteResponse, error)
-	//获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
+	// 获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
 	GetFavoriteCntByUId(ctx context.Context, in *GetFavoriteCntByUIdRequest, opts ...grpc.CallOption) (*GetFavoriteCntByUIdResponse, error)
 }
 
@@ -106,15 +106,15 @@ func (c *favoriteServiceClient) GetFavoriteCntByUId(ctx context.Context, in *Get
 // for forward compatibility
 type FavoriteServiceServer interface {
 	// 点赞/取消点赞
-	//登录用户才能点赞
+	// 登录用户才能点赞
 	Favorite(context.Context, *DouyinFavoriteActionRequest) (*DouyinFavoriteActionResponse, error)
 	// 获取用户点赞视频列表
 	FavoriteList(context.Context, *DouyinFavoriteListRequest) (*DouyinFavoriteListResponse, error)
-	//视频的获赞数
+	// 视频的获赞数
 	GetFavoriteCntByVId(context.Context, *GetFavoriteCntByVIdRequest) (*GetFavoriteCntByVIdResponse, error)
-	//是否喜欢
+	// 是否喜欢
 	GetIsFavorite(context.Context, *GetIsFavoriteRequest) (*GetIsFavoriteResponse, error)
-	//获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
+	// 获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
 	GetFavoriteCntByUId(context.Context, *GetFavoriteCntByUIdRequest) (*GetFavoriteCntByUIdResponse, error)
 	mustEmbedUnimplementedFavoriteServiceServer()
 }

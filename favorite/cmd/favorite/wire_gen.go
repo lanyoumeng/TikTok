@@ -34,7 +34,8 @@ func wireApp(kafka *conf.Kafka, confService *conf.Service, prometheus *conf.Prom
 	discovery := data.NewDiscovery(etcd)
 	userServiceClient := data.NewUserServiceClient(discovery, confService)
 	videoServiceClient := data.NewVideoServiceClient(discovery, confService)
-	reader := favkafka.InitKafkaConsumer(logger, kafka, client, videoServiceClient)
+	clientv3Client := data.NewEtcdClient(etcd)
+	reader := favkafka.InitKafkaConsumer(logger, kafka, client, clientv3Client, videoServiceClient)
 	dataData, cleanup2, err := data.NewData(confData, logger, db, client, userServiceClient, videoServiceClient, reader)
 	if err != nil {
 		cleanup()

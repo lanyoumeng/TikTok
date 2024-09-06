@@ -3,7 +3,6 @@ module favorite
 go 1.21
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kratos/kratos/contrib/config/nacos/v2 v2.0.0-20240615052815-46362d1a360d
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-20231219111544-85740b179b09
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20231219111544-85740b179b09

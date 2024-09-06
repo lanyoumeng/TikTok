@@ -17,8 +17,7 @@ COPY --from=builder /src/bin /app
 
 WORKDIR /app
 
-EXPOSE 8881
-EXPOSE 8001
+
 VOLUME /data/conf
 
 #CMD ["./server", "-conf", "/data/conf"]

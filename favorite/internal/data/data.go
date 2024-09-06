@@ -35,6 +35,7 @@ var ProviderSet = wire.NewSet(
 	NewDB,
 	NewRedis,
 	NewBizFavoriteRepo,
+	NewEtcdClient,
 
 	NewDiscovery,
 	NewRegistrar,
@@ -113,7 +114,7 @@ func NewRedis(conf *conf.Data) *redis.Client {
 	return rdb
 }
 
-func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, *clientv3.Client, func(), error) {
+func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, func(), error) {
 
 	// ETCD源地址
 	endpoint := []string{etcdpoint.Address}
@@ -136,7 +137,28 @@ func NewRegistrar(etcdpoint *conf.Etcd, logger log.Logger) (registry.Registrar, 
 	// 创建服务注册 reg
 	regi := etcd.New(client)
 
-	return regi, client, clean, nil
+	return regi, clean, nil
+}
+
+// 链接用户服务 grpc
+func NewEtcdClient(etcdpoint *conf.Etcd) *clientv3.Client {
+	// ETCD源地址
+	endpoint := []string{etcdpoint.Address}
+	// ETCD配置信息
+	etcdCfg := clientv3.Config{
+		Endpoints:   endpoint,
+		DialTimeout: time.Second,
+		DialOptions: []grpcx.DialOption{grpcx.WithBlock()},
+	}
+
+	// 创建ETCD客户端
+	client, err := clientv3.New(etcdCfg)
+	if err != nil {
+		panic(err)
+	}
+
+	return client
+
 }
 
 // 链接用户服务 grpc
