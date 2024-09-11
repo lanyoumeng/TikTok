@@ -85,8 +85,8 @@ message FollowCnt_request {
 }
 
 message FollowCnt_response {
-  int64 follow_cnt = 3; // 关注总数
-  int64 follower_cnt = 4; // 粉丝总数
+  int64 follow_cnt = 1; // 关注总数
+  int64 follower_cnt = 2; // 粉丝总数
 }
 
 message IsFollow_request {

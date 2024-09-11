@@ -30,12 +30,6 @@ type UserRepo interface {
 	//保存用户到redis
 	RSaveUser(ctx context.Context, user *model.User) error
 
-	// ////////
-	////从redis获取用户信息
-	//RUserInfoAllById(ctx context.Context, id int64) (*v1.User, error)
-	////保存用户信息到redis
-	//RSaveUserInfoAll(ctx context.Context, user *v1.User) error
-
 	//获取计数信息
 	GetCountById(context.Context, int64) (*model.UserCount, error)
 	//redis获取计数信息
@@ -89,6 +83,7 @@ func (uc *UserUsecase) Create(ctx context.Context, u *model.User) (int64, string
 	//因为前端原因，这里Avatar用户头像和BackgroundImage 用户个人页顶部大图默认
 	newUser.Avatar = "https://tiktok-example.oss-cn-beijing.aliyuncs.com/squirrel.jpg"
 	newUser.BackgroundImage = "https://tiktok-example.oss-cn-beijing.aliyuncs.com/squirrel.jpg"
+	newUser.Signature = "这个人很懒，什么都没留下"
 
 	// 创建用户
 	userId, err := uc.repo.CreateUser(ctx, newUser)
@@ -173,9 +168,12 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 		uc.log.Error("biz.UserInfo/RGetUserById-err:", err)
 		return nil, err
 	}
-
 	//uc.log.Debug("biz.UserInfo/user:", user)
-	_ = copier.Copy(&userinfo, user)
+	err = copier.Copy(&userinfo, user)
+	if err != nil {
+		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
+		return nil, err
+	}
 
 	count, err := uc.repo.RGetCountById(ctx, id)
 	if errors.Is(err, errno.ErrUserNotFound) {
@@ -194,15 +192,38 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 		uc.log.Error("biz.UserInfo/RGetCountById-err:", err)
 		return nil, err
 	}
-	_ = copier.Copy(&userinfo, count)
+	err = copier.Copy(&userinfo, count)
+	if err != nil {
+		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
+		return nil, err
+	}
 
 	// bool is_follow 默认就行,让video服务调用 // true-已关注，false-未关注
 
 	return userinfo, nil
 }
 
+// 无mysql表
 func (uc *UserUsecase) RGetCountById(ctx context.Context, userId int64) (*model.UserCount, error) {
-	return uc.repo.RGetCountById(ctx, userId)
+	count, err := uc.repo.RGetCountById(ctx, userId)
+	if err == errno.ErrUserNotFound {
+		count, err = uc.repo.GetCountById(ctx, userId)
+		if err != nil {
+			uc.log.Error("biz.RGetCountById/GetCountById-err:", err)
+			return nil, err
+		}
+
+		err = uc.repo.RSaveCount(ctx, count)
+		if err != nil {
+			uc.log.Error("biz.RGetCountById/RSaveCount-err:", err)
+			return nil, err
+		}
+	} else if err != nil {
+		uc.log.Error("biz.RGetCountById/RGetCountById-err:", err)
+		return nil, err
+	}
+
+	return count, nil
 }
 
 func (uc *UserUsecase) RSaveCount(ctx context.Context, userCount *model.UserCount) error {

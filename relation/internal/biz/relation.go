@@ -104,15 +104,6 @@ func (r *RelationUsecase) FollowList(ctx context.Context, userId int64) ([]*pb.U
 		return nil, err
 	}
 
-	//for _, user := range userInfoList {
-	//	//再获取每个用户的is_follow字段
-	//	flag, err := r.repo.IsFollow(ctx, user.Id, userId)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	user.IsFollow = flag
-	//}
-
 	for _, user := range userInfoList {
 		user.IsFollow = true
 	}
@@ -234,7 +225,7 @@ func (r *RelationUsecase) FriendList(ctx context.Context, userId int64) ([]*pb.F
 }
 
 func (r *RelationUsecase) IsFollow(ctx context.Context, userId, toUserId int64) (bool, error) {
-	// 1. 判断是否已经关注
+	// 判断是否已经关注
 	isFollow, err := r.repo.IsFollow(ctx, userId, toUserId)
 	if err != nil {
 		r.log.Error("IsFollow err:", err)
@@ -247,20 +238,20 @@ func (r *RelationUsecase) IsFollow(ctx context.Context, userId, toUserId int64) 
 
 func (r *RelationUsecase) FollowCnt(ctx context.Context, userId int64) (int64, int64, error) {
 
-	r.log.Debug("biz/FollowCnt start")
+	//r.log.Debug("biz/FollowCnt start")
 	// 1. 获取关注数和粉丝数
 	followUserIdList, err := r.repo.FollowUserIdList(ctx, userId)
 	if err != nil {
 		r.log.Error("FollowUserIdList err:", err)
 		return 0, 0, err
 	}
-	r.log.Debug("biz/FollowUserIdList end")
+	//r.log.Debug("biz/FollowUserIdList end")
 
 	followerUserIdList, err := r.repo.FollowerUserIdList(ctx, userId)
 	if err != nil {
 		r.log.Error("FollowerUserIdList err:", err)
 		return 0, 0, err
 	}
-	r.log.Debug("biz/FollowerUserIdList end")
+	//r.log.Debug("biz/FollowerUserIdList end")
 	return int64(len(followUserIdList)), int64(len(followerUserIdList)), nil
 }

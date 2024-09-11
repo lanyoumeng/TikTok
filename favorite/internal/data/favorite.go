@@ -34,12 +34,12 @@ func NewBizFavoriteRepo(data *Data, logger log.Logger) biz.FavoriteRepo {
 }
 func (f *FavoriteRepo) GetAuthorIdByVideoId(ctx context.Context, videoId int64) (int64, error) {
 
-	vIds, err := f.data.vc.FavoriteListByVId(ctx, &vpb.FavoriteListReq{VideoIdList: []int64{videoId}})
+	vIds, err := f.data.vc.FavoriteListByVId(context.Background(), &vpb.FavoriteListReq{VideoIdList: []int64{videoId}})
 	if err != nil {
 		f.log.Error("GetAuthorIdByVideoId err:", err)
 		return 0, err
 	}
-	return vIds.VideoList[0].Id, nil
+	return vIds.VideoList[0].Author.Id, nil
 }
 func (f *FavoriteRepo) FavoriteAction(ctx context.Context, authorId int64, videoId int64, userId int64, actionType int64) error {
 
@@ -82,7 +82,7 @@ func (f *FavoriteRepo) FavoriteAction(ctx context.Context, authorId int64, video
 	//1点赞 2取消点赞
 	if actionType == 1 {
 		//用户的点赞数+1 视频作者的被点赞数+1
-		_, err = f.data.userc.UpdateFavoriteCnt(ctx, &userV1.UpdateFavoriteCntRequest{
+		_, err = f.data.userc.UpdateFavoriteCnt(context.Background(), &userV1.UpdateFavoriteCntRequest{
 			FavoriteUserId:  strconv.FormatInt(userId, 10),
 			FavoritedUserId: strconv.FormatInt(authorId, 10),
 			FavoriteCount:   favoriteCount + 1,
@@ -102,7 +102,7 @@ func (f *FavoriteRepo) FavoriteAction(ctx context.Context, authorId int64, video
 	} else if actionType == 2 {
 
 		//用户的点赞数-1 视频作者的被点赞数-1
-		_, err = f.data.userc.UpdateFavoriteCnt(ctx, &userV1.UpdateFavoriteCntRequest{
+		_, err = f.data.userc.UpdateFavoriteCnt(context.Background(), &userV1.UpdateFavoriteCntRequest{
 			FavoriteUserId:  strconv.FormatInt(userId, 10),
 			FavoritedUserId: strconv.FormatInt(authorId, 10),
 			FavoriteCount:   favoriteCount - 1,
@@ -133,7 +133,7 @@ func (f *FavoriteRepo) FavoriteList(ctx context.Context, userId int64) ([]*vpb.V
 	videoIds, err := f.data.rdb.SMembers(ctx, "userFavList::"+strconv.FormatInt(userId, 10)).Result()
 	if !errors.Is(err, redis.Nil) || len(videoIds) == 0 {
 		//数据库获取
-		err := f.data.db.Model(&model.Favorite{}).Select("video_id").Where("user_id = ?", userId).Find(videoIds).Error
+		err := f.data.db.Model(&model.Favorite{}).Select("video_id").Where("user_id = ?", userId).Find(&videoIds).Error
 		if err != nil {
 			f.log.Error("FavoriteList err:", err)
 			return nil, err

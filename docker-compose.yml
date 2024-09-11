@@ -1,21 +1,77 @@
 services:
 
+
   etcd-node:
     image: quay.io/coreos/etcd:v3.5.0
     container_name: etcd-node
     restart: always
     ports:
       - "2379:2379"
+      - "2380:2380"
     volumes:
-      - ./deply/etcd/etcd-data:/etcd-data
+      - ./deply/etcd/etcd-data-node1:/etcd-data
     environment:
+      ETCD_NAME: etcd-node
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd-node:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd-node:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_INITIAL_CLUSTER: etcd-node=http://etcd-node:2380,etcd-node2=http://etcd-node2:2380,etcd-node3=http://etcd-node3:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
       ETCD_ENABLE_V2: "true"
       ALLOW_NONE_AUTHENTICATION: "yes"
-      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd-node:2379"
-      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
     networks:
       - TikTok-net
 
+  etcd-node2:
+    image: quay.io/coreos/etcd:v3.5.0
+    container_name: etcd-node2
+    restart: always
+    ports:
+      - "2479:2379"
+      - "2480:2380"
+    volumes:
+      - ./deply/etcd/etcd-data-node2:/etcd-data
+    environment:
+      ETCD_NAME: etcd-node2
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd-node2:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd-node2:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_INITIAL_CLUSTER: etcd-node=http://etcd-node:2380,etcd-node2=http://etcd-node2:2380,etcd-node3=http://etcd-node3:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
+      ETCD_ENABLE_V2: "true"
+      ALLOW_NONE_AUTHENTICATION: "yes"
+    networks:
+      - TikTok-net
+
+  etcd-node3:
+    image: quay.io/coreos/etcd:v3.5.0
+    container_name: etcd-node3
+    restart: always
+    ports:
+      - "2579:2379"
+      - "2580:2380"
+    volumes:
+      - ./deply/etcd/etcd-data-node3:/etcd-data
+    environment:
+      ETCD_NAME: etcd-node3
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd-node3:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd-node3:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_INITIAL_CLUSTER: etcd-node=http://etcd-node:2380,etcd-node2=http://etcd-node2:2380,etcd-node3=http://etcd-node3:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
+      ETCD_ENABLE_V2: "true"
+      ALLOW_NONE_AUTHENTICATION: "yes"
+    networks:
+      - TikTok-net
 
   nacos:
     image: nacos/nacos-server:latest

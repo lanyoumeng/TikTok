@@ -77,10 +77,11 @@ func (v *videoRepo) PublishKafka(ctx context.Context, videoKafkaMessage *model.V
 
 }
 func (v *videoRepo) GetvideoByVId(ctx context.Context, videoId int64) (*model.Video, error) {
+
 	video := &model.Video{}
 	err := v.data.db.Model(&model.Video{}).Where("id = ?", videoId).First(&video).Error
 	if err != nil {
-		v.log.Error("GetvideoByVId-err:", err)
+		v.log.Errorf("GetvideoByVId-err:%v , videoid:%v", err, videoId)
 		return nil, err
 	}
 	return video, nil
@@ -122,8 +123,13 @@ func (v *videoRepo) GetAuthorInfoById(ctx context.Context, authorId int64) (*vpb
 		v.log.Error("GetAuthorInfoById-err:", err)
 		return nil, err
 	}
-	var user *vpb.User
-	_ = copier.Copy(user, userrepo.User)
+
+	var user = &vpb.User{}
+	err = copier.Copy(user, userrepo.User)
+	if err != nil {
+		v.log.Error("GetAuthorInfoById-err:", err)
+		return nil, err
+	}
 
 	return user, nil
 

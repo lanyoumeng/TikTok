@@ -6,19 +6,20 @@ import (
 	"relation/internal/biz"
 	"relation/internal/conf"
 	"relation/pkg/token"
+	"time"
 
 	pb "relation/api/relation/v1"
 )
 
 type RelationService struct {
 	pb.UnimplementedRelationServiceServer
-	uc     *biz.RelationUsecase
+	ru     *biz.RelationUsecase
 	JwtKey string
 	log    *log.Helper
 }
 
 func NewRelationService(uc *biz.RelationUsecase, auth *conf.Auth, logger log.Logger) *RelationService {
-	return &RelationService{uc: uc, JwtKey: auth.JwtKey, log: log.NewHelper(logger)}
+	return &RelationService{ru: uc, JwtKey: auth.JwtKey, log: log.NewHelper(logger)}
 }
 
 func (s *RelationService) Relation(ctx context.Context, req *pb.DouyinRelationActionRequest) (*pb.DouyinRelationActionResponse, error) {
@@ -29,7 +30,7 @@ func (s *RelationService) Relation(ctx context.Context, req *pb.DouyinRelationAc
 		return nil, err
 	}
 
-	err = s.uc.Follow(ctx, user.UserId, req.ToUserId, int64(req.ActionType))
+	err = s.ru.Follow(ctx, user.UserId, req.ToUserId, int64(req.ActionType))
 	if err != nil {
 		s.log.Errorf("Follow error: %v", err)
 		return nil, err
@@ -46,7 +47,7 @@ func (s *RelationService) RelationFollowList(ctx context.Context, req *pb.Douyin
 	//获取user
 	userInfoList := make([]*pb.User, 5)
 
-	userInfoList, err := s.uc.FollowList(ctx, req.UserId)
+	userInfoList, err := s.ru.FollowList(ctx, req.UserId)
 	if err != nil {
 		s.log.Errorf("FollowList error: %v", err)
 		return nil, err
@@ -63,7 +64,7 @@ func (s *RelationService) RelationFollowerList(ctx context.Context, req *pb.Douy
 	//获取user
 	userInfoList := make([]*pb.User, 5)
 
-	userInfoList, err := s.uc.FollowerList(ctx, req.UserId)
+	userInfoList, err := s.ru.FollowerList(ctx, req.UserId)
 	if err != nil {
 		s.log.Errorf("FollowerList error: %v", err)
 		return nil, err
@@ -89,7 +90,7 @@ func (s *RelationService) FriendList(ctx context.Context, req *pb.DouyinRelation
 	//2.获取好友信息
 	//3.获取好友最新消息和消息类型
 
-	friendList, err := s.uc.FriendList(ctx, req.UserId)
+	friendList, err := s.ru.FriendList(ctx, req.UserId)
 	if err != nil {
 		s.log.Errorf("FriendList error: %v", err)
 		return nil, err
@@ -105,15 +106,15 @@ func (s *RelationService) FriendList(ctx context.Context, req *pb.DouyinRelation
 // 获取关注数和粉丝数
 func (s *RelationService) FollowCnt(ctx context.Context, req *pb.FollowCntRequest) (*pb.FollowCntResponse, error) {
 
-	s.log.Debugf("FollowCnt request: %v", req)
+	//s.log.Debugf("FollowCnt request: %v", req)
 	//获取user
-	followCnt, followerCnt, err := s.uc.FollowCnt(ctx, req.UserId)
+	followCnt, followerCnt, err := s.ru.FollowCnt(ctx, req.UserId)
 	if err != nil {
 		s.log.Errorf("FollowCnt error: %v", err)
 		return nil, err
 
 	}
-	s.log.Debugf("followCnt response: %v followerCnt :%v", followCnt, followerCnt)
+	//s.log.Debugf("followCnt response: %v followerCnt :%v", followCnt, followerCnt)
 	return &pb.FollowCntResponse{
 		FollowCnt:   followCnt,
 		FollowerCnt: followerCnt,
@@ -124,11 +125,13 @@ func (s *RelationService) FollowCnt(ctx context.Context, req *pb.FollowCntReques
 // rpc IsFollow (IsFollow_request) returns (IsFollow_response);
 func (s *RelationService) IsFollow(ctx context.Context, req *pb.IsFollowRequest) (*pb.IsFollowResponse, error) {
 
-	flag, err := s.uc.IsFollow(ctx, req.UserId, req.AuthorId)
+	s.log.Debugf("IsFollow start:%v", time.Now())
+	flag, err := s.ru.IsFollow(ctx, req.UserId, req.AuthorId)
 	if err != nil {
 		s.log.Errorf("IsFollow error: %v", err)
 		return nil, err
 	}
+	s.log.Debugf("IsFollow  end:%v", time.Now())
 	return &pb.IsFollowResponse{
 		IsFollow: flag,
 	}, nil

@@ -36,7 +36,7 @@ type RelationServiceClient interface {
 	RelationFollowerList(ctx context.Context, in *DouyinRelationFollowerListRequest, opts ...grpc.CallOption) (*DouyinRelationFollowerListResponse, error)
 	FriendList(ctx context.Context, in *DouyinRelationFriendListRequest, opts ...grpc.CallOption) (*DouyinRelationFriendListResponse, error)
 	FollowCnt(ctx context.Context, in *FollowCntRequest, opts ...grpc.CallOption) (*FollowCntResponse, error)
-	//根据userId,authorId查询用户是否关注作者
+	// 根据userId,authorId查询用户是否关注作者
 	IsFollow(ctx context.Context, in *IsFollowRequest, opts ...grpc.CallOption) (*IsFollowResponse, error)
 }
 
@@ -117,7 +117,7 @@ type RelationServiceServer interface {
 	RelationFollowerList(context.Context, *DouyinRelationFollowerListRequest) (*DouyinRelationFollowerListResponse, error)
 	FriendList(context.Context, *DouyinRelationFriendListRequest) (*DouyinRelationFriendListResponse, error)
 	FollowCnt(context.Context, *FollowCntRequest) (*FollowCntResponse, error)
-	//根据userId,authorId查询用户是否关注作者
+	// 根据userId,authorId查询用户是否关注作者
 	IsFollow(context.Context, *IsFollowRequest) (*IsFollowResponse, error)
 	mustEmbedUnimplementedRelationServiceServer()
 }

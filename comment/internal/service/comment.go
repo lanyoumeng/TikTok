@@ -24,6 +24,9 @@ func NewCommentService(uc *biz.CommentUsecase, auth *conf.Auth, logger log.Logge
 
 // rpc Comment (douyin_comment_send_request) returns(douyin_comment_send_response);
 func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendRequest) (*pb.DouyinCommentSendResponse, error) {
+
+	//log.Debug("service/comment--req:", req)
+
 	user, err := token.ParseToken(req.Token, c.JwtKey)
 	if err != nil {
 		c.log.Errorf("token.ParseToken error: %v", err)
@@ -31,7 +34,8 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 	}
 	// 1-发布评论，2-删除评论
 	// 发布评论
-	if req.SendType == 1 {
+	commentresp := &pb.Comment{}
+	if req.ActionType == "1" {
 		comment := &model.Comment{}
 		comment.Content = req.CommentText
 		comment.UserId = user.UserId
@@ -43,7 +47,6 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 			return nil, err
 		}
 
-		commentresp := &pb.Comment{}
 		// 评论用户信息
 		userinfo := &pb.User{}
 		// getuserinfoByUIdVIdAId
@@ -52,39 +55,38 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 			c.log.Errorf("GetUserinfoByUIdVIdAId error: %v", err)
 			return nil, err
 		}
+
 		commentresp.Id = comment.Id
 		commentresp.Content = comment.Content
 		commentresp.User = userinfo
 		commentresp.CreateDate = comment.CreateDate
 
-		return &pb.DouyinCommentSendResponse{
-			StatusCode: 0,
-			StatusMsg:  "push comment success",
-			Comment:    commentresp,
-		}, nil
-
 	}
-
-	//删除评论
-	if req.SendType == 1 {
-
+	if req.ActionType == "2" { //删除评论
+		//c.log.Infof("DelComment commentId: %v", req.CommentId)
 		err := c.uc.DelComment(ctx, req.CommentId)
 		if err != nil {
 			c.log.Errorf("DelComment error: %v", err)
 			return nil, err
 		}
+		return &pb.DouyinCommentSendResponse{
+			StatusCode: 0,
+			StatusMsg:  "Del comment success",
+			Comment:    nil,
+		}, nil
 
 	}
 
 	return &pb.DouyinCommentSendResponse{
 		StatusCode: 0,
-		StatusMsg:  "Del comment success",
+		StatusMsg:  "comment success",
+		Comment:    commentresp,
 	}, nil
+
 }
 
-//// 获取评论列表 注意每个评论用户信息中的is_follow字段需要从favorite服务单独获取
-//rpc CommentList(douyin_comment_list_request) returns (douyin_comment_list_response);
-
+// // 获取评论列表 注意每个评论用户信息中的is_follow字段需要从favorite服务单独获取
+// rpc CommentList(douyin_comment_list_request) returns (douyin_comment_list_response);
 func (c *CommentService) CommentList(ctx context.Context, req *pb.DouyinCommentListRequest) (*pb.DouyinCommentListResponse, error) {
 
 	// 获取评论列表

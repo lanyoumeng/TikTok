@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"sync"
 	favoriteV1 "user/api/favorite/v1"
 	relationV1 "user/api/relation/v1"
 	"user/internal/biz"
@@ -81,33 +82,46 @@ func (r *userRepo) GetCountById(ctx context.Context, id int64) (*model.UserCount
 	count := &model.UserCount{}
 	count.Id = id
 
+	var wg sync.WaitGroup
+
+	wg.Add(3)
+
 	//FollowCount  FollowerCnt
-	followCntRes, err := r.data.relationc.FollowCnt(context.Background(), &relationV1.FollowCntRequest{UserId: id})
-	if err != nil {
-		r.log.Errorf("data.GetCountById/FollowCnt-err:%v\n", err)
-		return nil, err
-	}
-	count.FollowCount = followCntRes.FollowCnt
-	count.FollowerCount = followCntRes.FollowerCnt
+	go func() {
+		defer wg.Done()
+		followCntRes, err := r.data.relationc.FollowCnt(context.Background(), &relationV1.FollowCntRequest{UserId: id})
+		if err != nil {
+			r.log.Errorf("data.GetCountById/FollowCnt-err:%v\n", err)
+			return
+		}
+		count.FollowCount = followCntRes.FollowCnt
+		count.FollowerCount = followCntRes.FollowerCnt
+	}()
 
 	//WorkCount
-
-	workCntRes, err := r.data.videoc.WorkCnt(ctx, &videov1.WorkCntRequest{UserId: id})
-	if err != nil {
-		r.log.Errorf("data.GetCountById/WorkCnt-err:%v\n", err)
-		return nil, err
-	}
-	count.WorkCount = workCntRes.WorkCount
+	go func() {
+		defer wg.Done()
+		workCntRes, err := r.data.videoc.WorkCnt(context.Background(), &videov1.WorkCntRequest{UserId: id})
+		if err != nil {
+			r.log.Errorf("data.GetCountById/WorkCnt-err:%v\n", err)
+			return
+		}
+		count.WorkCount = workCntRes.WorkCount
+	}()
 
 	//FavoriteCount  TotalFavorited
+	go func() {
+		defer wg.Done()
+		favoriteCntRes, err := r.data.favc.GetFavoriteCntByUId(context.Background(), &favoriteV1.GetFavoriteCntByUIdRequest{UserId: id})
+		if err != nil {
+			r.log.Errorf("data.GetCountById/GetFavoriteCntByUId-err:%v\n", err)
+			return
+		}
+		count.FavoriteCount = favoriteCntRes.FavoriteCount
+		count.TotalFavorited = favoriteCntRes.TotalFavorited
+	}()
 
-	favoriteCntRes, err := r.data.favc.GetFavoriteCntByUId(ctx, &favoriteV1.GetFavoriteCntByUIdRequest{UserId: id})
-	if err != nil {
-		r.log.Errorf("data.GetCountById/GetFavoriteCntByUId-err:%v\n", err)
-		return nil, err
-	}
-	count.FavoriteCount = favoriteCntRes.FavoriteCount
-	count.TotalFavorited = favoriteCntRes.TotalFavorited
+	wg.Wait()
 
 	return count, nil
 

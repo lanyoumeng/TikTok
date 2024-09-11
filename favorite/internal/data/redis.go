@@ -23,7 +23,7 @@ func (f *FavoriteRepo) GetFavoriteCount(ctx context.Context, userId int64) (int6
 		}
 
 		//缓存
-		err = f.data.rdb.Set(ctx, "userFavList::"+string(userId), favoriteCount, tool.GetRandomExpireTime()).Err()
+		err = f.data.rdb.Set(context.Background(), "userFavList::"+string(userId), favoriteCount, tool.GetRandomExpireTime()).Err()
 		if err != nil {
 			f.log.Errorf("GetFavoriteCount-err: %v", err)
 			return 0, err
@@ -47,7 +47,7 @@ func (f *FavoriteRepo) GetTotalFavorited(ctx context.Context, authorId int64) (i
 		//获取作者的发布视频id列表
 		//汇合所有视频的点赞数
 		var videoIds []string
-		repo, err := f.data.vc.PublishVidsByAId(ctx, &vpb.PublishVidsByAIdReq{AuthorId: authorId})
+		repo, err := f.data.vc.PublishVidsByAId(context.Background(), &vpb.PublishVidsByAIdReq{AuthorId: authorId})
 		if err != nil {
 			f.log.Errorf("GetTotalFavorited-err: %v", err)
 			return 0, err
@@ -65,7 +65,7 @@ func (f *FavoriteRepo) GetTotalFavorited(ctx context.Context, authorId int64) (i
 		totalFavorited = strconv.FormatInt(allNum, 10)
 
 		//写入缓存
-		err = f.data.rdb.Set(ctx, "userTotalFavorited::"+strconv.FormatInt(authorId, 10), totalFavorited, tool.GetRandomExpireTime()).Err()
+		err = f.data.rdb.Set(context.Background(), "userTotalFavorited::"+strconv.FormatInt(authorId, 10), totalFavorited, tool.GetRandomExpireTime()).Err()
 		if err != nil {
 			f.log.Errorf("GetTotalFavorited-err: %v", err)
 			return 0, err

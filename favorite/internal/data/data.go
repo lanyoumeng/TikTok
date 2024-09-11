@@ -195,7 +195,7 @@ func NewUserServiceClient(covery registry.Discovery, s *conf.Service) userV1.Use
 			tracing.Client(),
 			recovery.Recovery(),
 		),
-		grpc.WithTimeout(2*time.Second),
+		grpc.WithTimeout(10*time.Second),
 		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 	)
 	if err != nil {
@@ -216,7 +216,7 @@ func NewVideoServiceClient(covery registry.Discovery, s *conf.Service) videoV1.V
 			tracing.Client(),
 			recovery.Recovery(),
 		),
-		grpc.WithTimeout(2*time.Second),
+		grpc.WithTimeout(10*time.Second),
 		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 
 		// grpc.WithTLSConfig(), // 使用TLS连接

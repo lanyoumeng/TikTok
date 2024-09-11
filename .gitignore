@@ -2,7 +2,7 @@
 deploy/mysql/
 
 # 忽略 etcd 数据目录
-deply/etcd/etcd-data
+deply/etcd
 
 
 deply/es

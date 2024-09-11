@@ -520,12 +520,16 @@ func (v *VideoUsecase) GetRespVideo(ctx context.Context, videoList []*model.Vide
 		v.log.Errorw("Failed to wait all function calls returned", "err", err)
 		return nil, err
 	}
-	// var resp []*pb.model.Video
+
 	resp := make([]*vpb.Video, 0, len(videoList))
 
-	for _, v := range videoList {
-		user, _ := m.Load(v.Id)
-		resp = append(resp, user.(*vpb.Video))
+	for _, val := range videoList {
+		video, ok := m.Load(val.Id)
+		if !ok {
+			v.log.Error("Failed to load video from sync.Map  video_id:", val.Id)
+			return nil, errors.New("Failed to load video from sync Map")
+		}
+		resp = append(resp, video.(*vpb.Video))
 	}
 
 	return resp, nil

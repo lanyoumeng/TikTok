@@ -79,7 +79,7 @@
 | kafka                                                        | 消息队列                                                     | 日志收集✓ 、    发布视频异步✓、评论异步消息异步 | kafdrop(9000:9000)×                                          |
 | etcd                                                         | 服务注册中心                                                 | ✓                                               | etcd集群分开部署                                             |
 | nacos                                                        | 配置中心                                                     | ✓                                               | http://localhost:8848/nacos 初始账号密码为 nacos/nacos Data Id 必须加.yaml user.yaml |
-| swagger                                                      | API文档                                                      |                                                 | apifox直接导出                                               |
+| swagger                                                      | API文档                                                      |                                                 |                                                              |
 | FFmpeg                                                       | 视频压缩、裁剪视频封面                                       | ✓                                               |                                                              |
 | APISIX(UI： [Dashboard](https://apisix.apache.org/zh/docs/dashboard/USER_GUIDE/)) | API 网关，专门用于对 API 流量进行管理、路由和流量控制 API 的动态路由、限流、鉴权、监控 | ✓                                               | 9091被Prometheus采集 <br />dashboard （3001:3001）           |
 | Prometheus ，grafana                                         | 监控和可观测性软件工具：Prometheus收集系统的性能指标， 然后Grafana创建仪表板进行可视化展示， | ✓                                               | "9090:9090" <br />3000:3000                                  |
@@ -106,7 +106,7 @@
 
 
 
-## 缓存设计
+## 缓存
 
 读：
 
@@ -164,9 +164,81 @@ mysql-->flink cdc-->kafka-->订阅处理redis
 
 
 
+## 消息队列
 
 
-## 服务实现
+
+| 服务模块 | 用途                       |
+| -------- | -------------------------- |
+| video    | 异步上传视频，缩短响应时间 |
+
+
+
+### topic
+
+一共有3类topic
+
+1.日志
+
+2.redis-mysql同步
+
+3.video服务的视频异步发布
+
+
+
+
+
+------
+
+
+
+## 中间件
+
+### nacos
+
+![image-20240911001341069](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409110013468.png)
+
+### ELK
+
+- 通过logstash收集和聚合微服务的日志数据传输给kafka
+
+![image-20240906232118199](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409062321544.png)
+
+
+
+### APISIX
+
+前端app设计问题，post的请求参数都是放到url中，为了使grpc-transcode插件生效，apisix把post请求转为get请求
+
+![image-20240909183210039](C:\Users\20588\AppData\Roaming\Typora\typora-user-images\image-20240909183210039.png)
+
+![image-20240911101708631](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409111017965.png)
+
+### jaeger
+
+![image-20240911000922121](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409110009524.png)
+
+
+
+### promethus
+
+![image-20240911001136346](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409110011703.png)
+
+### grafana
+
+![image-20240911002233041](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409110022389.png)
+
+### flinkcdc
+
+单独部署，有6个服务对应的缓存同步任务
+
+![image-20240911001317344](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409110013702.png)
+
+### oss
+
+![image-20240911101309101](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409111013499.png)
+
+## 服务
 
 基于Etcd作为服务的注册和发现中心，nacos作为配置中心，
 
@@ -232,13 +304,13 @@ rpc内部使用rpc调用获取相关信息
 3. 获取好友列表
    好友列表，关注和粉丝的交集
 
-   
+
 
 ### message
 
 1. 前端是轮询获得消息
 2. 时间顺序获取消息记录
-3. 
+3.
 
 ------
 
@@ -253,44 +325,9 @@ app bug：
 
 1. Avatar用户头像和BackgroundImage 用户个人页顶部大图默认
 2. 视频流刷新不及时
-
-------
-
-## 消息队列
-
-
-
-| 服务模块  | 用途                           |
-| --------- | ------------------------------ |
-| video     | 异步上传视频，缩短响应时间     |
-| sociality | 异步执行社交操作，缩短响应时间 |
-| chat      | 异步发送聊天消息，缩短响应时间 |
-
-
-
-### topic
-
-一共有3类topic
-
-1.日志
-
-2.redis同步
-
-3.video的视频发布
-
-
-
-
-
-------
-
-
-
-## ELK
-
-- 通过logstash收集和聚合微服务的日志数据传输给kafka
-
-![image-20240906232118199](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409062321544.png)
+3. 前端请求头 (Headers)没有   Authorization：Bearer eyJhbG.......
+   token是直接放到url中的
+   不安全且导致kratos的jwt中间件不能用
 
 ------
 
@@ -298,26 +335,21 @@ app bug：
 
 ## 测试
 
+### 单元测试
+
 1.自动生成mock
 
-```
+```go
 //go:generate mockgen -destination=../mocks/mrepo/video.go -package=mrepo . VideoRepo
 ```
 
+### 性能测试
+
+![image-20240911163639101](https://raw.githubusercontent.com/lanyoumeng/Drawing-bed/main/docs/202409111636478.png)
+
 ------
 
+## 项目启动
 
-
-## 遇到问题
-
-1. v.log.Error 用于err    v.log.Debug用于调试
-
-2. 需要关闭防火墙
-
-3. 异步写入kafka时，ctx不要用上层传入的，  因为上层直接结束了，ctx相当于到期了
-
-   重新context.Background()
-
-4. 视频投稿接口的post的body是multipart/form-data类型，  而 gRPC 的 `protobuf` 不支持直接处理这种格式。生成的video_http.pb.go文件中的对应函数是不能用的，要进行修改
-
-## 
+1. 配置nacos、APISIX、OSS秘钥、flinkcdc
+2. docker-compose up -d

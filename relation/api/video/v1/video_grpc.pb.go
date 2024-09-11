@@ -38,9 +38,9 @@ type VideoServiceClient interface {
 	WorkCnt(ctx context.Context, in *WorkCntRequest, opts ...grpc.CallOption) (*WorkCntResponse, error)
 	// 通过喜欢视频id列表获取视频列表
 	FavoriteListByVId(ctx context.Context, in *FavoriteListReq, opts ...grpc.CallOption) (*FavoriteListResp, error)
-	//通过作者id 获取作者的发布视频id列表
+	// 通过作者id 获取作者的发布视频id列表
 	PublishVidsByAId(ctx context.Context, in *PublishVidsByAIdReq, opts ...grpc.CallOption) (*PublishVidsByAIdResp, error)
-	//通过视频id获取作者id
+	// 通过视频id获取作者id
 	GetAIdByVId(ctx context.Context, in *GetAIdByVIdReq, opts ...grpc.CallOption) (*GetAIdByVIdResp, error)
 }
 
@@ -132,9 +132,9 @@ type VideoServiceServer interface {
 	WorkCnt(context.Context, *WorkCntRequest) (*WorkCntResponse, error)
 	// 通过喜欢视频id列表获取视频列表
 	FavoriteListByVId(context.Context, *FavoriteListReq) (*FavoriteListResp, error)
-	//通过作者id 获取作者的发布视频id列表
+	// 通过作者id 获取作者的发布视频id列表
 	PublishVidsByAId(context.Context, *PublishVidsByAIdReq) (*PublishVidsByAIdResp, error)
-	//通过视频id获取作者id
+	// 通过视频id获取作者id
 	GetAIdByVId(context.Context, *GetAIdByVIdReq) (*GetAIdByVIdResp, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }

@@ -8,7 +8,6 @@ package v1
 
 import (
 	context "context"
-	"github.com/go-kratos/kratos/v2/log"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -37,7 +36,7 @@ type RelationServiceClient interface {
 	RelationFollowerList(ctx context.Context, in *DouyinRelationFollowerListRequest, opts ...grpc.CallOption) (*DouyinRelationFollowerListResponse, error)
 	FriendList(ctx context.Context, in *DouyinRelationFriendListRequest, opts ...grpc.CallOption) (*DouyinRelationFriendListResponse, error)
 	FollowCnt(ctx context.Context, in *FollowCntRequest, opts ...grpc.CallOption) (*FollowCntResponse, error)
-	//根据userId,authorId查询用户是否关注作者
+	// 根据userId,authorId查询用户是否关注作者
 	IsFollow(ctx context.Context, in *IsFollowRequest, opts ...grpc.CallOption) (*IsFollowResponse, error)
 }
 
@@ -118,7 +117,7 @@ type RelationServiceServer interface {
 	RelationFollowerList(context.Context, *DouyinRelationFollowerListRequest) (*DouyinRelationFollowerListResponse, error)
 	FriendList(context.Context, *DouyinRelationFriendListRequest) (*DouyinRelationFriendListResponse, error)
 	FollowCnt(context.Context, *FollowCntRequest) (*FollowCntResponse, error)
-	//根据userId,authorId查询用户是否关注作者
+	// 根据userId,authorId查询用户是否关注作者
 	IsFollow(context.Context, *IsFollowRequest) (*IsFollowResponse, error)
 	mustEmbedUnimplementedRelationServiceServer()
 }
@@ -231,14 +230,11 @@ func _RelationService_FriendList_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _RelationService_FollowCnt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	log.Debug("RelationService_FollowCnt_Handler")
 	in := new(FollowCntRequest)
 	if err := dec(in); err != nil {
-		log.Debug("RelationService_FollowCnt_Handler")
 		return nil, err
 	}
 	if interceptor == nil {
-		log.Debug("RelationService_FollowCnt_Handler")
 		return srv.(RelationServiceServer).FollowCnt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
@@ -246,10 +242,8 @@ func _RelationService_FollowCnt_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: RelationService_FollowCnt_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		log.Debug("RelationService_FollowCnt_Handler")
 		return srv.(RelationServiceServer).FollowCnt(ctx, req.(*FollowCntRequest))
 	}
-	log.Debug("RelationService_FollowCnt_Handler")
 	return interceptor(ctx, in, info, handler)
 }
 

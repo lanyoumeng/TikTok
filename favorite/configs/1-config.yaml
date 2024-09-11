@@ -41,7 +41,7 @@ etcd:
   address: 127.0.0.1:2379
 
 prometheus:
-  addr: :7272
+  addr: :7273
   path: /metrics
 
 kafka:

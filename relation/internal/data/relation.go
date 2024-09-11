@@ -30,45 +30,40 @@ func NewRelationRepo(data *Data, logger log.Logger) biz.RelationRepo {
 func (r *relationRepo) IsFollow(ctx context.Context, userId, targetUserId int64) (bool, error) {
 	//set  follow::user_id  关注用户的ids
 	//1.缓存获取
-	flag, err := r.data.rdb.SIsMember(ctx, "follow::"+strconv.Itoa(int(userId)), targetUserId).Result()
-	if errors.Is(err, redis.Nil) {
+	key := "follow::" + strconv.Itoa(int(userId))
+
+	exists, err := r.data.rdb.SIsMember(context.Background(), key, targetUserId).Result()
+	if err != nil {
+		r.log.Errorf("SIsMember err: %v", err)
+		return false, err
+	}
+
+	if !exists {
 		//2.数据库获取
-		var count int64
-		err := r.data.db.Model(&model.Relation{}).Where("user_id = ? AND to_user_id = ?", userId, targetUserId).Count(&count).Error
-		if err != nil {
-			r.log.Errorf("Count err: %v", err)
+		r.log.Debug("redis nil")
+
+		relation := &model.Relation{}
+		result := r.data.db.Model(&model.Relation{}).Where("user_id = ? AND to_user_id = ?", userId, targetUserId).First(&relation)
+		if result.Error != nil {
+			r.log.Errorf("Get Count err: %v", err)
 			return false, err
 		}
-		if count > 0 {
+		if result.RowsAffected != 0 {
 			// 记录存在
-			flag = true
-
+			exists = true
 			//更新缓存
-			err := r.data.rdb.SAdd(ctx, "follow::"+strconv.Itoa(int(userId)), targetUserId).Err()
+			err := r.data.rdb.SAdd(context.Background(), key, targetUserId).Err()
 			if err != nil {
 				r.log.Errorf("SAdd err: %v", err)
 				return false, err
 			}
 
-		} else {
-			// 记录不存在
-			flag = false
-
-			//更新缓存
-			err := r.data.rdb.SRem(ctx, "follow::"+strconv.Itoa(int(userId)), targetUserId).Err()
-			if err != nil {
-				r.log.Errorf("SRem err: %v", err)
-				return false, err
-			}
-
 		}
-	} else if err != nil {
-		r.log.Errorf("SIsMember err: %v", err)
-		return false, err
 	}
-	return flag, nil
+	return exists, nil
 
 }
+
 func (r *relationRepo) InsertFollow(ctx context.Context, userId, targetUserId int64) error {
 	//1.插入数据库
 	err := r.data.db.Create(&model.Relation{UserId: userId, ToUserId: targetUserId}).Error
@@ -95,7 +90,7 @@ func (r *relationRepo) FollowUserIdList(ctx context.Context, userId int64) ([]in
 	var userIds []int64
 
 	key := "follow::" + strconv.Itoa(int(userId))
-	ids, err := r.data.rdb.SMembers(ctx, key).Result()
+	ids, err := r.data.rdb.SMembers(context.Background(), key).Result()
 	if errors.Is(err, redis.Nil) || len(ids) == 0 {
 		//2.数据库获取
 		err := r.data.db.Model(&model.Relation{}).Select("to_user_id").Where("user_id = ?", userId).Find(&userIds).Error
@@ -106,14 +101,20 @@ func (r *relationRepo) FollowUserIdList(ctx context.Context, userId int64) ([]in
 
 		//更新缓存
 		if len(userIds) != 0 {
+			// 将 []int64 转换为 []interface{}
+			userIdsInterface := make([]interface{}, len(userIds))
+			for i, v := range userIds {
+				userIdsInterface[i] = v
+			}
 
-			err := r.data.rdb.SAdd(ctx, "follow::"+strconv.Itoa(int(userId)), userIds).Err()
+			// 使用解包操作将 userIdsInterface 传递给 SAdd
+			err := r.data.rdb.SAdd(context.Background(), "follow::"+strconv.Itoa(int(userId)), userIdsInterface...).Err()
 			if err != nil {
 				r.log.Errorf("SAdd err: %v", err)
 				return nil, err
 			}
 
-			return userIds, err
+			return userIds, nil
 		}
 
 	} else if err != nil {
@@ -132,7 +133,7 @@ func (r *relationRepo) FollowUserIdList(ctx context.Context, userId int64) ([]in
 func (r *relationRepo) UserInfoList(ctx context.Context, userIdList []int64) ([]*pb.User, error) {
 
 	//获取关注用户的ids 然后rpc获取用户信息
-	userInfoList, err := r.data.userc.UserInfoList(ctx, &userV1.UserInfoListrRequest{UserId: userIdList})
+	userInfoList, err := r.data.userc.UserInfoList(context.Background(), &userV1.UserInfoListrRequest{UserId: userIdList})
 	if err != nil {
 		r.log.Errorf("UserInfoList err: %v", err)
 		return nil, err
@@ -140,6 +141,7 @@ func (r *relationRepo) UserInfoList(ctx context.Context, userIdList []int64) ([]
 
 	pbUserInfoList := make([]*pb.User, len(userInfoList.Users))
 	for i, userInfo := range userInfoList.Users {
+		pbUserInfoList[i] = &pb.User{}
 		err = copier.Copy(pbUserInfoList[i], userInfo)
 		if err != nil {
 			r.log.Errorf("copier.Copy err: %v", err)
@@ -155,7 +157,7 @@ func (r *relationRepo) FollowerUserIdList(ctx context.Context, userId int64) ([]
 	//1.缓存获取
 	var userIds []int64
 
-	ids, err := r.data.rdb.SMembers(ctx, "follower::"+strconv.Itoa(int(userId))).Result()
+	ids, err := r.data.rdb.SMembers(context.Background(), "follower::"+strconv.Itoa(int(userId))).Result()
 	if errors.Is(err, redis.Nil) || len(ids) == 0 {
 		//2.数据库获取
 		err := r.data.db.Model(&model.Relation{}).Select("user_id").Where("to_user_id = ?", userId).Find(&userIds).Error
@@ -166,13 +168,20 @@ func (r *relationRepo) FollowerUserIdList(ctx context.Context, userId int64) ([]
 
 		//更新缓存
 		if len(userIds) != 0 {
-			err := r.data.rdb.SAdd(ctx, "follower::"+strconv.Itoa(int(userId)), userIds).Err()
+			// 将 []int64 转换为 []interface{}
+			userIdsInterface := make([]interface{}, len(userIds))
+			for i, v := range userIds {
+				userIdsInterface[i] = v
+			}
+
+			// 使用解包操作将 userIdsInterface 传递给 SAdd
+			err := r.data.rdb.SAdd(context.Background(), "follow::"+strconv.Itoa(int(userId)), userIdsInterface...).Err()
 			if err != nil {
 				r.log.Errorf("SAdd err: %v", err)
 				return nil, err
 			}
 
-			return userIds, err
+			return userIds, nil
 		}
 
 	} else if err != nil {
@@ -190,7 +199,7 @@ func (r *relationRepo) FollowerUserIdList(ctx context.Context, userId int64) ([]
 
 func (r *relationRepo) GetNewMessages(ctx context.Context, userId int64, friendIds []int64) ([]*messageV1.LatestMessage, error) {
 	//1.获取最新消息
-	latestMessages, err := r.data.messagec.GetNewMessages(ctx, &messageV1.GetNewMessagesRequest{UserId: strconv.FormatInt(userId, 10), ToUserId: friendIds})
+	latestMessages, err := r.data.messagec.GetNewMessages(context.Background(), &messageV1.GetNewMessagesRequest{UserId: strconv.FormatInt(userId, 10), ToUserId: friendIds})
 	if err != nil {
 		r.log.Errorf("GetNewMessages err: %v", err)
 		return nil, err

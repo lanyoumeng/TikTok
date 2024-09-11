@@ -4,9 +4,8 @@ import (
 	pb "comment/api/comment/v1"
 	"comment/internal/pkg/model"
 	"context"
-	"sync"
-
 	"github.com/go-kratos/kratos/v2/log"
+	"sync"
 )
 
 // CommentRepo is a Greater repo.
@@ -68,6 +67,7 @@ func (uc *CommentUsecase) GetUserinfoByUIdVIdAId(ctx context.Context, userId, vi
 		return nil, err
 
 	}
+
 	//3.根据userId,authorId查询用户是否关注作者
 	isFollow, err := uc.repo.GetFollowByUIdAId(ctx, userId, vId)
 	if err != nil {
@@ -88,36 +88,52 @@ func (uc *CommentUsecase) CommentList(ctx context.Context, videoId int64) ([]*pb
 		return nil, err
 	}
 
-	// 使用 sync.WaitGroup
+	//uc.log.Infof("comments: %v", comments)
+
 	var wg sync.WaitGroup
 	commentList := make([]*pb.Comment, len(comments))
-	mu := sync.Mutex{}
+	errChan := make(chan error, len(comments)) // 错误通道，用于捕获并发中的错误
+	defer close(errChan)
 
 	for i, comment := range comments {
 		wg.Add(1)
 		i, comment := i, comment // 捕获变量
 		go func() {
 			defer wg.Done()
+
+			// 获取用户信息
 			userinfo, err := uc.GetUserinfoByUIdVIdAId(ctx, comment.UserId, videoId)
 			if err != nil {
 				uc.log.Errorf("Error getting user info: %v", err)
+				errChan <- err
 				return
 			}
+
+			// 构造评论返回
 			commentresp := &pb.Comment{
 				Id:         comment.Id,
 				Content:    comment.Content,
 				User:       userinfo,
 				CreateDate: comment.CreateDate,
 			}
-			mu.Lock()
+
+			// 无需加锁，直接赋值
 			commentList[i] = commentresp
-			mu.Unlock()
 		}()
 	}
 
+	// 等待所有goroutine完成
 	wg.Wait()
 
-	return commentList, nil
+	// 检查是否有错误发生
+	select {
+	case err := <-errChan:
+		// 如果有错误，则返回第一个捕获的错误
+		return nil, err
+	default:
+		// 否则返回评论列表
+		return commentList, nil
+	}
 }
 
 // GetCommentCntByVId

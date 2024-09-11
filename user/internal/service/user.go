@@ -127,6 +127,8 @@ func (s *UserService) UpdateWorkCnt(ctx context.Context, req *pb.UpdateWorkCntRe
 
 func (s *UserService) UpdateFavoriteCnt(ctx context.Context, req *pb.UpdateFavoriteCntRequest) (*pb.UpdateFavoriteCntResponse, error) {
 
+	log.Debug("UpdateFavoriteCntRequest:", req)
+
 	//更新点赞用户的计数信息 FavoriteUserId
 	FavoriteUserId, err := strconv.ParseInt(req.FavoriteUserId, 10, 64)
 	if err != nil {
@@ -156,7 +158,7 @@ func (s *UserService) UpdateFavoriteCnt(ctx context.Context, req *pb.UpdateFavor
 	}
 	count, err = s.uc.RGetCountById(ctx, FavoritedUserId)
 	if err != nil {
-		s.log.Error("err:", err)
+		s.log.Errorf("err: %v ,userid:%v", err, FavoritedUserId)
 		return nil, err
 
 	}

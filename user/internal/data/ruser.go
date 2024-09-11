@@ -101,12 +101,12 @@ func (r *userRepo) RSaveCount(ctx context.Context, userCount *model.UserCount) e
 		r.log.Error("StructToMap error", err)
 		return err
 	}
-	err = r.data.rdb.HSet(ctx, key, countMap).Err()
+	err = r.data.rdb.HSet(context.Background(), key, countMap).Err()
 	if err != nil {
 		r.log.Error("HSet error", err)
 		return err
 	}
-	_, err = r.data.rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Result()
+	_, err = r.data.rdb.Expire(context.Background(), key, tool.GetRandomExpireTime()).Result()
 	if err != nil {
 		r.log.Error("Expire error", err)
 		return err
