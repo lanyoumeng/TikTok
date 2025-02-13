@@ -47,7 +47,8 @@ func wireApp(kafka *conf.Kafka, prometheus *conf.Prometheus, etcd *conf.Etcd, au
 	relationUsecase := biz.NewRelationUsecase(relationRepo, logger)
 	relationService := service.NewRelationService(relationUsecase, auth, logger)
 	grpcServer := server.NewGRPCServer(prometheus, confServer, auth, relationService, logger)
-	app := newApp(registrar, logger, grpcServer)
+	httpServer := server.NewHTTPServer(confServer, relationService, auth, logger)
+	app := newApp(registrar, logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup2()
 		cleanup()

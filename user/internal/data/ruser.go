@@ -3,8 +3,10 @@ package data
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strconv"
+	"time"
 	"user/internal/pkg/errno"
 	"user/internal/pkg/model"
 	"user/pkg/tool"
@@ -48,13 +50,18 @@ func (r *userRepo) RSaveUser(ctx context.Context, user *model.User) error {
 		r.log.Error("StructToMap error", err)
 		return err
 	}
-
 	key := "user::" + strconv.FormatInt(user.Id, 10)
+
+	start := time.Now()
+	ctx = context.Background()
 	err = r.data.rdb.HSet(ctx, key, userMap).Err()
+	fmt.Printf("HSet 花费时间 %v\n", time.Since(start))
+
 	if err != nil {
-		r.log.Error("HSet error", err)
+		r.log.Errorf("HSet key= %v, userMap = %v ,error=%v", key, userMap, err)
 		return err
 	}
+
 	// 设置过期时间
 	_, err = r.data.rdb.Expire(ctx, key, tool.GetRandomExpireTime()).Result()
 	if err != nil {
@@ -94,7 +101,7 @@ func (r *userRepo) RGetCountById(ctx context.Context, id int64) (*model.UserCoun
 	return userCount, nil
 }
 func (r *userRepo) RSaveCount(ctx context.Context, userCount *model.UserCount) error {
-
+	start := time.Now()
 	key := "count::" + strconv.FormatInt(userCount.Id, 10)
 	countMap, err := tool.StructToMap(userCount)
 	if err != nil {
@@ -111,6 +118,8 @@ func (r *userRepo) RSaveCount(ctx context.Context, userCount *model.UserCount) e
 		r.log.Error("Expire error", err)
 		return err
 	}
+
+	fmt.Printf("RSaveCount 花费时间 %v\n", time.Since(start))
 	return nil
 
 }

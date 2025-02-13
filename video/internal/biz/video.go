@@ -75,7 +75,7 @@ func NewVideoUsecase(repo VideoRepo, logger log.Logger) *VideoUsecase {
 }
 
 func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId int64) ([]*vpb.Video, int64, error) {
-
+	start := time.Now()
 	// 获取视频列表
 	// 从Redis中获取30视频id 列表
 	key := "videoAll"
@@ -142,11 +142,12 @@ func (v *VideoUsecase) Feed(ctx context.Context, latestTime time.Time, userId in
 		return nil, time.Now().Unix(), err
 	}
 
+	v.log.Infof("biz.Feed success , biz.Feed耗时=%v", time.Since(start))
 	return respVideo, earliestTime, nil
 }
 
 func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]byte, userId int64) error {
-
+	start := time.Now()
 	// 检查是否为视频文件
 	if !filetype.IsVideo(*videoData) {
 		return fmt.Errorf("file is not a video")
@@ -184,10 +185,13 @@ func (v *VideoUsecase) Publish(ctx context.Context, title string, videoData *[]b
 	//存储视频信息到kafka
 	go v.repo.PublishKafka(ctx, videoKafkaMessage)
 
+	v.log.Infof("biz.Publish success , biz.Publish耗时=%v", time.Since(start))
 	return nil
 }
 
 func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Video, error) {
+	start := time.Now()
+
 	videoIds, err := v.repo.RPublishVidsByAuthorId(ctx, userId)
 	if errors.Is(err, errno.ErrRedisPublishVidsNotFound) {
 		//  获取该用户发布视频列表
@@ -245,11 +249,14 @@ func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Vi
 		v.log.Error("biz.PublishList/GetRespVideo", err)
 		return nil, err
 	}
+
+	v.log.Infof("biz.PublishList success , biz.PublishList耗时=%v", time.Since(start))
 	return respVideo, nil
 
 }
 
 func (v *VideoUsecase) WorkCnt(ctx context.Context, userId int64) (int64, error) {
+	start := time.Now()
 	videoIds, err := v.repo.RPublishVidsByAuthorId(ctx, userId)
 	if errors.Is(err, errno.ErrRedisPublishVidsNotFound) {
 		//  获取该用户发布视频列表
@@ -275,11 +282,12 @@ func (v *VideoUsecase) WorkCnt(ctx context.Context, userId int64) (int64, error)
 		return 0, err
 
 	}
+	v.log.Infof("biz.WorkCnt success , biz.WorkCnt耗时=%v", time.Since(start))
 	return int64(len(videoIds)), nil
 }
 
 func (v *VideoUsecase) FavoriteListByVId(ctx context.Context, VideoIdList []int64) ([]*vpb.Video, error) {
-
+	start := time.Now()
 	// 根据 video_id 从缓存中查询 video_info
 	videoList := make([]*model.Video, len(VideoIdList))
 	for i, videoId := range VideoIdList {
@@ -311,11 +319,14 @@ func (v *VideoUsecase) FavoriteListByVId(ctx context.Context, VideoIdList []int6
 		v.log.Error("biz.FavoriteListByVId/GetRespVideo", err)
 		return nil, err
 	}
+
+	v.log.Infof("biz.FavoriteListByVId success , biz.FavoriteListByVId耗时=%v", time.Since(start))
 	return respVideo, nil
 
 }
 
 func (v *VideoUsecase) PublishVidsByAId(ctx context.Context, authorId int64) ([]int64, error) {
+	start := time.Now()
 	videoIds, err := v.repo.RPublishVidsByAuthorId(ctx, authorId)
 	if errors.Is(err, errno.ErrRedisPublishVidsNotFound) {
 		//  获取该用户发布视频列表
@@ -341,21 +352,24 @@ func (v *VideoUsecase) PublishVidsByAId(ctx context.Context, authorId int64) ([]
 		return nil, err
 
 	}
+	v.log.Infof("biz.PublishVidsByAId success , biz.PublishVidsByAId耗时=%v", time.Since(start))
 	return videoIds, nil
 }
 
 func (v *VideoUsecase) GetAIdByVId(ctx context.Context, videoId int64) (int64, error) {
+	start := time.Now()
 	video, err := v.repo.GetvideoByVId(ctx, videoId)
 	if err != nil {
 		v.log.Error("biz.GetAIdByVId/GetvideoByVId", err)
 		return 0, err
 	}
+	v.log.Infof("biz.GetAIdByVId success , biz.GetAIdByVId耗时=%v", time.Since(start))
 	return video.AuthorId, nil
 }
 
 // 注意userId和authorId
 func (v *VideoUsecase) GetRespVideo(ctx context.Context, videoList []*model.Video, userId int64) ([]*vpb.Video, error) {
-
+	start := time.Now()
 	var m sync.Map
 	eg, ctx := errgroup.WithContext(ctx)
 
@@ -532,5 +546,6 @@ func (v *VideoUsecase) GetRespVideo(ctx context.Context, videoList []*model.Vide
 		resp = append(resp, video.(*vpb.Video))
 	}
 
+	v.log.Infof("biz.GetRespVideo success , biz.GetRespVideo耗时=%v", time.Since(start))
 	return resp, nil
 }

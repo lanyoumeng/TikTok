@@ -31,12 +31,17 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RelationServiceClient interface {
+	// 关注/取消关注操作
 	Relation(ctx context.Context, in *DouyinRelationActionRequest, opts ...grpc.CallOption) (*DouyinRelationActionResponse, error)
+	// 获取关注列表
 	RelationFollowList(ctx context.Context, in *DouyinRelationFollowListRequest, opts ...grpc.CallOption) (*DouyinRelationFollowListResponse, error)
+	// 获取粉丝列表
 	RelationFollowerList(ctx context.Context, in *DouyinRelationFollowerListRequest, opts ...grpc.CallOption) (*DouyinRelationFollowerListResponse, error)
+	// 获取好友列表
 	FriendList(ctx context.Context, in *DouyinRelationFriendListRequest, opts ...grpc.CallOption) (*DouyinRelationFriendListResponse, error)
+	// 获取关注与粉丝数量
 	FollowCnt(ctx context.Context, in *FollowCntRequest, opts ...grpc.CallOption) (*FollowCntResponse, error)
-	// 根据userId,authorId查询用户是否关注作者
+	// 根据 userId 和 authorId 查询用户是否关注作者
 	IsFollow(ctx context.Context, in *IsFollowRequest, opts ...grpc.CallOption) (*IsFollowResponse, error)
 }
 
@@ -112,12 +117,17 @@ func (c *relationServiceClient) IsFollow(ctx context.Context, in *IsFollowReques
 // All implementations must embed UnimplementedRelationServiceServer
 // for forward compatibility
 type RelationServiceServer interface {
+	// 关注/取消关注操作
 	Relation(context.Context, *DouyinRelationActionRequest) (*DouyinRelationActionResponse, error)
+	// 获取关注列表
 	RelationFollowList(context.Context, *DouyinRelationFollowListRequest) (*DouyinRelationFollowListResponse, error)
+	// 获取粉丝列表
 	RelationFollowerList(context.Context, *DouyinRelationFollowerListRequest) (*DouyinRelationFollowerListResponse, error)
+	// 获取好友列表
 	FriendList(context.Context, *DouyinRelationFriendListRequest) (*DouyinRelationFriendListResponse, error)
+	// 获取关注与粉丝数量
 	FollowCnt(context.Context, *FollowCntRequest) (*FollowCntResponse, error)
-	// 根据userId,authorId查询用户是否关注作者
+	// 根据 userId 和 authorId 查询用户是否关注作者
 	IsFollow(context.Context, *IsFollowRequest) (*IsFollowResponse, error)
 	mustEmbedUnimplementedRelationServiceServer()
 }

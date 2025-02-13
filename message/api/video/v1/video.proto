@@ -4,21 +4,59 @@ package video.api.video.v1;
 
 option go_package = "/video/api/video/v1;v1";
 
+import "google/api/annotations.proto";
+
 service VideoService {
-	rpc Feed(douyin_feed_request)returns (douyin_feed_response);
-  rpc Publish(douyin_publish_action_request)returns (douyin_publish_action_response);
-  rpc PublishList(douyin_publish_list_request)returns (douyin_publish_list_response);
+  // 获取视频流
+  rpc Feed(douyin_feed_request) returns (douyin_feed_response) {
+    option (google.api.http) = {
+      get: "/douyin/feed"
+    };
+  }
 
-  rpc WorkCnt (WorkCnt_request)returns (WorkCnt_response);
+  // 发布视频
+  rpc Publish(douyin_publish_action_request) returns (douyin_publish_action_response) {
+    option (google.api.http) = {
+      post: "/douyin/publish/action"
+      body: "*"
+    };
+  }
 
-  // 通过喜欢视频id列表获取视频列表
-  rpc FavoriteListByVId(FavoriteListReq) returns (FavoriteListResp);
+  // 获取用户发布的视频列表
+  rpc PublishList(douyin_publish_list_request) returns (douyin_publish_list_response) {
+    option (google.api.http) = {
+      get: "/douyin/publish/list"
+    };
+  }
 
-  //通过作者id 获取作者的发布视频id列表
-  rpc PublishVidsByAId(PublishVidsByAId_req) returns (PublishVidsByAIdResp);
+  // 获取用户作品数量
+  rpc WorkCnt(WorkCnt_request) returns (WorkCnt_response) {
+    option (google.api.http) = {
+      get: "/douyin/work/count"
+    };
+  }
 
-  //通过视频id获取作者id
-  rpc GetAIdByVId(GetAIdByVId_req) returns (GetAIdByVIdResp);
+  // 通过喜欢视频 id 列表获取视频列表
+  rpc FavoriteListByVId(FavoriteListReq) returns (FavoriteListResp) {
+    option (google.api.http) = {
+      post: "/douyin/favorite/list"
+      body: "*"
+    };
+  }
+
+  // 通过作者 id 获取作者的发布视频 id 列表
+  rpc PublishVidsByAId(PublishVidsByAId_req) returns (PublishVidsByAIdResp) {
+    option (google.api.http) = {
+      get: "/douyin/publish/vids"
+    };
+  }
+
+  // 通过视频 id 获取作者 id
+  rpc GetAIdByVId(GetAIdByVId_req) returns (GetAIdByVIdResp) {
+    option (google.api.http) = {
+      get: "/douyin/author/video"
+    };
+  }
 }
 
 message Video {
@@ -33,17 +71,17 @@ message Video {
 }
 
 message User {
-  int64 id = 1; // 用户id
+  int64 id = 1; // 用户 id
   string name = 2; // 用户名称
   int64 follow_count = 3; // 关注总数
   int64 follower_count = 4; // 粉丝总数
   bool is_follow = 5; // true-已关注，false-未关注
-  string avatar = 6; //用户头像
-  string background_image = 7; //用户个人页顶部大图
-  string signature = 8; //个人简介
-  int64 total_favorited = 9; //获赞数量
-  int64 work_count = 10; //作品数量
-  int64 favorite_count = 11; //点赞数量
+  string avatar = 6; // 用户头像
+  string background_image = 7; // 用户个人页顶部大图
+  string signature = 8; // 个人简介
+  int64 total_favorited = 9; // 获赞数量
+  int64 work_count = 10; // 作品数量
+  int64 favorite_count = 11; // 点赞数量
 }
 
 message douyin_feed_request {
@@ -55,12 +93,11 @@ message douyin_feed_response {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
   repeated Video video_list = 3; // 视频列表
-  int64 next_time = 4; // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
+  int64 next_time = 4; // 本次返回的视频中，发布最早的时间，作为下次请求时的 latest_time
 }
 
-
 message douyin_publish_action_request {
-  string token = 1; // 用户鉴权token
+  string token = 1; // 用户鉴权 token
   bytes data = 2; // 视频数据
   string title = 3; // 视频标题
 }
@@ -70,10 +107,9 @@ message douyin_publish_action_response {
   string status_msg = 2; // 返回状态描述
 }
 
-
 message douyin_publish_list_request {
-  int64 user_id = 1; // 用户id
-  string token = 2; // 用户鉴权token
+  int64 user_id = 1; // 用户 id
+  string token = 2; // 用户鉴权 token
 }
 
 message douyin_publish_list_response {
@@ -82,31 +118,34 @@ message douyin_publish_list_response {
   repeated Video video_list = 3; // 用户发布的视频列表
 }
 
-message  WorkCnt_request {
-  int64 user_id = 1; // 用户id
+message WorkCnt_request {
+  int64 user_id = 1; // 用户 id
 }
 
-message  WorkCnt_response {
+message WorkCnt_response {
   int64 work_count = 3; // 用户发布的视频数量
 }
 
-message FavoriteListReq{
-  repeated int64 video_id_list = 1; // 视频id列表
+message FavoriteListReq {
+  repeated int64 video_id_list = 1; // 视频 id 列表
 }
-message FavoriteListResp{
+
+message FavoriteListResp {
   repeated Video video_list = 1; // 视频列表
 }
 
-message PublishVidsByAId_req{
-  int64 author_id = 1; // 作者id
-}
-message PublishVidsByAIdResp{
-  repeated int64 video_id_list = 1; // 视频id列表
+message PublishVidsByAId_req {
+  int64 author_id = 1; // 作者 id
 }
 
-message GetAIdByVId_req{
-  int64 video_id = 1; // 视频id
+message PublishVidsByAIdResp {
+  repeated int64 video_id_list = 1; // 视频 id 列表
 }
-message GetAIdByVIdResp{
-  int64 author_id = 1; // 作者id
+
+message GetAIdByVId_req {
+  int64 video_id = 1; // 视频 id
+}
+
+message GetAIdByVIdResp {
+  int64 author_id = 1; // 作者 id
 }

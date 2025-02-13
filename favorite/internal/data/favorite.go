@@ -36,7 +36,7 @@ func (f *FavoriteRepo) GetAuthorIdByVideoId(ctx context.Context, videoId int64) 
 
 	vIds, err := f.data.vc.FavoriteListByVId(context.Background(), &vpb.FavoriteListReq{VideoIdList: []int64{videoId}})
 	if err != nil {
-		f.log.Error("GetAuthorIdByVideoId err:", err)
+		f.log.Error("GetAuthorIdByVideoId 调用vc.FavoriteListByVId失败 err:", err)
 		return 0, err
 	}
 	return vIds.VideoList[0].Author.Id, nil

@@ -32,15 +32,19 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VideoServiceClient interface {
+	// 获取视频流
 	Feed(ctx context.Context, in *DouyinFeedRequest, opts ...grpc.CallOption) (*DouyinFeedResponse, error)
+	// 发布视频
 	Publish(ctx context.Context, in *DouyinPublishActionRequest, opts ...grpc.CallOption) (*DouyinPublishActionResponse, error)
+	// 获取用户发布的视频列表
 	PublishList(ctx context.Context, in *DouyinPublishListRequest, opts ...grpc.CallOption) (*DouyinPublishListResponse, error)
+	// 获取用户作品数量
 	WorkCnt(ctx context.Context, in *WorkCntRequest, opts ...grpc.CallOption) (*WorkCntResponse, error)
-	// 通过喜欢视频id列表获取视频列表
+	// 通过喜欢视频 id 列表获取视频列表
 	FavoriteListByVId(ctx context.Context, in *FavoriteListReq, opts ...grpc.CallOption) (*FavoriteListResp, error)
-	// 通过作者id 获取作者的发布视频id列表
+	// 通过作者 id 获取作者的发布视频 id 列表
 	PublishVidsByAId(ctx context.Context, in *PublishVidsByAIdReq, opts ...grpc.CallOption) (*PublishVidsByAIdResp, error)
-	// 通过视频id获取作者id
+	// 通过视频 id 获取作者 id
 	GetAIdByVId(ctx context.Context, in *GetAIdByVIdReq, opts ...grpc.CallOption) (*GetAIdByVIdResp, error)
 }
 
@@ -126,15 +130,19 @@ func (c *videoServiceClient) GetAIdByVId(ctx context.Context, in *GetAIdByVIdReq
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility
 type VideoServiceServer interface {
+	// 获取视频流
 	Feed(context.Context, *DouyinFeedRequest) (*DouyinFeedResponse, error)
+	// 发布视频
 	Publish(context.Context, *DouyinPublishActionRequest) (*DouyinPublishActionResponse, error)
+	// 获取用户发布的视频列表
 	PublishList(context.Context, *DouyinPublishListRequest) (*DouyinPublishListResponse, error)
+	// 获取用户作品数量
 	WorkCnt(context.Context, *WorkCntRequest) (*WorkCntResponse, error)
-	// 通过喜欢视频id列表获取视频列表
+	// 通过喜欢视频 id 列表获取视频列表
 	FavoriteListByVId(context.Context, *FavoriteListReq) (*FavoriteListResp, error)
-	// 通过作者id 获取作者的发布视频id列表
+	// 通过作者 id 获取作者的发布视频 id 列表
 	PublishVidsByAId(context.Context, *PublishVidsByAIdReq) (*PublishVidsByAIdResp, error)
-	// 通过视频id获取作者id
+	// 通过视频 id 获取作者 id
 	GetAIdByVId(context.Context, *GetAIdByVIdReq) (*GetAIdByVIdResp, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }

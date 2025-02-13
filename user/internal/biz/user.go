@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"time"
 
 	v1 "user/api/user/v1"
 	"user/internal/conf"
@@ -48,7 +49,7 @@ func NewUserUsecase(repo UserRepo, logger log.Logger, conf *conf.Auth) *UserUsec
 	return &UserUsecase{repo: repo, log: log.NewHelper(logger), JwtKey: conf.JwtKey}
 }
 func (uc *UserUsecase) Create(ctx context.Context, u *model.User) (int64, string, error) {
-
+	start := time.Now()
 	//uc.log.Debug("Create user")
 
 	// 查询用户是否已存在
@@ -104,10 +105,12 @@ func (uc *UserUsecase) Create(ctx context.Context, u *model.User) (int64, string
 		return 0, "", errno.ErrSignToken
 	}
 
+	uc.log.Infof("biz.Create success , userId=%v , Register耗时=%v", userId, time.Since(start))
 	return userId, token, nil
 }
 
 func (uc *UserUsecase) Login(ctx context.Context, u *model.User) (int64, string, error) {
+	start := time.Now()
 	// 获取登录用户的所有信息
 	user, err := uc.repo.UserByName(ctx, u.Name)
 	if err != nil {
@@ -132,6 +135,7 @@ func (uc *UserUsecase) Login(ctx context.Context, u *model.User) (int64, string,
 		return 0, "", errno.ErrSignToken
 	}
 
+	uc.log.Infof("biz.Login success , userId=%v , Login耗时=%v", user.Id, time.Since(start))
 	return user.Id, token, nil
 }
 
@@ -149,6 +153,7 @@ func (uc *UserUsecase) UserById(ctx context.Context, id int64) (*model.User, err
 
 // 获取用户所有信息
 func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error) {
+	start := time.Now()
 	userinfo := &v1.User{}
 	//从数据库获取用户注册信息\作品数量\点赞数量\粉丝数量\关注数量\获赞数量\ 进行整合
 	user, err := uc.repo.RGetUserById(ctx, id)
@@ -168,12 +173,16 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 		uc.log.Error("biz.UserInfo/RGetUserById-err:", err)
 		return nil, err
 	}
+
+	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetUserById耗时=%v", id, time.Since(start))
+
 	//uc.log.Debug("biz.UserInfo/user:", user)
 	err = copier.Copy(&userinfo, user)
 	if err != nil {
 		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
 		return nil, err
 	}
+	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy耗时=%v", id, time.Since(start))
 
 	count, err := uc.repo.RGetCountById(ctx, id)
 	if errors.Is(err, errno.ErrUserNotFound) {
@@ -192,19 +201,25 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 		uc.log.Error("biz.UserInfo/RGetCountById-err:", err)
 		return nil, err
 	}
+	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetCountById耗时=%v", id, time.Since(start))
+
 	err = copier.Copy(&userinfo, count)
 	if err != nil {
 		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
 		return nil, err
 	}
+	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy耗时=%v", id, time.Since(start))
 
 	// bool is_follow 默认就行,让video服务调用 // true-已关注，false-未关注
+
+	uc.log.Infof("biz.UserInfo success , userId=%v , UserInfo耗时=%v", id, time.Since(start))
 
 	return userinfo, nil
 }
 
 // 无mysql表
 func (uc *UserUsecase) RGetCountById(ctx context.Context, userId int64) (*model.UserCount, error) {
+	start := time.Now()
 	count, err := uc.repo.RGetCountById(ctx, userId)
 	if err == errno.ErrUserNotFound {
 		count, err = uc.repo.GetCountById(ctx, userId)
@@ -223,6 +238,7 @@ func (uc *UserUsecase) RGetCountById(ctx context.Context, userId int64) (*model.
 		return nil, err
 	}
 
+	uc.log.Infof("biz.RGetCountById success , userId=%v , RGetCountById耗时=%v", userId, time.Since(start))
 	return count, nil
 }
 
@@ -231,6 +247,7 @@ func (uc *UserUsecase) RSaveCount(ctx context.Context, userCount *model.UserCoun
 }
 
 func (uc *UserUsecase) UserInfoList(ctx context.Context, ids []int64) ([]*v1.User, error) {
+	start := time.Now()
 	var userInfos []*v1.User
 	for _, id := range ids {
 		userInfo, err := uc.UserInfo(ctx, id)
@@ -240,5 +257,7 @@ func (uc *UserUsecase) UserInfoList(ctx context.Context, ids []int64) ([]*v1.Use
 		}
 		userInfos = append(userInfos, userInfo)
 	}
+
+	uc.log.Infof("biz.UserInfoList success , UserInfoList耗时=%v", time.Since(start))
 	return userInfos, nil
 }

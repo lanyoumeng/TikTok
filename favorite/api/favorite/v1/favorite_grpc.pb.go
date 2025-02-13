@@ -35,11 +35,11 @@ type FavoriteServiceClient interface {
 	Favorite(ctx context.Context, in *DouyinFavoriteActionRequest, opts ...grpc.CallOption) (*DouyinFavoriteActionResponse, error)
 	// 获取用户点赞视频列表
 	FavoriteList(ctx context.Context, in *DouyinFavoriteListRequest, opts ...grpc.CallOption) (*DouyinFavoriteListResponse, error)
-	// 视频的获赞数
+	// 获取视频的获赞数
 	GetFavoriteCntByVId(ctx context.Context, in *GetFavoriteCntByVIdRequest, opts ...grpc.CallOption) (*GetFavoriteCntByVIdResponse, error)
-	// 是否喜欢
+	// 是否喜欢视频
 	GetIsFavorite(ctx context.Context, in *GetIsFavoriteRequest, opts ...grpc.CallOption) (*GetIsFavoriteResponse, error)
-	// 获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
+	// 获取用户的获赞数和点赞数量
 	GetFavoriteCntByUId(ctx context.Context, in *GetFavoriteCntByUIdRequest, opts ...grpc.CallOption) (*GetFavoriteCntByUIdResponse, error)
 }
 
@@ -110,11 +110,11 @@ type FavoriteServiceServer interface {
 	Favorite(context.Context, *DouyinFavoriteActionRequest) (*DouyinFavoriteActionResponse, error)
 	// 获取用户点赞视频列表
 	FavoriteList(context.Context, *DouyinFavoriteListRequest) (*DouyinFavoriteListResponse, error)
-	// 视频的获赞数
+	// 获取视频的获赞数
 	GetFavoriteCntByVId(context.Context, *GetFavoriteCntByVIdRequest) (*GetFavoriteCntByVIdResponse, error)
-	// 是否喜欢
+	// 是否喜欢视频
 	GetIsFavorite(context.Context, *GetIsFavoriteRequest) (*GetIsFavoriteResponse, error)
-	// 获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
+	// 获取用户的获赞数和点赞数量
 	GetFavoriteCntByUId(context.Context, *GetFavoriteCntByUIdRequest) (*GetFavoriteCntByUIdResponse, error)
 	mustEmbedUnimplementedFavoriteServiceServer()
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"strconv"
+	"time"
 	pb "user/api/user/v1"
 	"user/internal/biz"
 	"user/internal/pkg/model"
@@ -21,6 +22,7 @@ func NewUserService(uc *biz.UserUsecase, logger log.Logger) *UserService {
 }
 
 func (s *UserService) Register(ctx context.Context, req *pb.UserRegisterRequest) (*pb.UserRegisterResponse, error) {
+	start := time.Now()
 	// var user *biz.User
 	user := &model.User{} // 初始化 user
 	user.Name = req.Username
@@ -36,6 +38,7 @@ func (s *UserService) Register(ctx context.Context, req *pb.UserRegisterRequest)
 		}, err
 	}
 
+	s.log.Infof("service.Register success , userId=%v , Register耗时=%v", userId, time.Since(start))
 	return &pb.UserRegisterResponse{
 		StatusCode: 0,
 		StatusMsg:  "创建用户成功",
@@ -44,7 +47,7 @@ func (s *UserService) Register(ctx context.Context, req *pb.UserRegisterRequest)
 	}, nil
 }
 func (s *UserService) Login(ctx context.Context, req *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
-
+	start := time.Now()
 	// var user *biz.User
 	user := &model.User{} // 初始化 user
 	user.Name = req.Username
@@ -60,6 +63,8 @@ func (s *UserService) Login(ctx context.Context, req *pb.UserLoginRequest) (*pb.
 		}, err
 
 	}
+
+	s.log.Infof("service.Login success , userId=%v , Login耗时=%v", userId, time.Since(start))
 	return &pb.UserLoginResponse{
 		StatusCode: 0,
 		StatusMsg:  "登录成功",
@@ -68,6 +73,8 @@ func (s *UserService) Login(ctx context.Context, req *pb.UserLoginRequest) (*pb.
 }
 
 func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.UserResponse, error) {
+	start := time.Now()
+	s.log.Infof("service.UserInfo/  req.UserId=:%v", req.UserId)
 
 	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
@@ -76,8 +83,11 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 			StatusCode: -1,
 			StatusMsg:  "ParseInt函数失败",
 		}, err
-
 	}
+
+	end1 := time.Now()
+	s.log.Infof("service.UserInfo/  userId=%v , strconv.ParseInt耗时=:%v", userId, end1.Sub(start))
+
 	user, err := s.uc.UserInfo(ctx, userId)
 	if err != nil {
 		s.log.Error("err:", err)
@@ -87,6 +97,7 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 		}, err
 	}
 
+	s.log.Infof("service.UserInfo success , userId=%v , UserInfo耗时=%v", userId, time.Since(start))
 	return &pb.UserResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取用户信息成功",
@@ -97,6 +108,7 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 // //WorkCount
 // rpc UpdateWorkCnt(UpdateWorkCntRequest) returns(UpdateWorkCntResponse);
 func (s *UserService) UpdateWorkCnt(ctx context.Context, req *pb.UpdateWorkCntRequest) (*pb.UpdateWorkCntResponse, error) {
+	start := time.Now()
 	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
 		s.log.Error("err:", err)
@@ -118,6 +130,7 @@ func (s *UserService) UpdateWorkCnt(ctx context.Context, req *pb.UpdateWorkCntRe
 
 	}
 
+	s.log.Infof("service.UpdateWorkCnt success , userId=%v , UpdateWorkCnt耗时=%v", userId, time.Since(start))
 	return &pb.UpdateWorkCntResponse{
 		StatusCode: 0,
 		StatusMsg:  "作品数量更新",
@@ -126,7 +139,7 @@ func (s *UserService) UpdateWorkCnt(ctx context.Context, req *pb.UpdateWorkCntRe
 }
 
 func (s *UserService) UpdateFavoriteCnt(ctx context.Context, req *pb.UpdateFavoriteCntRequest) (*pb.UpdateFavoriteCntResponse, error) {
-
+	start := time.Now()
 	log.Debug("UpdateFavoriteCntRequest:", req)
 
 	//更新点赞用户的计数信息 FavoriteUserId
@@ -170,6 +183,7 @@ func (s *UserService) UpdateFavoriteCnt(ctx context.Context, req *pb.UpdateFavor
 		return nil, err
 	}
 
+	s.log.Infof("service.UpdateFavoriteCnt success , userId=%v , UpdateFavoriteCnt耗时=%v", FavoriteUserId, time.Since(start))
 	return &pb.UpdateFavoriteCntResponse{
 		StatusCode: 0,
 		StatusMsg:  "点赞计数更新",
@@ -177,6 +191,7 @@ func (s *UserService) UpdateFavoriteCnt(ctx context.Context, req *pb.UpdateFavor
 }
 
 func (s *UserService) UpdateFollowCnt(ctx context.Context, req *pb.UpdateFollowCntRequest) (*pb.UpdateFollowCntResponse, error) {
+	start := time.Now()
 	//更新执行关注的 用户的计数信息 FollowUserId
 	userId, err := strconv.ParseInt(req.FollowUserId, 10, 64)
 	if err != nil {
@@ -219,6 +234,7 @@ func (s *UserService) UpdateFollowCnt(ctx context.Context, req *pb.UpdateFollowC
 		return nil, err
 	}
 
+	s.log.Infof("service.UpdateFollowCnt success , userId=%v , UpdateFollowCnt耗时=%v", userId, time.Since(start))
 	return &pb.UpdateFollowCntResponse{
 		StatusCode: 0,
 		StatusMsg:  "关注计数更新",
@@ -228,7 +244,7 @@ func (s *UserService) UpdateFollowCnt(ctx context.Context, req *pb.UpdateFollowC
 // 用户信息列表 uIds
 // rpc UserInfoList (UserInfoListrRequest) returns (UserInfoListResponse);
 func (s *UserService) UserInfoList(ctx context.Context, req *pb.UserInfoListrRequest) (*pb.UserInfoListResponse, error) {
-
+	start := time.Now()
 	//获取用户信息列表
 	userInfoList := make([]*pb.User, 5)
 	userInfoList, err := s.uc.UserInfoList(ctx, req.UserId)
@@ -236,6 +252,8 @@ func (s *UserService) UserInfoList(ctx context.Context, req *pb.UserInfoListrReq
 		s.log.Error("err:", err)
 		return nil, err
 	}
+
+	s.log.Infof("service.UserInfoList success , UserInfoList耗时=%v", time.Since(start))
 
 	return &pb.UserInfoListResponse{
 		StatusCode: 0,

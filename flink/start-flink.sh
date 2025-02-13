@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # 启动 Flink 集群
-bin/flink start-cluster
+./bin/start-cluster.sh
+
+export FLINK_HOME=/home/lanmengyou/code/go_code/TikTok/flink/flink-1.18.0
 
 # 等待集群启动
-sleep 15
+sleep 5
 
 # 提交 Flink CDC 作业
 bin/flink-cdc.sh job/user-mysql-to-kafka.yaml

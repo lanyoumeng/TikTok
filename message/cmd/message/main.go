@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"message/internal/conf"
@@ -73,7 +74,7 @@ func initTracer(url string) error {
 	otel.SetTracerProvider(tp)
 	return nil
 }
-func newApp(r registry.Registrar, logger log.Logger, gs *grpc.Server) *kratos.App {
+func newApp(r registry.Registrar, logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -83,6 +84,7 @@ func newApp(r registry.Registrar, logger log.Logger, gs *grpc.Server) *kratos.Ap
 
 		kratos.Server(
 			gs,
+			hs,
 		),
 		kratos.Registrar(r),
 	)

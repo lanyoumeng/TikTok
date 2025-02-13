@@ -26,7 +26,7 @@ func NewVideoService(vc *biz.VideoUsecase, auth *conf.Auth, logger log.Logger) *
 }
 
 func (v *VideoService) Feed(ctx context.Context, req *pb.DouyinFeedRequest) (*pb.DouyinFeedResponse, error) {
-
+	start := time.Now()
 	//lastTime
 	latestTime := req.LatestTime
 	loc, _ := time.LoadLocation("Asia/Shanghai")
@@ -53,6 +53,8 @@ func (v *VideoService) Feed(ctx context.Context, req *pb.DouyinFeedRequest) (*pb
 	//	feed[k] = *v
 	//}
 
+	v.log.Infof("service.Feed success , Feed耗时=%v", time.Since(start))
+
 	return &pb.DouyinFeedResponse{
 		StatusCode: 0,
 		StatusMsg:  "返回视频流成功",
@@ -61,7 +63,7 @@ func (v *VideoService) Feed(ctx context.Context, req *pb.DouyinFeedRequest) (*pb
 	}, nil
 }
 func (v *VideoService) Publish(ctx context.Context, req *pb.DouyinPublishActionRequest) (*pb.DouyinPublishActionResponse, error) {
-
+	start := time.Now()
 	fmt.Printf("title:%v ,data:%v, token:%v", req.Title, req.Data, req.Token)
 	//获取user
 	user, err := token.ParseToken(req.Token, v.JwtKey)
@@ -76,12 +78,14 @@ func (v *VideoService) Publish(ctx context.Context, req *pb.DouyinPublishActionR
 
 	}
 
+	v.log.Infof("service.Publish success , Publish耗时=%v", time.Since(start))
 	return &pb.DouyinPublishActionResponse{
 		StatusCode: 0,
 		StatusMsg:  "发布视频成功",
 	}, nil
 }
 func (v *VideoService) PublishList(ctx context.Context, req *pb.DouyinPublishListRequest) (*pb.DouyinPublishListResponse, error) {
+	start := time.Now()
 
 	//获取user
 	user, err := token.ParseToken(req.Token, v.JwtKey)
@@ -92,6 +96,8 @@ func (v *VideoService) PublishList(ctx context.Context, req *pb.DouyinPublishLis
 	if err != nil {
 		return nil, err
 	}
+
+	v.log.Infof("service.PublishList success , PublishList耗时=%v", time.Since(start))
 	return &pb.DouyinPublishListResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取发布视频列表成功",
@@ -100,23 +106,29 @@ func (v *VideoService) PublishList(ctx context.Context, req *pb.DouyinPublishLis
 }
 
 func (v *VideoService) WorkCnt(ctx context.Context, req *pb.WorkCntRequest) (*pb.WorkCntResponse, error) {
+	start := time.Now()
 
 	workCount, err := v.vc.WorkCnt(ctx, req.UserId)
 	if err != nil {
 		log.Debug("workCount", workCount, "err", err)
 		return nil, err
 	}
+
+	v.log.Infof("service.WorkCnt success , WorkCnt耗时=%v", time.Since(start))
 	return &pb.WorkCntResponse{
 		WorkCount: workCount,
 	}, nil
 }
 
 func (v *VideoService) FavoriteListByVId(ctx context.Context, req *pb.FavoriteListReq) (*pb.FavoriteListResp, error) {
+	start := time.Now()
 
 	videoList, err := v.vc.FavoriteListByVId(ctx, req.VideoIdList)
 	if err != nil {
 		return nil, err
 	}
+
+	v.log.Infof("service.FavoriteListByVId success , FavoriteListByVId耗时=%v", time.Since(start))
 	return &pb.FavoriteListResp{
 		VideoList: videoList,
 	}, nil
@@ -125,10 +137,13 @@ func (v *VideoService) FavoriteListByVId(ctx context.Context, req *pb.FavoriteLi
 // //通过作者id 获取作者的发布视频id列表
 // rpc PublishVidsByAId(PublishVidsByAId_req) returns (PublishVidsByAIdResp);
 func (v *VideoService) PublishVidsByAId(ctx context.Context, req *pb.PublishVidsByAIdReq) (*pb.PublishVidsByAIdResp, error) {
+	start := time.Now()
 	videoIds, err := v.vc.PublishVidsByAId(ctx, req.AuthorId)
 	if err != nil {
 		return nil, err
 	}
+
+	v.log.Infof("service.PublishVidsByAId success , PublishVidsByAId耗时=%v", time.Since(start))
 	return &pb.PublishVidsByAIdResp{
 		VideoIdList: videoIds,
 	}, nil
@@ -137,10 +152,13 @@ func (v *VideoService) PublishVidsByAId(ctx context.Context, req *pb.PublishVids
 
 // 通过视频id获取作者id
 func (v *VideoService) GetAIdByVId(ctx context.Context, req *pb.GetAIdByVIdReq) (*pb.GetAIdByVIdResp, error) {
+	start := time.Now()
 	authorId, err := v.vc.GetAIdByVId(ctx, req.VideoId)
 	if err != nil {
 		return nil, err
 	}
+
+	v.log.Infof("service.GetAIdByVId success , GetAIdByVId耗时=%v", time.Since(start))
 	return &pb.GetAIdByVIdResp{
 		AuthorId: authorId,
 	}, nil

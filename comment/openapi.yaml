@@ -5,6 +5,1238 @@ openapi: 3.0.3
 info:
     title: ""
     version: 0.0.1
-paths: {}
+paths:
+    /douyin/author/video:
+        get:
+            tags:
+                - VideoService
+            description: 通过视频 id 获取作者 id
+            operationId: VideoService_GetAIdByVId
+            parameters:
+                - name: videoId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.GetAIdByVIdResp'
+    /douyin/comment/action:
+        post:
+            tags:
+                - CommentService
+            description: 发布/删除评论
+            operationId: CommentService_Comment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/comment.api.comment.v1.Douyin_comment_send_request'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/comment.api.comment.v1.Douyin_comment_send_response'
+    /douyin/comment/count/video:
+        get:
+            tags:
+                - CommentService
+            description: 获取视频评论总数
+            operationId: CommentService_GetCommentCntByVId
+            parameters:
+                - name: videoId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/comment.api.comment.v1.GetCommentCntByVIdResp'
+    /douyin/comment/list:
+        get:
+            tags:
+                - CommentService
+            description: 获取评论列表
+            operationId: CommentService_CommentList
+            parameters:
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+                - name: videoId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/comment.api.comment.v1.Douyin_comment_list_response'
+    /douyin/favorite/action:
+        post:
+            tags:
+                - FavoriteService
+            description: |-
+                点赞/取消点赞
+                 登录用户才能点赞
+            operationId: FavoriteService_Favorite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/favorite.api.favorite.v1.Douyin_favorite_action_request'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/favorite.api.favorite.v1.Douyin_favorite_action_response'
+    /douyin/favorite/count/user:
+        get:
+            tags:
+                - FavoriteService
+            description: 获取用户的获赞数和点赞数量
+            operationId: FavoriteService_GetFavoriteCntByUId
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/favorite.api.favorite.v1.GetFavoriteCntByUIdResponse'
+    /douyin/favorite/count/video:
+        get:
+            tags:
+                - FavoriteService
+            description: 获取视频的获赞数
+            operationId: FavoriteService_GetFavoriteCntByVId
+            parameters:
+                - name: id
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/favorite.api.favorite.v1.GetFavoriteCntByVIdResponse'
+    /douyin/favorite/is_favorite:
+        get:
+            tags:
+                - FavoriteService
+            description: 是否喜欢视频
+            operationId: FavoriteService_GetIsFavorite
+            parameters:
+                - name: videoId
+                  in: query
+                  schema:
+                    type: string
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/favorite.api.favorite.v1.GetIsFavoriteResponse'
+    /douyin/favorite/list:
+        get:
+            tags:
+                - FavoriteService
+            description: 获取用户点赞视频列表
+            operationId: FavoriteService_FavoriteList
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/favorite.api.favorite.v1.Douyin_favorite_list_response'
+        post:
+            tags:
+                - VideoService
+            description: 通过喜欢视频 id 列表获取视频列表
+            operationId: VideoService_FavoriteListByVId
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.api.video.v1.FavoriteListReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.FavoriteListResp'
+    /douyin/feed:
+        get:
+            tags:
+                - VideoService
+            description: 获取视频流
+            operationId: VideoService_Feed
+            parameters:
+                - name: latestTime
+                  in: query
+                  schema:
+                    type: string
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.Douyin_feed_response'
+    /douyin/message/action:
+        post:
+            tags:
+                - MessageService
+            description: 发送消息
+            operationId: MessageService_MessageSend
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/message.api.message.v1.Douyin_message_send_request'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/message.api.message.v1.Douyin_message_send_response'
+    /douyin/message/chat:
+        get:
+            tags:
+                - MessageService
+            description: 获取历史消息记录
+            operationId: MessageService_MessageRecord
+            parameters:
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+                - name: toUserId
+                  in: query
+                  schema:
+                    type: string
+                - name: preMsgTime
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/message.api.message.v1.Douyin_message_record_response'
+    /douyin/message/latest:
+        get:
+            tags:
+                - MessageService
+            description: 获取用户和每个好友的最新一条消息
+            operationId: MessageService_GetNewMessages
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: toUserId
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/message.api.message.v1.GetNewMessages_response'
+    /douyin/publish/action:
+        post:
+            tags:
+                - VideoService
+            description: 发布视频
+            operationId: VideoService_Publish
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.api.video.v1.Douyin_publish_action_request'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.Douyin_publish_action_response'
+    /douyin/publish/list:
+        get:
+            tags:
+                - VideoService
+            description: 获取用户发布的视频列表
+            operationId: VideoService_PublishList
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.Douyin_publish_list_response'
+    /douyin/publish/vids:
+        get:
+            tags:
+                - VideoService
+            description: 通过作者 id 获取作者的发布视频 id 列表
+            operationId: VideoService_PublishVidsByAId
+            parameters:
+                - name: authorId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.PublishVidsByAIdResp'
+    /douyin/relation/action:
+        post:
+            tags:
+                - RelationService
+            description: 关注/取消关注操作
+            operationId: RelationService_Relation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/relation.api.relation.v1.Douyin_relation_action_request'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/relation.api.relation.v1.Douyin_relation_action_response'
+    /douyin/relation/follow/list:
+        get:
+            tags:
+                - RelationService
+            description: 获取关注列表
+            operationId: RelationService_RelationFollowList
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/relation.api.relation.v1.Douyin_relation_follow_list_response'
+    /douyin/relation/followcnt:
+        get:
+            tags:
+                - RelationService
+            description: 获取关注与粉丝数量
+            operationId: RelationService_FollowCnt
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/relation.api.relation.v1.FollowCnt_response'
+    /douyin/relation/follower/list:
+        get:
+            tags:
+                - RelationService
+            description: 获取粉丝列表
+            operationId: RelationService_RelationFollowerList
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/relation.api.relation.v1.Douyin_relation_follower_list_response'
+    /douyin/relation/friend/list:
+        get:
+            tags:
+                - RelationService
+            description: 获取好友列表
+            operationId: RelationService_FriendList
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/relation.api.relation.v1.Douyin_relation_friend_list_response'
+    /douyin/relation/isfollow:
+        get:
+            tags:
+                - RelationService
+            description: 根据 userId 和 authorId 查询用户是否关注作者
+            operationId: RelationService_IsFollow
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: authorId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/relation.api.relation.v1.IsFollow_response'
+    /douyin/user:
+        get:
+            tags:
+                - UserService
+            description: |-
+                获取用户信息，有 Redis，user + cnt
+                 注意 is_follow 字段默认值，需要其他服务调用 favorite 服务取得
+            operationId: UserService_UserInfo
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UserResponse'
+    /douyin/user/list:
+        post:
+            tags:
+                - UserService
+            description: 获取用户信息列表，使用用户 ID 列表查询
+            operationId: UserService_UserInfoList
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UserInfoListrRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UserInfoListResponse'
+    /douyin/user/login:
+        post:
+            tags:
+                - UserService
+            description: 用户登录，有 Redis
+            operationId: UserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UserLoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UserLoginResponse'
+    /douyin/user/register:
+        post:
+            tags:
+                - UserService
+            description: 用户注册
+            operationId: UserService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UserRegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UserRegisterResponse'
+    /douyin/user/update_favorite_count:
+        post:
+            tags:
+                - UserService
+            description: |-
+                更新点赞数量
+                 FavoriteCount 和 TotalFavorited
+            operationId: UserService_UpdateFavoriteCnt
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateFavoriteCntRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UpdateFavoriteCntResponse'
+    /douyin/user/update_follow_count:
+        post:
+            tags:
+                - UserService
+            description: |-
+                更新关注数量
+                 FollowCount 和 FollowerCount
+            operationId: UserService_UpdateFollowCnt
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateFollowCntRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UpdateFollowCntResponse'
+    /douyin/user/update_work_count:
+        post:
+            tags:
+                - UserService
+            description: |-
+                更新计数
+                 更新作品数量
+            operationId: UserService_UpdateWorkCnt
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateWorkCntRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UpdateWorkCntResponse'
+    /douyin/work/count:
+        get:
+            tags:
+                - VideoService
+            description: 获取用户作品数量
+            operationId: VideoService_WorkCnt
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.api.video.v1.WorkCnt_response'
 components:
-    schemas: {}
+    schemas:
+        comment.api.comment.v1.Comment:
+            type: object
+            properties:
+                id:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/comment.api.comment.v1.User'
+                content:
+                    type: string
+                createDate:
+                    type: string
+        comment.api.comment.v1.Douyin_comment_list_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                commentList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/comment.api.comment.v1.Comment'
+        comment.api.comment.v1.Douyin_comment_send_request:
+            type: object
+            properties:
+                token:
+                    type: string
+                videoId:
+                    type: string
+                actionType:
+                    type: string
+                commentText:
+                    type: string
+                commentId:
+                    type: string
+        comment.api.comment.v1.Douyin_comment_send_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                comment:
+                    $ref: '#/components/schemas/comment.api.comment.v1.Comment'
+        comment.api.comment.v1.GetCommentCntByVIdResp:
+            type: object
+            properties:
+                commentCount:
+                    type: string
+        comment.api.comment.v1.User:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                followCount:
+                    type: string
+                followerCount:
+                    type: string
+                isFollow:
+                    type: boolean
+                avatar:
+                    type: string
+                backgroundImage:
+                    type: string
+                signature:
+                    type: string
+                totalFavorited:
+                    type: string
+                workCount:
+                    type: string
+                favoriteCount:
+                    type: string
+        favorite.api.favorite.v1.Douyin_favorite_action_request:
+            type: object
+            properties:
+                token:
+                    type: string
+                videoId:
+                    type: string
+                actionType:
+                    type: integer
+                    format: int32
+        favorite.api.favorite.v1.Douyin_favorite_action_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+        favorite.api.favorite.v1.Douyin_favorite_list_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                videoList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/favorite.api.favorite.v1.Video'
+        favorite.api.favorite.v1.GetFavoriteCntByUIdResponse:
+            type: object
+            properties:
+                totalFavorited:
+                    type: string
+                favoriteCount:
+                    type: string
+        favorite.api.favorite.v1.GetFavoriteCntByVIdResponse:
+            type: object
+            properties:
+                favoriteCount:
+                    type: string
+        favorite.api.favorite.v1.GetIsFavoriteResponse:
+            type: object
+            properties:
+                Favorite:
+                    type: boolean
+        favorite.api.favorite.v1.User:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                followCount:
+                    type: string
+                followerCount:
+                    type: string
+                isFollow:
+                    type: boolean
+                avatar:
+                    type: string
+                backgroundImage:
+                    type: string
+                signature:
+                    type: string
+                totalFavorited:
+                    type: string
+                workCount:
+                    type: string
+                favoriteCount:
+                    type: string
+        favorite.api.favorite.v1.Video:
+            type: object
+            properties:
+                id:
+                    type: string
+                author:
+                    $ref: '#/components/schemas/favorite.api.favorite.v1.User'
+                playUrl:
+                    type: string
+                coverUrl:
+                    type: string
+                favoriteCount:
+                    type: string
+                commentCount:
+                    type: string
+                isFavorite:
+                    type: boolean
+                title:
+                    type: string
+        message.api.message.v1.Douyin_message_record_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                messageList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/message.api.message.v1.Message'
+        message.api.message.v1.Douyin_message_send_request:
+            type: object
+            properties:
+                token:
+                    type: string
+                toUserId:
+                    type: string
+                sendType:
+                    type: integer
+                    format: int32
+                content:
+                    type: string
+        message.api.message.v1.Douyin_message_send_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+        message.api.message.v1.GetNewMessages_response:
+            type: object
+            properties:
+                latestMessageList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/message.api.message.v1.LatestMessage'
+        message.api.message.v1.LatestMessage:
+            type: object
+            properties:
+                content:
+                    type: string
+                msgType:
+                    type: string
+                friendId:
+                    type: string
+        message.api.message.v1.Message:
+            type: object
+            properties:
+                id:
+                    type: string
+                toUserId:
+                    type: string
+                fromUserId:
+                    type: string
+                content:
+                    type: string
+                createTime:
+                    type: string
+        relation.api.relation.v1.Douyin_relation_action_request:
+            type: object
+            properties:
+                token:
+                    type: string
+                toUserId:
+                    type: string
+                actionType:
+                    type: integer
+                    format: int32
+        relation.api.relation.v1.Douyin_relation_action_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+        relation.api.relation.v1.Douyin_relation_follow_list_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                userList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/relation.api.relation.v1.User'
+        relation.api.relation.v1.Douyin_relation_follower_list_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                userList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/relation.api.relation.v1.User'
+        relation.api.relation.v1.Douyin_relation_friend_list_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                userList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/relation.api.relation.v1.FriendUser'
+        relation.api.relation.v1.FollowCnt_response:
+            type: object
+            properties:
+                followCnt:
+                    type: string
+                followerCnt:
+                    type: string
+        relation.api.relation.v1.FriendUser:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/relation.api.relation.v1.User'
+                message:
+                    type: string
+                msgType:
+                    type: string
+        relation.api.relation.v1.IsFollow_response:
+            type: object
+            properties:
+                isFollow:
+                    type: boolean
+        relation.api.relation.v1.User:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                followCount:
+                    type: string
+                followerCount:
+                    type: string
+                isFollow:
+                    type: boolean
+                avatar:
+                    type: string
+                backgroundImage:
+                    type: string
+                signature:
+                    type: string
+                totalFavorited:
+                    type: string
+                workCount:
+                    type: string
+                favoriteCount:
+                    type: string
+        user.v1.UpdateFavoriteCntRequest:
+            type: object
+            properties:
+                favoriteUserId:
+                    type: string
+                favoritedUserId:
+                    type: string
+                favoriteCount:
+                    type: string
+                totalFavorited:
+                    type: string
+        user.v1.UpdateFavoriteCntResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+        user.v1.UpdateFollowCntRequest:
+            type: object
+            properties:
+                followUserId:
+                    type: string
+                followedUserId:
+                    type: string
+                followCount:
+                    type: string
+                followerCount:
+                    type: string
+        user.v1.UpdateFollowCntResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+        user.v1.UpdateWorkCntRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                workCount:
+                    type: string
+        user.v1.UpdateWorkCntResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+        user.v1.User:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                followCount:
+                    type: string
+                followerCount:
+                    type: string
+                isFollow:
+                    type: boolean
+                avatar:
+                    type: string
+                backgroundImage:
+                    type: string
+                signature:
+                    type: string
+                totalFavorited:
+                    type: string
+                workCount:
+                    type: string
+                favoriteCount:
+                    type: string
+        user.v1.UserInfoListResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/user.v1.User'
+        user.v1.UserInfoListrRequest:
+            type: object
+            properties:
+                userId:
+                    type: array
+                    items:
+                        type: string
+        user.v1.UserLoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+        user.v1.UserLoginResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                userId:
+                    type: string
+                token:
+                    type: string
+        user.v1.UserRegisterRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+        user.v1.UserRegisterResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                userId:
+                    type: string
+                token:
+                    type: string
+        user.v1.UserResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/user.v1.User'
+        video.api.video.v1.Douyin_feed_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                videoList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.api.video.v1.Video'
+                nextTime:
+                    type: string
+        video.api.video.v1.Douyin_publish_action_request:
+            type: object
+            properties:
+                token:
+                    type: string
+                data:
+                    type: string
+                    format: bytes
+                title:
+                    type: string
+        video.api.video.v1.Douyin_publish_action_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+        video.api.video.v1.Douyin_publish_list_response:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    format: int32
+                statusMsg:
+                    type: string
+                videoList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.api.video.v1.Video'
+        video.api.video.v1.FavoriteListReq:
+            type: object
+            properties:
+                videoIdList:
+                    type: array
+                    items:
+                        type: string
+        video.api.video.v1.FavoriteListResp:
+            type: object
+            properties:
+                videoList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.api.video.v1.Video'
+        video.api.video.v1.GetAIdByVIdResp:
+            type: object
+            properties:
+                authorId:
+                    type: string
+        video.api.video.v1.PublishVidsByAIdResp:
+            type: object
+            properties:
+                videoIdList:
+                    type: array
+                    items:
+                        type: string
+        video.api.video.v1.User:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                followCount:
+                    type: string
+                followerCount:
+                    type: string
+                isFollow:
+                    type: boolean
+                avatar:
+                    type: string
+                backgroundImage:
+                    type: string
+                signature:
+                    type: string
+                totalFavorited:
+                    type: string
+                workCount:
+                    type: string
+                favoriteCount:
+                    type: string
+        video.api.video.v1.Video:
+            type: object
+            properties:
+                id:
+                    type: string
+                author:
+                    $ref: '#/components/schemas/video.api.video.v1.User'
+                playUrl:
+                    type: string
+                coverUrl:
+                    type: string
+                favoriteCount:
+                    type: string
+                commentCount:
+                    type: string
+                isFavorite:
+                    type: boolean
+                title:
+                    type: string
+        video.api.video.v1.WorkCnt_response:
+            type: object
+            properties:
+                workCount:
+                    type: string
+tags:
+    - name: CommentService
+    - name: FavoriteService
+    - name: MessageService
+    - name: RelationService
+    - name: UserService
+    - name: VideoService

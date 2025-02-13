@@ -98,7 +98,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList["/user.v1.UserService/Register"] = struct{}{}
 	whiteList["/user.v1.UserService/Login"] = struct{}{}
-	//whiteList["/user.v1.UserService/UserInfo"] = struct{}{}
+	whiteList["/user.v1.UserService/UserInfo"] = struct{}{}
 
 	whiteList["/user.v1.UserService/UpdateWorkCnt"] = struct{}{}
 	whiteList["/user.v1.UserService/UpdateFavoriteCnt"] = struct{}{}

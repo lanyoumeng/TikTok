@@ -3,24 +3,45 @@ syntax = "proto3";
 package favorite.api.favorite.v1;
 
 option go_package = "/favorite/api/favorite/v1;v1";
+import "google/api/annotations.proto";
 
 service FavoriteService {
   // 点赞/取消点赞
-  //登录用户才能点赞
-  rpc Favorite (douyin_favorite_action_request) returns (douyin_favorite_action_response);
+  // 登录用户才能点赞
+  rpc Favorite (douyin_favorite_action_request) returns (douyin_favorite_action_response) {
+    option (google.api.http) = {
+      post: "/douyin/favorite/action"
+      body: "*"
+    };
+  }
+
   // 获取用户点赞视频列表
-  rpc FavoriteList (douyin_favorite_list_request) returns (douyin_favorite_list_response);
+  rpc FavoriteList (douyin_favorite_list_request) returns (douyin_favorite_list_response) {
+    option (google.api.http) = {
+      get: "/douyin/favorite/list"
+    };
+  }
 
+  // 获取视频的获赞数
+  rpc GetFavoriteCntByVId (GetFavoriteCntByVIdRequest) returns (GetFavoriteCntByVIdResponse) {
+    option (google.api.http) = {
+      get: "/douyin/favorite/count/video"
+    };
+  }
 
+  // 是否喜欢视频
+  rpc GetIsFavorite (GetIsFavoriteRequest) returns (GetIsFavoriteResponse) {
+    option (google.api.http) = {
+      get: "/douyin/favorite/is_favorite"
+    };
+  }
 
-  //视频的获赞数
-  rpc GetFavoriteCntByVId (GetFavoriteCntByVIdRequest) returns (GetFavoriteCntByVIdResponse);
-
-  //是否喜欢
-  rpc GetIsFavorite (GetIsFavoriteRequest) returns (GetIsFavoriteResponse);
-
-  //获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
-  rpc GetFavoriteCntByUId (GetFavoriteCntByUIdRequest) returns (GetFavoriteCntByUIdResponse);
+  // 获取用户的获赞数和点赞数量
+  rpc GetFavoriteCntByUId (GetFavoriteCntByUIdRequest) returns (GetFavoriteCntByUIdResponse) {
+    option (google.api.http) = {
+      get: "/douyin/favorite/count/user"
+    };
+  }
 }
 
 message Video {
@@ -40,14 +61,13 @@ message User {
   int64 follow_count = 3; // 关注总数
   int64 follower_count = 4; // 粉丝总数
   bool is_follow = 5; // true-已关注，false-未关注
-  string avatar = 6; //用户头像
-  string background_image = 7; //用户个人页顶部大图
-  string signature = 8; //个人简介
-  int64 total_favorited = 9; //获赞数量
-  int64 work_count = 10; //作品数量
-  int64 favorite_count = 11; //点赞数量
+  string avatar = 6; // 用户头像
+  string background_image = 7; // 用户个人页顶部大图
+  string signature = 8; // 个人简介
+  int64 total_favorited = 9; // 获赞数量
+  int64 work_count = 10; // 作品数量
+  int64 favorite_count = 11; // 点赞数量
 }
-
 
 message douyin_favorite_action_request {
   string token = 1; // 用户鉴权token
@@ -60,7 +80,6 @@ message douyin_favorite_action_response {
   string status_msg = 2; // 返回状态描述
 }
 
-
 message douyin_favorite_list_request {
   int64 user_id = 1; // 用户id
   string token = 2; // 用户鉴权token
@@ -72,26 +91,28 @@ message douyin_favorite_list_response {
   repeated Video video_list = 3; // 用户点赞视频列表
 }
 
-
-message GetFavoriteCntByVIdRequest{
+message GetFavoriteCntByVIdRequest {
   int64 id = 1; // 视频唯一标识
 }
-message GetFavoriteCntByVIdResponse{
+
+message GetFavoriteCntByVIdResponse {
   int64 favorite_count = 1; // 视频的点赞总数
 }
 
-message GetIsFavoriteRequest{
-  int64 video_id =1; //视频id
+message GetIsFavoriteRequest {
+  int64 video_id = 1; // 视频id
   int64 user_id = 2; // 用户id
 }
-message GetIsFavoriteResponse{
-  bool Favorite =1;//是否喜欢
+
+message GetIsFavoriteResponse {
+  bool Favorite = 1; // 是否喜欢
 }
 
-message GetFavoriteCntByUIdRequest{
+message GetFavoriteCntByUIdRequest {
   int64 user_id = 1; // 用户id
 }
-message GetFavoriteCntByUIdResponse{
-  int64 total_favorited = 1; //获赞数量
-  int64 favorite_count = 2; //点赞数量
+
+message GetFavoriteCntByUIdResponse {
+  int64 total_favorited = 1; // 获赞数量
+  int64 favorite_count = 2; // 点赞数量
 }

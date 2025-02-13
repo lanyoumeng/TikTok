@@ -32,19 +32,23 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
+	// 用户注册
 	Register(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*UserRegisterResponse, error)
-	//有 redis
+	// 用户登录，有 Redis
 	Login(ctx context.Context, in *UserLoginRequest, opts ...grpc.CallOption) (*UserLoginResponse, error)
-	//有redis user+cnt  注意is_follow字段一直都是默认，需要其他服务调用 favorite服务取得
+	// 获取用户信息，有 Redis，user + cnt
+	// 注意 is_follow 字段默认值，需要其他服务调用 favorite 服务取得
 	UserInfo(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
-	//更新计数
-	//WorkCount
+	// 更新计数
+	// 更新作品数量
 	UpdateWorkCnt(ctx context.Context, in *UpdateWorkCntRequest, opts ...grpc.CallOption) (*UpdateWorkCntResponse, error)
-	//FavoriteCount TotalFavorited
+	// 更新点赞数量
+	// FavoriteCount 和 TotalFavorited
 	UpdateFavoriteCnt(ctx context.Context, in *UpdateFavoriteCntRequest, opts ...grpc.CallOption) (*UpdateFavoriteCntResponse, error)
-	//FollowCount FollowerCount
+	// 更新关注数量
+	// FollowCount 和 FollowerCount
 	UpdateFollowCnt(ctx context.Context, in *UpdateFollowCntRequest, opts ...grpc.CallOption) (*UpdateFollowCntResponse, error)
-	//用户信息列表 uIds
+	// 获取用户信息列表，使用用户 ID 列表查询
 	UserInfoList(ctx context.Context, in *UserInfoListrRequest, opts ...grpc.CallOption) (*UserInfoListResponse, error)
 }
 
@@ -130,19 +134,23 @@ func (c *userServiceClient) UserInfoList(ctx context.Context, in *UserInfoListrR
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
+	// 用户注册
 	Register(context.Context, *UserRegisterRequest) (*UserRegisterResponse, error)
-	//有 redis
+	// 用户登录，有 Redis
 	Login(context.Context, *UserLoginRequest) (*UserLoginResponse, error)
-	//有redis user+cnt  注意is_follow字段一直都是默认，需要其他服务调用 favorite服务取得
+	// 获取用户信息，有 Redis，user + cnt
+	// 注意 is_follow 字段默认值，需要其他服务调用 favorite 服务取得
 	UserInfo(context.Context, *UserRequest) (*UserResponse, error)
-	//更新计数
-	//WorkCount
+	// 更新计数
+	// 更新作品数量
 	UpdateWorkCnt(context.Context, *UpdateWorkCntRequest) (*UpdateWorkCntResponse, error)
-	//FavoriteCount TotalFavorited
+	// 更新点赞数量
+	// FavoriteCount 和 TotalFavorited
 	UpdateFavoriteCnt(context.Context, *UpdateFavoriteCntRequest) (*UpdateFavoriteCntResponse, error)
-	//FollowCount FollowerCount
+	// 更新关注数量
+	// FollowCount 和 FollowerCount
 	UpdateFollowCnt(context.Context, *UpdateFollowCntRequest) (*UpdateFollowCntResponse, error)
-	//用户信息列表 uIds
+	// 获取用户信息列表，使用用户 ID 列表查询
 	UserInfoList(context.Context, *UserInfoListrRequest) (*UserInfoListResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }

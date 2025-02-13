@@ -4,26 +4,67 @@ package user.v1;
 
 option go_package = "user/api/user/v1;v1";
 
+import "google/api/annotations.proto";
 
 service UserService {
-    rpc Register (UserRegisterRequest) returns (UserRegisterResponse);
-    //有 redis
-    rpc Login (UserLoginRequest) returns (UserLoginResponse );
+    // 用户注册
+    rpc Register(UserRegisterRequest) returns (UserRegisterResponse) {
+        option (google.api.http) = {
+            post: "/douyin/user/register"
+            body: "*"
+        };
+    }
 
-    //有redis user+cnt  注意is_follow字段一直都是默认，需要其他服务调用 favorite服务取得
-    rpc UserInfo (UserRequest) returns (UserResponse);
+    // 用户登录，有 Redis
+    rpc Login(UserLoginRequest) returns (UserLoginResponse) {
+        option (google.api.http) = {
+            post: "/douyin/user/login"
+            body: "*"
+        };
+    }
 
-    //更新计数
-    //WorkCount
-    rpc UpdateWorkCnt(UpdateWorkCntRequest) returns(UpdateWorkCntResponse);
-    //FavoriteCount TotalFavorited
-    rpc UpdateFavoriteCnt(UpdateFavoriteCntRequest) returns(UpdateFavoriteCntResponse);
-    //FollowCount FollowerCount
-    rpc UpdateFollowCnt(UpdateFollowCntRequest) returns(UpdateFollowCntResponse);
+    // 获取用户信息，有 Redis，user + cnt
+    // 注意 is_follow 字段默认值，需要其他服务调用 favorite 服务取得
+    rpc UserInfo(UserRequest) returns (UserResponse) {
+        option (google.api.http) = {
+            get: "/douyin/user"
+        };
+    }
 
-    //用户信息列表 uIds
-    rpc UserInfoList (UserInfoListrRequest) returns (UserInfoListResponse);
+    // 更新计数
+    // 更新作品数量
+    rpc UpdateWorkCnt(UpdateWorkCntRequest) returns (UpdateWorkCntResponse) {
+        option (google.api.http) = {
+            post: "/douyin/user/update_work_count"
+            body: "*"
+        };
+    }
 
+    // 更新点赞数量
+    // FavoriteCount 和 TotalFavorited
+    rpc UpdateFavoriteCnt(UpdateFavoriteCntRequest) returns (UpdateFavoriteCntResponse) {
+        option (google.api.http) = {
+            post: "/douyin/user/update_favorite_count"
+            body: "*"
+        };
+    }
+
+    // 更新关注数量
+    // FollowCount 和 FollowerCount
+    rpc UpdateFollowCnt(UpdateFollowCntRequest) returns (UpdateFollowCntResponse) {
+        option (google.api.http) = {
+            post: "/douyin/user/update_follow_count"
+            body: "*"
+        };
+    }
+
+    // 获取用户信息列表，使用用户 ID 列表查询
+    rpc UserInfoList(UserInfoListrRequest) returns (UserInfoListResponse) {
+        option (google.api.http) = {
+            post: "/douyin/user/list"
+            body: "*"
+        };
+    }
 }
 
 message User {
@@ -32,14 +73,13 @@ message User {
     int64 follow_count = 3; // 关注总数
     int64 follower_count = 4; // 粉丝总数
     bool is_follow = 5; // true-已关注，false-未关注
-    string avatar = 6; //用户头像
-    string background_image = 7; //用户个人页顶部大图
-    string signature = 8; //个人简介
-    int64 total_favorited = 9; //获赞数量
-    int64 work_count = 10; //作品数量
-    int64 favorite_count = 11; //点赞数量
+    string avatar = 6; // 用户头像
+    string background_image = 7; // 用户个人页顶部大图
+    string signature = 8; // 个人简介
+    int64 total_favorited = 9; // 获赞数量
+    int64 work_count = 10; // 作品数量
+    int64 favorite_count = 11; // 点赞数量
 }
-
 
 message UserRegisterRequest {
     string username = 1; // 注册用户名，最长32个字符
@@ -64,6 +104,7 @@ message UserLoginResponse {
     int64 user_id = 3; // 用户id
     string token = 4; // 用户鉴权token
 }
+
 message UserRequest {
     string user_id = 1; // 用户id
     string token = 2; // 用户鉴权token

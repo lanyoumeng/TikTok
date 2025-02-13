@@ -11,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
@@ -74,7 +75,7 @@ func initTracer(url string) error {
 	return nil
 }
 
-func newApp(r registry.Registrar, logger log.Logger, gs *grpc.Server) *kratos.App {
+func newApp(r registry.Registrar, logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -83,6 +84,7 @@ func newApp(r registry.Registrar, logger log.Logger, gs *grpc.Server) *kratos.Ap
 		kratos.Logger(logger),
 		kratos.Server(
 			gs,
+			hs,
 		),
 		kratos.Registrar(r),
 	)

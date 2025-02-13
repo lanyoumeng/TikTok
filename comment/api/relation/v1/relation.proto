@@ -3,17 +3,51 @@ syntax = "proto3";
 package relation.api.relation.v1;
 
 option go_package = "/relation/api/relation/v1;v1";
+import "google/api/annotations.proto";
 
 service RelationService {
-  rpc Relation (douyin_relation_action_request) returns (douyin_relation_action_response);
-  rpc RelationFollowList (douyin_relation_follow_list_request) returns (douyin_relation_follow_list_response);
-  rpc RelationFollowerList (douyin_relation_follower_list_request) returns (douyin_relation_follower_list_response);
-  rpc FriendList (douyin_relation_friend_list_request) returns (douyin_relation_friend_list_response);
+  // 关注/取消关注操作
+  rpc Relation (douyin_relation_action_request) returns (douyin_relation_action_response) {
+    option (google.api.http) = {
+      post: "/douyin/relation/action"
+      body: "*"
+    };
+  }
 
-  rpc FollowCnt (FollowCnt_request) returns (FollowCnt_response);
+  // 获取关注列表
+  rpc RelationFollowList (douyin_relation_follow_list_request) returns (douyin_relation_follow_list_response) {
+    option (google.api.http) = {
+      get: "/douyin/relation/follow/list"
+    };
+  }
 
-  //根据userId,authorId查询用户是否关注作者
-  rpc IsFollow (IsFollow_request) returns (IsFollow_response);
+  // 获取粉丝列表
+  rpc RelationFollowerList (douyin_relation_follower_list_request) returns (douyin_relation_follower_list_response) {
+    option (google.api.http) = {
+      get: "/douyin/relation/follower/list"
+    };
+  }
+
+  // 获取好友列表
+  rpc FriendList (douyin_relation_friend_list_request) returns (douyin_relation_friend_list_response) {
+    option (google.api.http) = {
+      get: "/douyin/relation/friend/list"
+    };
+  }
+
+  // 获取关注与粉丝数量
+  rpc FollowCnt (FollowCnt_request) returns (FollowCnt_response) {
+    option (google.api.http) = {
+      get: "/douyin/relation/followcnt"
+    };
+  }
+
+  // 根据 userId 和 authorId 查询用户是否关注作者
+  rpc IsFollow (IsFollow_request) returns (IsFollow_response) {
+    option (google.api.http) = {
+      get: "/douyin/relation/isfollow"
+    };
+  }
 }
 
 message User {
@@ -35,6 +69,7 @@ message FriendUser {
   string message = 2; // 和该好友的最新聊天消息
   int64 msgType = 3; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
+
 message douyin_relation_action_request {
   string token = 1; // 用户鉴权token
   int64 to_user_id = 2; // 对方用户id
@@ -45,7 +80,6 @@ message douyin_relation_action_response {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
 }
-
 
 message douyin_relation_follow_list_request {
   int64 user_id = 1; // 用户id

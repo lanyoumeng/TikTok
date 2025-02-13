@@ -28,11 +28,11 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessageServiceClient interface {
+	// 获取历史消息记录
 	MessageRecord(ctx context.Context, in *DouyinMessageRecordRequest, opts ...grpc.CallOption) (*DouyinMessageRecordResponse, error)
+	// 发送消息
 	MessageSend(ctx context.Context, in *DouyinMessageSendRequest, opts ...grpc.CallOption) (*DouyinMessageSendResponse, error)
-	//  string message = 2; // 和该好友的最新聊天消息
-	//  int64 msgType = 3; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
-	//获得用户和每个好友的最新一条消息
+	// 获取用户和每个好友的最新一条消息
 	GetNewMessages(ctx context.Context, in *GetNewMessagesRequest, opts ...grpc.CallOption) (*GetNewMessagesResponse, error)
 }
 
@@ -78,11 +78,11 @@ func (c *messageServiceClient) GetNewMessages(ctx context.Context, in *GetNewMes
 // All implementations must embed UnimplementedMessageServiceServer
 // for forward compatibility
 type MessageServiceServer interface {
+	// 获取历史消息记录
 	MessageRecord(context.Context, *DouyinMessageRecordRequest) (*DouyinMessageRecordResponse, error)
+	// 发送消息
 	MessageSend(context.Context, *DouyinMessageSendRequest) (*DouyinMessageSendResponse, error)
-	//  string message = 2; // 和该好友的最新聊天消息
-	//  int64 msgType = 3; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
-	//获得用户和每个好友的最新一条消息
+	// 获取用户和每个好友的最新一条消息
 	GetNewMessages(context.Context, *GetNewMessagesRequest) (*GetNewMessagesResponse, error)
 	mustEmbedUnimplementedMessageServiceServer()
 }
