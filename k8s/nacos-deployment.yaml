@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: nacos
+  name: nacos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: nacos
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: nacos
+    spec:
+      containers:
+      - env:
+        - name: MODE
+          value: standalone
+        image: nacos/nacos-server:latest
+        imagePullPolicy: ""
+        name: nacos
+        ports:
+        - containerPort: 8848
+        - containerPort: 9848
+        - containerPort: 9849
+        resources: {}
+        volumeMounts:
+        - mountPath: /home/nacos/logs
+          name: nacos-claim0
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: nacos-claim0
+        persistentVolumeClaim:
+          claimName: nacos-claim0
+status: {}

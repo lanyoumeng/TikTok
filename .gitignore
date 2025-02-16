@@ -1,9 +1,5 @@
-# 忽略 MySQL 数据目录
-deploy/mysql/
-
 # 忽略 etcd 数据目录
-deply/etcd
-
+deply/etcd/etcd-*
 
 deply/es
 

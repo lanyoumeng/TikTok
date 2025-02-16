@@ -87,12 +87,13 @@ func (v *VideoService) Publish(ctx context.Context, req *pb.DouyinPublishActionR
 func (v *VideoService) PublishList(ctx context.Context, req *pb.DouyinPublishListRequest) (*pb.DouyinPublishListResponse, error) {
 	start := time.Now()
 
-	//获取user
-	user, err := token.ParseToken(req.Token, v.JwtKey)
-	if err != nil {
-		return nil, err
-	}
-	publishList, err := v.vc.PublishList(ctx, user.UserId)
+	////获取user
+	//user, err := token.ParseToken(req.Token, v.JwtKey)
+	//if err != nil {
+	//	return nil, err
+	//}
+	userId := req.UserId
+	publishList, err := v.vc.PublishList(ctx, userId)
 	if err != nil {
 		return nil, err
 	}

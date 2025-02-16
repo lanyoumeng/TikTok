@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: etcd-node
+  name: etcd-node
+spec:
+  ports:
+  - name: "2379"
+    port: 2379
+    targetPort: 2379
+  - name: "2380"
+    port: 2380
+    targetPort: 2380
+  selector:
+    io.kompose.service: etcd-node
+status:
+  loadBalancer: {}

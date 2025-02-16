@@ -40,7 +40,7 @@ func (r *relationRepo) IsFollow(ctx context.Context, userId, targetUserId int64)
 
 	if !exists {
 		//2.数据库获取
-		r.log.Debug("redis nil")
+		r.log.Debug("redis nil,缓存获取失败")
 
 		relation := &model.Relation{}
 		result := r.data.db.Model(&model.Relation{}).Where("user_id = ? AND to_user_id = ?", userId, targetUserId).First(&relation)
@@ -80,6 +80,14 @@ func (r *relationRepo) DeleteFollow(ctx context.Context, userId, targetUserId in
 	err := r.data.db.Where("user_id = ? AND to_user_id = ?", userId, targetUserId).Delete(&model.Relation{}).Error
 	if err != nil {
 		r.log.Errorf("Delete err: %v", err)
+		return err
+	}
+
+	//2.删除缓存
+	key := "follow::" + strconv.Itoa(int(userId))
+	err = r.data.rdb.SRem(context.Background(), key, targetUserId).Err()
+	if err != nil {
+		r.log.Errorf("SRem err: %v", err)
 		return err
 	}
 

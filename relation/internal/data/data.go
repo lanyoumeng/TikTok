@@ -193,7 +193,7 @@ func NewUserServiceClient(covery registry.Discovery, s *conf.Service) userV1.Use
 			tracing.Client(),
 			recovery.Recovery(),
 		),
-		grpc.WithTimeout(10*time.Second),
+		grpc.WithTimeout(2*time.Second),
 		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 	)
 	if err != nil {
@@ -214,7 +214,7 @@ func NewFavoriteClient(covery registry.Discovery, s *conf.Service) favoriteV1.Fa
 			tracing.Client(),
 			recovery.Recovery(),
 		),
-		grpc.WithTimeout(10*time.Second),
+		grpc.WithTimeout(2*time.Second),
 		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 	)
 	if err != nil {
@@ -235,7 +235,7 @@ func NewCommentClient(covery registry.Discovery, s *conf.Service) commentV1.Comm
 			tracing.Client(),
 			recovery.Recovery(),
 		),
-		grpc.WithTimeout(10*time.Second),
+		grpc.WithTimeout(2*time.Second),
 		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 	)
 	if err != nil {
@@ -256,7 +256,7 @@ func NewVideoClient(covery registry.Discovery, s *conf.Service) videov1.VideoSer
 			tracing.Client(),
 			recovery.Recovery(),
 		),
-		grpc.WithTimeout(10*time.Second),
+		grpc.WithTimeout(2*time.Second),
 		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 	)
 	if err != nil {
@@ -277,7 +277,7 @@ func NewMessageClient(covery registry.Discovery, s *conf.Service) messageV1.Mess
 			tracing.Client(),
 			recovery.Recovery(),
 		),
-		grpc.WithTimeout(10*time.Second),
+		grpc.WithTimeout(2*time.Second),
 		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 	)
 	if err != nil {

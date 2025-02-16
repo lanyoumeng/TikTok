@@ -174,15 +174,16 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 		return nil, err
 	}
 
-	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetUserById耗时=%v", id, time.Since(start))
+	end1 := time.Now()
+	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetUserById耗时=%v", id, end1.Sub(start))
 
-	//uc.log.Debug("biz.UserInfo/user:", user)
 	err = copier.Copy(&userinfo, user)
 	if err != nil {
 		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
 		return nil, err
 	}
-	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy耗时=%v", id, time.Since(start))
+	end2 := time.Now()
+	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy(&userinfo, user) 耗时=%v", id, end2.Sub(end1))
 
 	count, err := uc.repo.RGetCountById(ctx, id)
 	if errors.Is(err, errno.ErrUserNotFound) {
@@ -201,14 +202,16 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 		uc.log.Error("biz.UserInfo/RGetCountById-err:", err)
 		return nil, err
 	}
-	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetCountById耗时=%v", id, time.Since(start))
+	end3 := time.Now()
+	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetCountById耗时=%v", id, end3.Sub(end2))
 
 	err = copier.Copy(&userinfo, count)
 	if err != nil {
 		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
 		return nil, err
 	}
-	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy耗时=%v", id, time.Since(start))
+	end4 := time.Now()
+	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy(&userinfo, count) 耗时=%v", id, end4.Sub(end3))
 
 	// bool is_follow 默认就行,让video服务调用 // true-已关注，false-未关注
 

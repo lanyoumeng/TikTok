@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: es
+  name: es
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: es
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: es
+    spec:
+      containers:
+      - env:
+        - name: ES_JAVA_OPTS
+          value: -Xms512m -Xmx512m
+        - name: TAKE_FILE_OWNERSHIP
+          value: "true"
+        - name: bootstrap.memory_lock
+          value: "true"
+        - name: cluster.name
+          value: elasticsearch
+        - name: discovery.type
+          value: single-node
+        - name: node.name
+          value: es
+        - name: xpack.security.enabled
+          value: "false"
+        - name: xpack.security.http.ssl.enabled
+          value: "false"
+        - name: xpack.security.transport.ssl.enabled
+          value: "false"
+        image: elasticsearch:8.6.0
+        imagePullPolicy: ""
+        name: es
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        resources: {}
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: es-claim0
+        - mountPath: /usr/share/elasticsearch/logs
+          name: es-claim1
+        - mountPath: /usr/share/elasticsearch/plugins
+          name: es-claim2
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: es-claim0
+        persistentVolumeClaim:
+          claimName: es-claim0
+      - name: es-claim1
+        persistentVolumeClaim:
+          claimName: es-claim1
+      - name: es-claim2
+        persistentVolumeClaim:
+          claimName: es-claim2
+status: {}

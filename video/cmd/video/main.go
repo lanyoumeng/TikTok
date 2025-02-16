@@ -14,7 +14,6 @@ import (
 	knacos "github.com/go-kratos/kratos/contrib/config/nacos/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.opentelemetry.io/otel"
@@ -97,11 +96,12 @@ func main() {
 	flag.Parse()
 
 	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
+		//*constant.NewServerConfig("127.0.0.1", 8848),
+		*constant.NewServerConfig("nacos", 8848),
 	}
 
 	cc := &constant.ClientConfig{
-		NamespaceId:         "public", //namespace id
+		NamespaceId:         "", //namespace id
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "../../deply/nacos/logs",
@@ -141,7 +141,7 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
-	//log.Info(bc)
+	log.Infof("config: %+v", bc)
 
 	//// watch key 配置文件发生变更时，自动更新配置
 	//if err := c.Watch("service.name", func(key string, value config.Value) {
@@ -165,11 +165,11 @@ func main() {
 
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
-		"service.id", id,
-		"service.name", Name,
-		"service.version", Version,
-		"trace_id", tracing.TraceID(),
-		"span_id", tracing.SpanID(),
+		//"service.id", id,
+		//"service.name", Name,
+		//"service.version", Version,
+		//"trace_id", tracing.TraceID(),
+		//"span_id", tracing.SpanID(),
 	)
 
 	app, cleanup, err := wireApp(

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	knacos "github.com/go-kratos/kratos/contrib/config/nacos/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/nacos-group/nacos-sdk-go/clients"
@@ -10,10 +11,8 @@ import (
 	"user/internal/conf"
 	"user/internal/pkg/ukafka"
 
-	knacos "github.com/go-kratos/kratos/contrib/config/nacos/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/nacos-group/nacos-sdk-go/vo"
@@ -39,7 +38,7 @@ var (
 
 func idFunc() string {
 	hostname, _ := os.Hostname()
-	id := hostname + Name
+	id := hostname + "." + Name
 	return id
 }
 func init() {
@@ -70,6 +69,7 @@ func initTracer(url string) error {
 		)),
 	)
 	otel.SetTracerProvider(tp)
+
 	return nil
 }
 func newApp(r registry.Registrar, logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
@@ -110,11 +110,12 @@ func main() {
 	//log.Debug("22222222222:", source)
 
 	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
+		//*constant.NewServerConfig("127.0.0.1", 8848),
+		*constant.NewServerConfig("nacos", 8848),
 	}
 
 	cc := &constant.ClientConfig{
-		NamespaceId:         "public", //namespace id
+		NamespaceId:         "", ////当namespace是public时，此处填空字符串。
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "../../deply/nacos/logs",
@@ -130,7 +131,7 @@ func main() {
 		},
 	)
 	if err != nil {
-		log.Debug(err)
+		log.Errorf("new config client err: %v", err)
 	}
 
 	c := config.New(
@@ -147,16 +148,20 @@ func main() {
 	defer c.Close()
 
 	if err := c.Load(); err != nil {
+		log.Errorf("config.Load err: %v", err)
 		panic(err)
 	}
 
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
+		log.Errorf("config.Scan err: %v", err)
 		panic(err)
 	}
 
+	log.Debugf("config: %+v", bc)
 	// 加入链路追踪的配置
 	if err := initTracer(bc.Trace.Endpoint); err != nil {
+		log.Errorf("initTracer err: %v", err)
 		panic(err)
 	}
 
@@ -168,15 +173,16 @@ func main() {
 
 	// 创建 Logger
 
-	//logger := log.With(log.NewStdLogger(kafkaWriter),
-	logger := log.With(log.NewStdLogger(os.Stdout),
-		"ts", log.DefaultTimestamp,
+	logger := log.With(log.NewStdLogger(kafkaWriter),
+		//logger := log.With(log.NewStdLogger(os.Stdout),
 		"caller", log.DefaultCaller,
-		"service.id", id,
-		"service.name", Name,
-		"service.version", Version,
-		"trace_id", tracing.TraceID(),
-		"span_id", tracing.SpanID(),
+		"ts", log.DefaultTimestamp,
+
+		//"service.id", id,
+		//"service.name", Name,
+		//"service.version", Version,
+		//"trace_id", tracing.TraceID(),
+		//"span_id", tracing.SpanID(),
 	)
 
 	app, cleanup, err := wireApp(
@@ -189,6 +195,7 @@ func main() {
 		bc.Data,
 		logger)
 	if err != nil {
+		log.Errorf("wireApp err: %v", err)
 		panic(err)
 	}
 	defer cleanup()

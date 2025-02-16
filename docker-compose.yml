@@ -3,7 +3,7 @@ services:
   etcd-node:
     image: quay.io/coreos/etcd:v3.5.0
     container_name: etcd-node
-    restart: always
+    #    restart: always
     ports:
       - "2379:2379"
       - "2380:2380"
@@ -27,7 +27,7 @@ services:
   etcd-node2:
     image: quay.io/coreos/etcd:v3.5.0
     container_name: etcd-node2
-    restart: always
+    #    restart: always
     ports:
       - "2479:2379"
       - "2480:2380"
@@ -51,7 +51,7 @@ services:
   etcd-node3:
     image: quay.io/coreos/etcd:v3.5.0
     container_name: etcd-node3
-    restart: always
+    #    restart: always
     ports:
       - "2579:2379"
       - "2580:2380"
@@ -75,7 +75,7 @@ services:
   nacos:
     image: nacos/nacos-server:latest
     container_name: nacos
-    restart: always
+    #    restart: always
     environment:
       - MODE=standalone
     ports:
@@ -90,7 +90,7 @@ services:
   apisix:
     image: apache/apisix:${APISIX_IMAGE_TAG:-3.5.0-debian}
     container_name: apisix
-    restart: always
+    #    restart: always
     volumes:
       - ./deply/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
     depends_on:
@@ -143,7 +143,7 @@ services:
     image: prom/prometheus
     container_name: prometheus
     hostname: prometheus
-    restart: always
+    #    restart: always
     volumes:
       - ./deply/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -164,15 +164,15 @@ services:
     networks:
       - TikTok-net
 
-#  flink:
-#    image: lanmengyou/flinkcdc-my:v1.0
-#    container_name: flink
-#    ports:
-#      - "8081:8081"
-#      - "6123:6123"
-#      - "6124:6124"
-#    networks:
-#      - TikTok-net
+  #  flink:
+  #    image: lanmengyou/flinkcdc-my:v1.0
+  #    container_name: flink
+  #    ports:
+  #      - "8081:8081"
+  #      - "6123:6123"
+  #      - "6124:6124"
+  #    networks:
+  #      - TikTok-net
 
   kafka:
     image: wurstmeister/kafka
@@ -196,7 +196,7 @@ services:
     depends_on:
       - zoo
     networks:
-        - TikTok-net
+      - TikTok-net
 
   zoo:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -245,7 +245,6 @@ services:
     ports:
       - '5044:5044'
       - '50000:50000'
-      - '50000:50000'
       - '9600:9600'
     environment:
       LS_JAVA_OPTS: -Xms1024m -Xmx1024m
@@ -274,7 +273,7 @@ services:
   mysql:
     container_name: mysql
     image: mysql:8.0.20
-    restart: always
+    #    restart: always
     ports:
       - "7500:3306"
     environment:
@@ -287,21 +286,21 @@ services:
       # - ./deply/mysql/logs:/logs
       - ./deply/mysql:/docker-entrypoint-initdb.d
     command:
-     --default-authentication-plugin=mysql_native_password 
-     --character-set-server=utf8mb4 
-     --collation-server=utf8mb4_general_ci 
-     --explicit_defaults_for_timestamp=true 
-     --lower_case_table_names=1
-     --log-bin=mysql-bin
-     --binlog-format=ROW
-     --server-id=1
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --server-id=1
     networks:
       - TikTok-net
 
   Redis:
     container_name: redis
     image: redis:6.2.7
-    restart: always
+    #    restart: always
     volumes:
       - ./deply/redis/data:/data
       - ./deply/redis/redis.conf:/etc/redis/redis.conf
@@ -311,11 +310,27 @@ services:
     networks:
       - TikTok-net
 
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "11111:8080"
+      - "11112:50000"
+    volumes:
+      - ./deply/jenkins/jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - JAVA_OPTS=-Duser.timezone=Asia/Shanghai
+
 
   user:
     build: ./user
     container_name: user
-    network_mode: host
+    #    network_mode: host
+    #    ports:
+    #      - "8001:8001"
+    #      - "8881:8881"
+    #      - "7271:7271"
     depends_on:
       - mysql
       - Redis
@@ -331,75 +346,35 @@ services:
       - es
       - grafana
       - zoo
-
+    networks:
+      - TikTok-net
 
   video:
     build: ./video
     container_name: video
-    network_mode: host
+    #    network_mode: host
     depends_on:
-        - mysql
-        - Redis
-        - nacos
-        - etcd-node
-        - jaeger
-        - prometheus
-        - kafka
-        - apisix
-        - dashboard
-        - logstash
-        - kibana
-        - es
-        - grafana
-        - zoo
-
+      - mysql
+      - Redis
+      - nacos
+      - etcd-node
+      - jaeger
+      - prometheus
+      - kafka
+      - apisix
+      - dashboard
+      - logstash
+      - kibana
+      - es
+      - grafana
+      - zoo
+    networks:
+      - TikTok-net
 
 
   favorite:
     build: ./favorite
     container_name: favorite
-    network_mode: host
-    depends_on:
-        - mysql
-        - Redis
-        - nacos
-        - etcd-node
-        - jaeger
-        - prometheus
-        - kafka
-        - apisix
-        - dashboard
-        - logstash
-        - kibana
-        - es
-        - grafana
-        - zoo
-
-  comment:
-    build: ./comment
-    container_name: comment
-    network_mode: host
-    depends_on:
-        - mysql
-        - Redis
-        - nacos
-        - etcd-node
-        - jaeger
-        - prometheus
-        - kafka
-        - apisix
-        - dashboard
-        - logstash
-        - kibana
-        - es
-        - grafana
-        - zoo
-
-
-  relation:
-    build: ./relation
-    container_name: relation
-    network_mode: host
     depends_on:
       - mysql
       - Redis
@@ -415,28 +390,79 @@ services:
       - es
       - grafana
       - zoo
+    networks:
+      - TikTok-net
 
+  comment:
+    build: ./comment
+    container_name: comment
+    depends_on:
+      - mysql
+      - Redis
+      - nacos
+      - etcd-node
+      - jaeger
+      - prometheus
+      - kafka
+      - apisix
+      - dashboard
+      - logstash
+      - kibana
+      - es
+      - grafana
+      - zoo
+    networks:
+      - TikTok-net
+
+  relation:
+    build: ./relation
+    container_name: relation
+    ports:
+      - "8005:8005"
+      - "8885:8885"
+      - "7275:7275"
+    depends_on:
+      - mysql
+      - Redis
+      - nacos
+      - etcd-node
+      - jaeger
+      - prometheus
+      - kafka
+      - apisix
+      - dashboard
+      - logstash
+      - kibana
+      - es
+      - grafana
+      - zoo
+    networks:
+      - TikTok-net
 
 
   message:
     build: ./message
     container_name: message
-    network_mode: host
+    ports:
+      - "8006:8006"
+      - "8886:8886"
     depends_on:
-        - mysql
-        - Redis
-        - nacos
-        - etcd-node
-        - jaeger
-        - prometheus
-        - kafka
-        - apisix
-        - dashboard
-        - logstash
-        - kibana
-        - es
-        - grafana
-        - zoo
+      - mysql
+      - Redis
+      - nacos
+      - etcd-node
+      - jaeger
+      - prometheus
+      - kafka
+      - apisix
+      - dashboard
+      - logstash
+      - kibana
+      - es
+      - grafana
+      - zoo
+    networks:
+      - TikTok-net
 
 
 

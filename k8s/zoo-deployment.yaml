@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: zoo
+  name: zoo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: zoo
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: zoo
+    spec:
+      containers:
+      - env:
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "2181"
+        - name: ZOOKEEPER_SERVERS
+          value: zoo:2888:3888
+        - name: ZOOKEEPER_SERVER_ID
+          value: "1"
+        image: confluentinc/cp-zookeeper:7.3.2
+        imagePullPolicy: ""
+        name: zoo
+        ports:
+        - containerPort: 2181
+        resources: {}
+      hostname: zoo
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes: null
+status: {}

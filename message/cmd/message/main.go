@@ -13,7 +13,6 @@ import (
 	knacos "github.com/go-kratos/kratos/contrib/config/nacos/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/nacos-group/nacos-sdk-go/vo"
@@ -112,11 +111,12 @@ func main() {
 	//log.Debug("22222222222:", source)
 
 	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
+		//*constant.NewServerConfig("127.0.0.1", 8848),
+		*constant.NewServerConfig("nacos", 8848),
 	}
 
 	cc := &constant.ClientConfig{
-		NamespaceId:         "public", //namespace id
+		NamespaceId:         "", //namespace id
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "../../deply/nacos/logs",
@@ -149,17 +149,21 @@ func main() {
 	defer c.Close()
 
 	if err := c.Load(); err != nil {
-		panic(err)
+		log.Errorf("config.Load err: %v", err)
+		//panic(err)
 	}
 
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
-		panic(err)
+		log.Errorf("config.Scan err: %v", err)
+		//panic(err)
 	}
+	log.Infof("config: %+v", bc)
 
 	// 加入链路追踪的配置
 	if err := initTracer(bc.Trace.Endpoint); err != nil {
-		panic(err)
+		log.Errorf("initTracer err: %v", err)
+		//panic(err)
 	}
 
 	// init log
@@ -170,14 +174,14 @@ func main() {
 
 	// 创建 Logger
 	logger := log.With(log.NewStdLogger(kafkaWriter),
-
+		//logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
-		"service.id", id,
-		"service.name", Name,
-		"service.version", Version,
-		"trace_id", tracing.TraceID(),
-		"span_id", tracing.SpanID(),
+		//"service.id", id,
+		//"service.name", Name,
+		//"service.version", Version,
+		//"trace_id", tracing.TraceID(),
+		//"span_id", tracing.SpanID(),
 	)
 
 	app, cleanup, err := wireApp(
@@ -190,12 +194,14 @@ func main() {
 		bc.Data,
 		logger)
 	if err != nil {
-		panic(err)
+		log.Errorf("wireApp err: %v", err)
+		//panic(err)
 	}
 	defer cleanup()
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
-		panic(err)
+		log.Errorf("app.Run err: %v", err)
+		//panic(err)
 	}
 }

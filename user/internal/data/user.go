@@ -56,10 +56,16 @@ func (r *userRepo) GetUserById(ctx context.Context, Id int64) (*model.User, erro
 	user := &model.User{}
 	if err := r.data.db.Model(&model.User{}).Where("id = ?", Id).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			r.log.Error("GetUserById-err:", errno.ErrUserNotFound)
 			return nil, errno.ErrUserNotFound
 		}
 		r.log.Error("GetUserById-err:", err)
 		return nil, err
+	}
+	//如果用户不存在，报错
+	if user.Id == 0 {
+		r.log.Error("user.Id == 0, GetUserById-err:", errno.ErrUserNotFound)
+		return nil, errno.ErrUserNotFound
 	}
 
 	return user, nil
