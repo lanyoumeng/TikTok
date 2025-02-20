@@ -8,10 +8,12 @@ import (
 	"favorite/pkg/tool"
 	"github.com/go-redis/redis/v8"
 	"strconv"
+	"time"
 )
 
 // 获取用户点赞总数
 func (f *FavoriteRepo) GetFavoriteCount(ctx context.Context, userId int64) (int64, error) {
+	start := time.Now()
 	//FavoriteCount userFavList::<userId>的size
 	favoriteCount, err := f.data.rdb.SCard(ctx, "userFavList::"+string(userId)).Result()
 	if errors.Is(err, redis.Nil) || favoriteCount == 0 {
@@ -34,12 +36,15 @@ func (f *FavoriteRepo) GetFavoriteCount(ctx context.Context, userId int64) (int6
 		f.log.Errorf("GetFavoriteCount-err: %v", err)
 		return 0, err
 	}
+
+	f.log.Infof("GetFavoriteCount success , GetFavoriteCount耗时=%v", time.Since(start))
 	return favoriteCount, nil
 }
 
 //作者获赞总数
 
 func (f *FavoriteRepo) GetTotalFavorited(ctx context.Context, authorId int64) (int64, error) {
+	start := time.Now()
 	var totalFavorited string
 	totalFavorited, err := f.data.rdb.Get(ctx, "userTotalFavorited::"+strconv.FormatInt(authorId, 10)).Result()
 	if errors.Is(err, redis.Nil) || totalFavorited == "" {
@@ -76,5 +81,7 @@ func (f *FavoriteRepo) GetTotalFavorited(ctx context.Context, authorId int64) (i
 		f.log.Errorf("GetTotalFavorited-err: %v", err)
 		return 0, err
 	}
+
+	f.log.Infof("GetTotalFavorited success , GetTotalFavorited耗时=%v", time.Since(start))
 	return strconv.ParseInt(totalFavorited, 10, 64)
 }

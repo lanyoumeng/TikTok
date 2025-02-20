@@ -28,11 +28,13 @@ func GetRandomExpireTime() time.Duration {
 }
 
 func StrSliceToInt64Slice(ids []string) []int64 {
+
 	var result []int64
 	for _, id := range ids {
 		i, _ := strconv.ParseInt(id, 10, 64)
 		result = append(result, i)
 	}
+
 	return result
 }
 

@@ -3,7 +3,6 @@ package data
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strconv"
 	"time"
@@ -14,6 +13,7 @@ import (
 
 // 从redis获取用户
 func (r *userRepo) RGetUserById(ctx context.Context, id int64) (*model.User, error) {
+	start := time.Now()
 	// 从redis获取用户
 	key := "user::" + strconv.FormatInt(id, 10)
 	user, err := r.data.rdb.HGetAll(ctx, key).Result()
@@ -38,12 +38,13 @@ func (r *userRepo) RGetUserById(ctx context.Context, id int64) (*model.User, err
 	u.BackgroundImage = user["background_image"]
 	u.Signature = user["signature"]
 
-	//r.log.Infof("RGetUserById: %v", u)
+	r.log.Infof("RGetUserById 花费时间 %v\n", time.Since(start))
 	return u, nil
 }
 
 // 保存用户到redis
 func (r *userRepo) RSaveUser(ctx context.Context, user *model.User) error {
+	start := time.Now()
 	// 保存用户到redis
 	userMap, err := tool.StructToMap(user)
 	if err != nil {
@@ -52,11 +53,8 @@ func (r *userRepo) RSaveUser(ctx context.Context, user *model.User) error {
 	}
 	key := "user::" + strconv.FormatInt(user.Id, 10)
 
-	start := time.Now()
 	ctx = context.Background()
 	err = r.data.rdb.HSet(ctx, key, userMap).Err()
-	fmt.Printf("HSet 花费时间 %v\n", time.Since(start))
-
 	if err != nil {
 		r.log.Errorf("HSet key= %v, userMap = %v ,error=%v", key, userMap, err)
 		return err
@@ -68,11 +66,14 @@ func (r *userRepo) RSaveUser(ctx context.Context, user *model.User) error {
 		r.log.Error("Expire error", err)
 		return err
 	}
+
+	r.log.Infof("RSaveUser 花费时间 %v\n", time.Since(start))
 	return nil
 
 }
 
 func (r *userRepo) RGetCountById(ctx context.Context, id int64) (*model.UserCount, error) {
+	start := time.Now()
 	// 从redis获取所有计数信息
 
 	key := "count::" + strconv.FormatInt(id, 10)
@@ -98,6 +99,7 @@ func (r *userRepo) RGetCountById(ctx context.Context, id int64) (*model.UserCoun
 	userCount.FavoriteCount, _ = strconv.ParseInt(count["favorite_count"], 10, 64)
 	userCount.TotalFavorited, _ = strconv.ParseInt(count["total_favorited"], 10, 64)
 
+	r.log.Infof("RGetCountById 花费时间 %v\n", time.Since(start))
 	return userCount, nil
 }
 func (r *userRepo) RSaveCount(ctx context.Context, userCount *model.UserCount) error {
@@ -119,7 +121,7 @@ func (r *userRepo) RSaveCount(ctx context.Context, userCount *model.UserCount) e
 		return err
 	}
 
-	fmt.Printf("RSaveCount 花费时间 %v\n", time.Since(start))
+	r.log.Infof("RSaveCount 花费时间 %v\n", time.Since(start))
 	return nil
 
 }

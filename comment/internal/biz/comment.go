@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
 	"sync"
+	"time"
 )
 
 // CommentRepo is a Greater repo.
@@ -51,7 +52,7 @@ func (uc *CommentUsecase) DelComment(ctx context.Context, commentId int64) error
 
 // 评论用户信息
 func (uc *CommentUsecase) GetUserinfoByUIdVIdAId(ctx context.Context, userId, videoId int64) (*pb.User, error) {
-
+	start := time.Now()
 	//1.根据userId查询用户信息
 	userInfo, err := uc.repo.GetUserinfoByUId(ctx, userId)
 	if err != nil {
@@ -76,11 +77,13 @@ func (uc *CommentUsecase) GetUserinfoByUIdVIdAId(ctx context.Context, userId, vi
 	}
 	userInfo.IsFollow = isFollow
 
+	uc.log.Infof("GetUserinfoByUIdVIdAId success , 耗时=%v", time.Since(start))
 	return userInfo, nil
 }
 
 // CommentList 方法
 func (uc *CommentUsecase) CommentList(ctx context.Context, videoId int64) ([]*pb.Comment, error) {
+	start := time.Now()
 	// 获取mysql 评论列表
 	comments, err := uc.repo.CommentList(ctx, videoId)
 	if err != nil {
@@ -125,6 +128,7 @@ func (uc *CommentUsecase) CommentList(ctx context.Context, videoId int64) ([]*pb
 	// 等待所有goroutine完成
 	wg.Wait()
 
+	uc.log.Infof("CommentList success , 耗时=%v", time.Since(start))
 	// 检查是否有错误发生
 	select {
 	case err := <-errChan:

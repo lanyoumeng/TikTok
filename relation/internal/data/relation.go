@@ -12,6 +12,7 @@ import (
 	"relation/internal/biz"
 	"relation/internal/pkg/model"
 	"strconv"
+	"time"
 )
 
 type relationRepo struct {
@@ -28,6 +29,7 @@ func NewRelationRepo(data *Data, logger log.Logger) biz.RelationRepo {
 }
 
 func (r *relationRepo) IsFollow(ctx context.Context, userId, targetUserId int64) (bool, error) {
+	start := time.Now()
 	//set  follow::user_id  关注用户的ids
 	//1.缓存获取
 	key := "follow::" + strconv.Itoa(int(userId))
@@ -60,11 +62,14 @@ func (r *relationRepo) IsFollow(ctx context.Context, userId, targetUserId int64)
 
 		}
 	}
+
+	r.log.Infof("IsFollow success , 耗时=%v", time.Since(start))
 	return exists, nil
 
 }
 
 func (r *relationRepo) InsertFollow(ctx context.Context, userId, targetUserId int64) error {
+	start := time.Now()
 	//1.插入数据库
 	err := r.data.db.Create(&model.Relation{UserId: userId, ToUserId: targetUserId}).Error
 	if err != nil {
@@ -72,10 +77,12 @@ func (r *relationRepo) InsertFollow(ctx context.Context, userId, targetUserId in
 		return err
 	}
 
+	r.log.Infof("InsertFollow success , 耗时=%v", time.Since(start))
 	return nil
 }
 
 func (r *relationRepo) DeleteFollow(ctx context.Context, userId, targetUserId int64) error {
+	start := time.Now()
 	//1.删除数据库
 	err := r.data.db.Where("user_id = ? AND to_user_id = ?", userId, targetUserId).Delete(&model.Relation{}).Error
 	if err != nil {
@@ -91,9 +98,11 @@ func (r *relationRepo) DeleteFollow(ctx context.Context, userId, targetUserId in
 		return err
 	}
 
+	r.log.Infof("DeleteFollow success , 耗时=%v", time.Since(start))
 	return nil
 }
 func (r *relationRepo) FollowUserIdList(ctx context.Context, userId int64) ([]int64, error) {
+	start := time.Now()
 	//1.缓存获取
 	var userIds []int64
 
@@ -135,11 +144,12 @@ func (r *relationRepo) FollowUserIdList(ctx context.Context, userId int64) ([]in
 		userIds = append(userIds, userId)
 	}
 
+	r.log.Infof("FollowUserIdList success , 耗时=%v", time.Since(start))
 	return userIds, nil
 }
 
 func (r *relationRepo) UserInfoList(ctx context.Context, userIdList []int64) ([]*pb.User, error) {
-
+	start := time.Now()
 	//获取关注用户的ids 然后rpc获取用户信息
 	userInfoList, err := r.data.userc.UserInfoList(context.Background(), &userV1.UserInfoListrRequest{UserId: userIdList})
 	if err != nil {
@@ -157,11 +167,13 @@ func (r *relationRepo) UserInfoList(ctx context.Context, userIdList []int64) ([]
 		}
 	}
 
+	r.log.Infof("UserInfoList success , 耗时=%v", time.Since(start))
 	return pbUserInfoList, nil
 
 }
 
 func (r *relationRepo) FollowerUserIdList(ctx context.Context, userId int64) ([]int64, error) {
+	start := time.Now()
 	//1.缓存获取
 	var userIds []int64
 
@@ -202,10 +214,12 @@ func (r *relationRepo) FollowerUserIdList(ctx context.Context, userId int64) ([]
 		userIds = append(userIds, userId)
 	}
 
+	r.log.Infof("FollowerUserIdList success , 耗时=%v", time.Since(start))
 	return userIds, nil
 }
 
 func (r *relationRepo) GetNewMessages(ctx context.Context, userId int64, friendIds []int64) ([]*messageV1.LatestMessage, error) {
+	start := time.Now()
 	//1.获取最新消息
 	latestMessages, err := r.data.messagec.GetNewMessages(context.Background(), &messageV1.GetNewMessagesRequest{UserId: strconv.FormatInt(userId, 10), ToUserId: friendIds})
 	if err != nil {
@@ -213,5 +227,6 @@ func (r *relationRepo) GetNewMessages(ctx context.Context, userId int64, friendI
 		return nil, err
 	}
 
+	r.log.Infof("GetNewMessages success , 耗时=%v", time.Since(start))
 	return latestMessages.LatestMessageList, nil
 }

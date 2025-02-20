@@ -6,6 +6,7 @@ import (
 	"favorite/pkg/tool"
 	"github.com/go-redis/redis/v8"
 	"strconv"
+	"time"
 
 	// cpb "favorite/api/comment/v1"
 
@@ -33,16 +34,17 @@ func NewBizFavoriteRepo(data *Data, logger log.Logger) biz.FavoriteRepo {
 	}
 }
 func (f *FavoriteRepo) GetAuthorIdByVideoId(ctx context.Context, videoId int64) (int64, error) {
-
+	start := time.Now()
 	vIds, err := f.data.vc.FavoriteListByVId(context.Background(), &vpb.FavoriteListReq{VideoIdList: []int64{videoId}})
 	if err != nil {
 		f.log.Error("GetAuthorIdByVideoId 调用vc.FavoriteListByVId失败 err:", err)
 		return 0, err
 	}
+	f.log.Infof("GetAuthorIdByVideoId success , GetAuthorIdByVideoId耗时=%v", time.Since(start))
 	return vIds.VideoList[0].Author.Id, nil
 }
 func (f *FavoriteRepo) FavoriteAction(ctx context.Context, authorId int64, videoId int64, userId int64, actionType int64) error {
-
+	start := time.Now()
 	var favorite model.Favorite
 
 	if err := f.data.db.Model(&model.Favorite{}).Where("video_id =? and user_id = ?", videoId, userId).Find(&favorite).Error; err != nil {
@@ -121,11 +123,13 @@ func (f *FavoriteRepo) FavoriteAction(ctx context.Context, authorId int64, video
 
 	}
 
+	f.log.Infof("FavoriteAction success , FavoriteAction耗时=%v", time.Since(start))
 	return nil
 
 }
 
 func (f *FavoriteRepo) FavoriteList(ctx context.Context, userId int64) ([]*vpb.Video, error) {
+	start := time.Now()
 	// var videos []*vpb.Video
 
 	var videoIds []string
@@ -170,11 +174,13 @@ func (f *FavoriteRepo) FavoriteList(ctx context.Context, userId int64) ([]*vpb.V
 		return nil, err
 	}
 
+	f.log.Infof("FavoriteList success , FavoriteList耗时=%v", time.Since(start))
 	return repo.VideoList, nil
 
 }
 
 func (f *FavoriteRepo) IsFavorite(ctx context.Context, videoId int64, userId int64) (bool, error) {
+	start := time.Now()
 	var isfavorite string
 	//fav::<videoId>::<userId>
 	isfavorite, err := f.data.rdb.Get(ctx, "fav::"+strconv.FormatInt(videoId, 10)+"::"+strconv.FormatInt(userId, 10)).Result()
@@ -199,10 +205,12 @@ func (f *FavoriteRepo) IsFavorite(ctx context.Context, videoId int64, userId int
 		return false, err
 	}
 
+	f.log.Infof("IsFavorite success , IsFavorite耗时=%v", time.Since(start))
 	return strconv.ParseBool(isfavorite)
 }
 
 func (f *FavoriteRepo) GetFavoriteCntByVId(ctx context.Context, videoId int64) (int64, error) {
+	start := time.Now()
 	var likeCount string
 	likeCount, err := f.data.rdb.Get(ctx, "videoFavCnt::"+strconv.FormatInt(videoId, 10)).Result()
 	if !errors.Is(err, redis.Nil) || likeCount == "" {
@@ -226,13 +234,15 @@ func (f *FavoriteRepo) GetFavoriteCntByVId(ctx context.Context, videoId int64) (
 		return 0, err
 
 	}
+
+	f.log.Infof("GetFavoriteCntByVId success , GetFavoriteCntByVId耗时=%v", time.Since(start))
 	return strconv.ParseInt(likeCount, 10, 64)
 
 }
 
 // 获取 用户的 获赞数TotalFavorited 和 点赞数量FavoriteCount
 func (f *FavoriteRepo) GetFavoriteCntByUId(ctx context.Context, userId int64) (int64, int64, error) {
-
+	start := time.Now()
 	//FavoriteCount userFavList::<userId>的size
 	favoriteCount, err := f.GetFavoriteCount(ctx, userId)
 	if err != nil {
@@ -246,5 +256,6 @@ func (f *FavoriteRepo) GetFavoriteCntByUId(ctx context.Context, userId int64) (i
 		return 0, 0, err
 	}
 
+	f.log.Infof("GetFavoriteCntByUId success , GetFavoriteCntByUId耗时=%v", time.Since(start))
 	return totalFavorited, favoriteCount, nil
 }

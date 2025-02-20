@@ -246,7 +246,7 @@ func (v *VideoUsecase) PublishList(ctx context.Context, userId int64) ([]*vpb.Vi
 
 	respVideo, err := v.GetRespVideo(ctx, videoList, userId)
 	if err != nil {
-		v.log.Error("biz.PublishList/GetRespVideo", err)
+		v.log.Error("biz.PublishList/GetRespVideo ", err)
 		return nil, err
 	}
 
@@ -267,7 +267,6 @@ func (v *VideoUsecase) WorkCnt(ctx context.Context, userId int64) (int64, error)
 		}
 		for _, video := range videos {
 			videoIds = append(videoIds, video.Id)
-
 		}
 		//存入redis
 		err = v.repo.RSavePublishVids(ctx, userId, videoIds)

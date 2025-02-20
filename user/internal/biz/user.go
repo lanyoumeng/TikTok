@@ -177,11 +177,17 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 	end1 := time.Now()
 	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetUserById耗时=%v", id, end1.Sub(start))
 
-	err = copier.Copy(&userinfo, user)
-	if err != nil {
-		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
-		return nil, err
-	}
+	//err = copier.Copy(&userinfo, user)
+	//if err != nil {
+	//	uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
+	//	return nil, err
+	//}
+	userinfo.Id = user.Id
+	userinfo.Name = user.Name
+	userinfo.Avatar = user.Avatar
+	userinfo.BackgroundImage = user.BackgroundImage
+	userinfo.Signature = user.Signature
+
 	end2 := time.Now()
 	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy(&userinfo, user) 耗时=%v", id, end2.Sub(end1))
 
@@ -205,11 +211,17 @@ func (uc *UserUsecase) UserInfo(ctx context.Context, id int64) (*v1.User, error)
 	end3 := time.Now()
 	uc.log.Infof("biz.UserInfo: userId=%v , uc.repo.RGetCountById耗时=%v", id, end3.Sub(end2))
 
-	err = copier.Copy(&userinfo, count)
-	if err != nil {
-		uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
-		return nil, err
-	}
+	userinfo.Id = count.Id
+	userinfo.FollowCount = count.FollowCount
+	userinfo.FollowerCount = count.FollowerCount
+	userinfo.WorkCount = count.WorkCount
+	userinfo.FavoriteCount = count.FavoriteCount
+	userinfo.TotalFavorited = count.TotalFavorited
+	//err = copier.Copy(&userinfo, count)
+	//if err != nil {
+	//	uc.log.Error("biz.UserInfo/copier.Copy-err:", err)
+	//	return nil, err
+	//}
 	end4 := time.Now()
 	uc.log.Infof("biz.UserInfo: userId=%v ,  copier.Copy(&userinfo, count) 耗时=%v", id, end4.Sub(end3))
 

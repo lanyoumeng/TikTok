@@ -8,6 +8,7 @@ import (
 	"comment/pkg/token"
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
+	"time"
 )
 
 type CommentService struct {
@@ -24,9 +25,7 @@ func NewCommentService(uc *biz.CommentUsecase, auth *conf.Auth, logger log.Logge
 
 // rpc Comment (douyin_comment_send_request) returns(douyin_comment_send_response);
 func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendRequest) (*pb.DouyinCommentSendResponse, error) {
-
-	//log.Debug("service/comment--req:", req)
-
+	start := time.Now()
 	user, err := token.ParseToken(req.Token, c.JwtKey)
 	if err != nil {
 		c.log.Errorf("token.ParseToken error: %v", err)
@@ -77,6 +76,7 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 
 	}
 
+	c.log.Infof("service.Comment success , Comment耗时=%v", time.Since(start))
 	return &pb.DouyinCommentSendResponse{
 		StatusCode: 0,
 		StatusMsg:  "comment success",
@@ -88,7 +88,7 @@ func (c *CommentService) Comment(ctx context.Context, req *pb.DouyinCommentSendR
 // // 获取评论列表 注意每个评论用户信息中的is_follow字段需要从favorite服务单独获取
 // rpc CommentList(douyin_comment_list_request) returns (douyin_comment_list_response);
 func (c *CommentService) CommentList(ctx context.Context, req *pb.DouyinCommentListRequest) (*pb.DouyinCommentListResponse, error) {
-
+	start := time.Now()
 	// 获取评论列表
 	commentList, err := c.uc.CommentList(ctx, req.VideoId)
 	if err != nil {
@@ -96,6 +96,7 @@ func (c *CommentService) CommentList(ctx context.Context, req *pb.DouyinCommentL
 		return nil, err
 	}
 
+	c.log.Infof("service.CommentList success , CommentList耗时=%v", time.Since(start))
 	return &pb.DouyinCommentListResponse{
 		StatusCode:  0,
 		StatusMsg:   "get comment list success",
@@ -105,6 +106,7 @@ func (c *CommentService) CommentList(ctx context.Context, req *pb.DouyinCommentL
 
 // rpc GetCommentCntByVId(GetCommentCntByVIdReq) returns (GetCommentCntByVIdResp);
 func (c *CommentService) GetCommentCntByVId(ctx context.Context, req *pb.GetCommentCntByVIdReq) (*pb.GetCommentCntByVIdResp, error) {
+	start := time.Now()
 	//GetCommentCntByVId
 	cnt, err := c.uc.GetCommentCntByVId(ctx, req.VideoId)
 	if err != nil {
@@ -112,6 +114,7 @@ func (c *CommentService) GetCommentCntByVId(ctx context.Context, req *pb.GetComm
 		return nil, err
 	}
 
+	c.log.Infof("service.GetCommentCntByVId success , GetCommentCntByVId耗时=%v", time.Since(start))
 	return &pb.GetCommentCntByVIdResp{
 		CommentCount: cnt,
 	}, nil

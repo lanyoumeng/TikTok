@@ -32,7 +32,7 @@ func NewCommentRepo(data *Data, logger log.Logger) biz.CommentRepo {
 }
 
 func (r *commentRepo) SaveComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {
-
+	start := time.Now()
 	//评论发布日期，格式 mm-dd
 	comment.CreateDate = time.Now().Format("01-02")
 	err := r.data.db.Save(comment).Error
@@ -41,21 +41,25 @@ func (r *commentRepo) SaveComment(ctx context.Context, comment *model.Comment) (
 		return nil, err
 	}
 
+	r.log.Infof("SaveComment success , commentId=%v , SaveComment耗时=%v", comment.Id, time.Since(start))
 	return comment, nil
 }
 
 func (r *commentRepo) DelComment(ctx context.Context, commentId int64) error {
+	start := time.Now()
 	err := r.data.db.Where("id = ?", commentId).Delete(&model.Comment{}).Error
 	if err != nil {
 		r.log.Errorf("DelComment-err: %v", err)
 		return err
 	}
+
+	r.log.Infof("DelComment success , commentId=%v , DelComment耗时=%v", commentId, time.Since(start))
 	return nil
 }
 
 // 根据userId查询用户信息
 func (r *commentRepo) GetUserinfoByUId(ctx context.Context, userId int64) (*pb.User, error) {
-
+	start := time.Now()
 	resp, err := r.data.userc.UserInfo(context.Background(), &userV1.UserRequest{UserId: strconv.FormatInt(userId, 10)})
 	if err != nil {
 		r.log.Errorf("Error getting user info: %v", err)
@@ -75,41 +79,44 @@ func (r *commentRepo) GetUserinfoByUId(ctx context.Context, userId int64) (*pb.U
 	userInfo.WorkCount = resp.User.WorkCount
 	userInfo.FavoriteCount = resp.User.FavoriteCount
 
+	r.log.Infof("GetUserinfoByUId success , 耗时=%v", time.Since(start))
 	return userInfo, nil
 }
 
 // 根据videoId查询作者Id
 func (r *commentRepo) GetAuthorIdByVId(ctx context.Context, videoId int64) (int64, error) {
-
+	start := time.Now()
 	resp, err := r.data.videoc.GetAIdByVId(context.Background(), &videoV1.GetAIdByVIdReq{VideoId: videoId})
 	if err != nil {
 		r.log.Errorf("Error getting author info: %v", err)
 		return 0, err
 
 	}
+
+	r.log.Infof("GetAuthorIdByVId success , 耗时=%v", time.Since(start))
 	return resp.AuthorId, nil
 
 }
 
 // 根据userId,authorId查询用户是否关注作者
 func (r *commentRepo) GetFollowByUIdAId(ctx context.Context, userId, authorId int64) (bool, error) {
-
+	start := time.Now()
 	//ctx, cancel := context.WithTimeout(context.Background(), time.Second*3000)
 	//defer cancel()
 
-	//r.log.Infof("begin isfollow at:%v", time.Now())
 	resp, err := r.data.relationc.IsFollow(context.Background(), &relationV1.IsFollowRequest{UserId: userId, AuthorId: authorId})
 	if err != nil {
 		r.log.Errorf("Error getting follow info: %v", err)
 		return false, err
 	}
-	//r.log.Infof("endisfollow at:%v, resp: %v", time.Now(), resp)
 
+	r.log.Infof("GetFollowByUIdAId success , 耗时=%v", time.Since(start))
 	return resp.IsFollow, nil
 }
 
 // 评论列表
 func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.Comment, error) {
+	start := time.Now()
 	//zset
 	//comment::video_id
 	//score: 评论发布时间戳 member: id+user_id+content
@@ -187,12 +194,14 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 		commentList = append(commentList, comment)
 	}
 	r.log.Infof("redis----commentList[0]: %v ,len(commentList):%v", commentList[0], len(commentList))
-	return commentList, nil
 
+	r.log.Infof("CommentList success , 耗时=%v", time.Since(start))
+	return commentList, nil
 }
 
 // 获取评论数
 func (r *commentRepo) GetCommentCntByVId(ctx context.Context, videoId int64) (int64, error) {
+	start := time.Now()
 	//zset
 	//comment::video_id
 	//score: 评论发布时间戳 member: id+user_id+content
@@ -212,5 +221,6 @@ func (r *commentRepo) GetCommentCntByVId(ctx context.Context, videoId int64) (in
 		return 0, err
 	}
 
+	r.log.Infof("GetCommentCntByVId success , 耗时=%v", time.Since(start))
 	return count, nil
 }

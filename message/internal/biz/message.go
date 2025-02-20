@@ -28,6 +28,7 @@ func NewMessageUsecase(repo MessageRepo, logger log.Logger) *MessageUsecase {
 }
 
 func (m *MessageUsecase) SendMessage(ctx context.Context, message model.Message) error {
+	start := time.Now()
 	// 发送消息
 
 	err := m.repo.SaveMessage(ctx, message)
@@ -35,11 +36,13 @@ func (m *MessageUsecase) SendMessage(ctx context.Context, message model.Message)
 		m.log.Error("SaveMessage err:", err)
 		return err
 	}
+	m.log.Infof("SaveMessage success , SaveMessage耗时=%v", time.Since(start))
 	return nil
 
 }
 
 func (m *MessageUsecase) GetMessageRecord(ctx context.Context, userId, toUserId, preMsgTime int64) ([]*pb.Message, error) {
+	start := time.Now()
 	// 获取消息记录
 	// 1. 查询mysql消息记录
 	messageList, err := m.repo.GetMessageRecord(ctx, userId, toUserId, preMsgTime)
@@ -61,12 +64,15 @@ func (m *MessageUsecase) GetMessageRecord(ctx context.Context, userId, toUserId,
 		}
 		pbMessageList = append(pbMessageList, pbMessage)
 	}
+
+	m.log.Infof("GetMessageRecord success , GetMessageRecord耗时=%v", time.Since(start))
 	return pbMessageList, nil
 
 }
 
 // MessageRecordRequest .
 func (m *MessageUsecase) GetLatestMessage(ctx context.Context, userId int64, friendIds []int64) ([]*pb.LatestMessage, error) {
+	start := time.Now()
 	// 获取最新消息
 	// 1. 查询mysql消息记录
 	var latestMessageList []*pb.LatestMessage
@@ -82,5 +88,7 @@ func (m *MessageUsecase) GetLatestMessage(ctx context.Context, userId int64, fri
 		latestMessageList = append(latestMessageList, latestMessage)
 
 	}
+
+	m.log.Infof("GetLatestMessage success , GetLatestMessage耗时=%v", time.Since(start))
 	return latestMessageList, nil
 }

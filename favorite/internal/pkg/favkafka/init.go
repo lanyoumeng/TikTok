@@ -21,8 +21,8 @@ func InitKafkaConsumer(
 	vc videoV1.VideoServiceClient,
 ) *kafka.Reader {
 
-	log := log.NewHelper(log.With(logger, "module", "vkafka"))
-
+	//log := log.NewHelper(log.With(logger, "module", "vkafka"))
+	log := log.NewHelper(logger)
 	reader := NewRedisKafkaReader(log, k, client, rdb, vc)
 
 	return reader

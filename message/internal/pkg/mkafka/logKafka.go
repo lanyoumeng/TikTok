@@ -52,15 +52,15 @@ func NewLogKafkaWriter(k *conf.Kafka) *KafkaWriter {
 
 		//Balancer:     &kafka.Hash{},     //把message的key进行hash，确定partition  &kafka.LeastBytes{}指定分区的balancer模式为最小字节分布  &kafka.RoundRobin{}：循环地将消息依次发送到每个分区，实现轮询效果。(默认)
 		WriteTimeout: 1 * time.Second, //设定写超时
-		RequiredAcks: kafka.RequireOne,
+		RequiredAcks: kafka.RequireNone,
 		//RequireNone不需要等待ack返回，效率最高，安全性最低；
 		// RequireOne只需要确保Leader写入成功就可以发送下一条消息；
 		// kafka.RequireAll需要确保Leader和所有Follower都写入成功才可以发送下一条消息。
 		AllowAutoTopicCreation: true, //Topic不存在时自动创建。生产环境中一般设为false，由运维管理员创建Topic并配置partition数目
-		// Async:                  true, // 异步,在后台发送消息，而不会阻塞主线程。
+		Async:                  true, // 异步,在后台发送消息，而不会阻塞主线程。
 		// Logger:      kafka.LoggerFunc(zap.NewExample().Sugar().Infof), //使用第三方日志库
 		// ErrorLogger: kafka.LoggerFunc(zap.NewExample().Sugar().Errorf),
-		// Compression: kafka.Snappy, //压缩
+		Compression: kafka.Snappy, //压缩
 	}
 	// defer writer.Close() //记得关闭连接
 

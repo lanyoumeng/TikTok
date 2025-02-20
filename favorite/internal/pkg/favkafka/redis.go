@@ -87,15 +87,13 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 			if err != nil {
 				log.Fatalf("无法创建租约: %v", err)
 			}
-
 			lockName := fmt.Sprintf("lock_%d", videoId)
 			key := fmt.Sprintf("locks/%s", lockName)
-
 			_, err = etcdClient.Put(ctx, key, "locked", clientv3.WithLease(leaseResp.ID))
 			if err != nil {
 				log.Fatalf("无法获取锁: %v", err)
 			}
-			fmt.Println("成功获取锁")
+			log.Infof("成功获取锁")
 
 			//favorite表创建/更新记录，
 			if redisKafkaMessage.Op == "u" || redisKafkaMessage.Op == "c" {

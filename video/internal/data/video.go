@@ -44,6 +44,7 @@ func (v *videoRepo) Save(ctx context.Context, video *model.Video) error {
 
 // 发布视频上传信息·到消息队列
 func (v *videoRepo) PublishKafka(ctx context.Context, videoKafkaMessage *model.VideoKafkaMessage) {
+	start := time.Now()
 	//videoByte, _ := sonic.Marshal(videoKafkaMessage)
 
 	//v.log.Debug("data/PublishKafka:", videoKafkaMessage)
@@ -74,19 +75,22 @@ func (v *videoRepo) PublishKafka(ctx context.Context, videoKafkaMessage *model.V
 		}
 
 	}
+	v.log.Infof("PublishKafka cost: %v", time.Since(start))
 
 }
 func (v *videoRepo) GetvideoByVId(ctx context.Context, videoId int64) (*model.Video, error) {
-
+	start := time.Now()
 	video := &model.Video{}
 	err := v.data.db.Model(&model.Video{}).Where("id = ?", videoId).First(&video).Error
 	if err != nil {
 		v.log.Errorf("GetvideoByVId-err:%v , videoid:%v", err, videoId)
 		return nil, err
 	}
+	v.log.Infof("GetvideoByVId cost: %v", time.Since(start))
 	return video, nil
 }
 func (v *videoRepo) GetVideoListByLatestTime(ctx context.Context, latestTime time.Time) ([]*model.Video, time.Time, error) {
+	start := time.Now()
 	videos := make([]*model.Video, 10)
 	err := v.data.db.Model(&model.Video{}).Where("created_at < ?", latestTime).Order("created_at desc").Limit(30).Find(&videos).Error
 	if err != nil {
@@ -94,7 +98,7 @@ func (v *videoRepo) GetVideoListByLatestTime(ctx context.Context, latestTime tim
 		return nil, time.Now(), err
 
 	}
-
+	v.log.Infof("GetVideoListByLatestTime cost: %v", time.Since(start))
 	if len(videos) == 0 {
 		return videos, time.Now(), nil
 	} else {
@@ -105,6 +109,7 @@ func (v *videoRepo) GetVideoListByLatestTime(ctx context.Context, latestTime tim
 
 // 获取该用户发布视频列表
 func (v *videoRepo) GetVideoListByAuthorId(ctx context.Context, userId int64) ([]*model.Video, error) {
+	start := time.Now()
 	videos := make([]*model.Video, 10)
 	err := v.data.db.Model(&model.Video{}).Where("author_id = ?", userId).Find(&videos).Error
 
@@ -113,11 +118,13 @@ func (v *videoRepo) GetVideoListByAuthorId(ctx context.Context, userId int64) ([
 		return nil, err
 	}
 
+	v.log.Infof("GetVideoListByAuthorId cost: %v , userId = %v", time.Since(start), userId)
 	return videos, nil
 
 }
 
 func (v *videoRepo) GetAuthorInfoById(ctx context.Context, authorId int64) (*vpb.User, error) {
+	start := time.Now()
 	userrepo, err := v.data.userc.UserInfo(ctx, &upb.UserRequest{UserId: strconv.FormatInt(authorId, 10)})
 	if err != nil {
 		v.log.Error("GetAuthorInfoById-err:", err)
@@ -131,33 +138,40 @@ func (v *videoRepo) GetAuthorInfoById(ctx context.Context, authorId int64) (*vpb
 		return nil, err
 	}
 
+	v.log.Infof("GetAuthorInfoById cost: %v", time.Since(start))
 	return user, nil
 
 }
 
 func (v *videoRepo) GetFavoriteCntByVId(ctx context.Context, videoId int64) (int64, error) {
+	start := time.Now()
 	favorepo, err := v.data.favc.GetFavoriteCntByVId(ctx, &fpb.GetFavoriteCntByVIdRequest{Id: videoId})
 	if err != nil {
 		v.log.Error("GetFavoriteCntByVId-err:", err)
 		return 0, err
 	}
+	v.log.Infof("GetFavoriteCntByVId cost: %v", time.Since(start))
 	return favorepo.FavoriteCount, nil
 }
 
 func (v *videoRepo) GetCommentCntByVId(ctx context.Context, videoId int64) (int64, error) {
+	start := time.Now()
 	commentrepo, err := v.data.commentc.GetCommentCntByVId(ctx, &cpb.GetCommentCntByVIdReq{VideoId: videoId})
 	if err != nil {
 		v.log.Error("GetCommentCntByVId-err:", err)
 		return 0, err
 	}
+	v.log.Infof("GetCommentCntByVId cost: %v", time.Since(start))
 	return commentrepo.CommentCount, nil
 }
 
 func (v *videoRepo) GetIsFavorite(ctx context.Context, videoId int64, userId int64) (bool, error) {
+	start := time.Now()
 	favorepo, err := v.data.favc.GetIsFavorite(ctx, &fpb.GetIsFavoriteRequest{VideoId: videoId, UserId: userId})
 	if err != nil {
 		v.log.Error("GetIsFavorite-err:", err)
 		return false, err
 	}
+	v.log.Infof("GetIsFavorite cost: %v", time.Since(start))
 	return favorepo.Favorite, nil
 }

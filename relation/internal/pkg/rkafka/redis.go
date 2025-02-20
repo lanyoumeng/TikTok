@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"relation/internal/conf"
 	"relation/internal/pkg/model"
+	"relation/pkg/tool"
 	"strconv"
 	"syscall"
 	"time"
@@ -99,7 +100,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					log.Errorf("SAdd failed: %v", err)
 				}
 				//过期时间
-				err = rdb.Expire(ctx, "follow::"+strconv.FormatInt(userId, 10), 24*time.Hour).Err()
+				err = rdb.Expire(ctx, "follow::"+strconv.FormatInt(userId, 10), tool.GetRandomExpireTime()).Err()
 				if err != nil {
 					log.Errorf("Expire failed: %v", err)
 				}
@@ -108,7 +109,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					log.Errorf("SAdd failed: %v", err)
 				}
 				//过期时间
-				err = rdb.Expire(ctx, "follower::"+strconv.FormatInt(toUserId, 10), 24*time.Hour).Err()
+				err = rdb.Expire(ctx, "follower::"+strconv.FormatInt(toUserId, 10), tool.GetRandomExpireTime()).Err()
 				if err != nil {
 					log.Errorf("Expire failed: %v", err)
 				}
@@ -123,7 +124,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					log.Errorf("SRem failed: %v", err)
 				}
 				//过期时间
-				err = rdb.Expire(ctx, "follow::"+strconv.FormatInt(userId, 10), 24*time.Hour).Err()
+				err = rdb.Expire(ctx, "follow::"+strconv.FormatInt(userId, 10), tool.GetRandomExpireTime()).Err()
 				if err != nil {
 					log.Errorf("Expire failed: %v", err)
 				}
@@ -132,7 +133,7 @@ func InitRedisKafkaConsumer(ctx context.Context, log *log.Helper, reader *kafka.
 					log.Errorf("SRem failed: %v", err)
 				}
 				//过期时间
-				err = rdb.Expire(ctx, "follower::"+strconv.FormatInt(toUserId, 10), 24*time.Hour).Err()
+				err = rdb.Expire(ctx, "follower::"+strconv.FormatInt(toUserId, 10), tool.GetRandomExpireTime()).Err()
 				if err != nil {
 					log.Errorf("Expire failed: %v", err)
 				}

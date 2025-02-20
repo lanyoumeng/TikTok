@@ -5,6 +5,7 @@ import (
 	pb "message/api/message/v1"
 	"message/internal/biz"
 	"message/internal/pkg/model"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -23,6 +24,7 @@ func NewMessageRepo(data *Data, logger log.Logger) biz.MessageRepo {
 }
 
 func (r *messageRepo) SaveMessage(ctx context.Context, message model.Message) error {
+	start := time.Now()
 	// 保存消息
 	err := r.data.db.Create(&message).Error
 	if err != nil {
@@ -30,10 +32,12 @@ func (r *messageRepo) SaveMessage(ctx context.Context, message model.Message) er
 		return err
 	}
 
+	r.log.Infof("SaveMessage success , SaveMessage耗时=%v", time.Since(start))
 	return nil
 }
 
 func (r *messageRepo) GetMessageRecord(ctx context.Context, userId, toUserId, preMsgTime int64) ([]*model.Message, error) {
+	start := time.Now()
 	// 获取消息记录
 	var messageList []*model.Message
 
@@ -46,11 +50,12 @@ func (r *messageRepo) GetMessageRecord(ctx context.Context, userId, toUserId, pr
 		return nil, err
 	}
 
+	r.log.Infof("GetMessageRecord success , GetMessageRecord耗时=%v", time.Since(start))
 	return messageList, nil
 }
 
 func (r *messageRepo) GetLatestMessage(ctx context.Context, userId, friendId int64) (*pb.LatestMessage, error) {
-
+	start := time.Now()
 	// 获取最新消息 1条
 	//看是用户发的，还是好友发的
 	var cnt1, cnt2 int64
@@ -99,5 +104,6 @@ func (r *messageRepo) GetLatestMessage(ctx context.Context, userId, friendId int
 
 	}
 
+	r.log.Infof("GetLatestMessage success , GetLatestMessage耗时=%v", time.Since(start))
 	return latestMessage, nil
 }

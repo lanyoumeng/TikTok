@@ -17,8 +17,8 @@ func InitKafkaConsumer(
 	rdb *redis.Client,
 ) *kafka.Reader {
 
-	log := log.NewHelper(log.With(logger, "module", "rkafka"))
-
+	//log := log.NewHelper(log.With(logger, "module", "rkafka"))
+	log := log.NewHelper(logger)
 	reader := NewRedisKafkaReader(log, k, rdb)
 
 	return reader

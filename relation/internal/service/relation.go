@@ -23,7 +23,7 @@ func NewRelationService(uc *biz.RelationUsecase, auth *conf.Auth, logger log.Log
 }
 
 func (s *RelationService) Relation(ctx context.Context, req *pb.DouyinRelationActionRequest) (*pb.DouyinRelationActionResponse, error) {
-	s.log.Infof("Relation start:%v", time.Now())
+	start := time.Now()
 	user, err := token.ParseToken(req.Token, s.JwtKey)
 	if err != nil {
 		s.log.Errorf("token.ParseToken error: %v", err)
@@ -37,14 +37,14 @@ func (s *RelationService) Relation(ctx context.Context, req *pb.DouyinRelationAc
 
 	}
 
-	s.log.Infof("Relation end:%v", time.Now())
+	s.log.Infof("Relation end , Relationh耗时:%v", time.Since(start))
 	return &pb.DouyinRelationActionResponse{
 		StatusCode: 0,
 		StatusMsg:  "操作成功",
 	}, nil
 }
 func (s *RelationService) RelationFollowList(ctx context.Context, req *pb.DouyinRelationFollowListRequest) (*pb.DouyinRelationFollowListResponse, error) {
-	s.log.Infof("RelationFollowList start:%v", time.Now())
+	start := time.Now()
 	//关注列表
 	//获取user
 	userInfoList := make([]*pb.User, 5)
@@ -55,7 +55,7 @@ func (s *RelationService) RelationFollowList(ctx context.Context, req *pb.Douyin
 		return nil, err
 	}
 
-	s.log.Infof("RelationFollowList end:%v", time.Now())
+	s.log.Infof("RelationFollowList end ，RelationFollowList耗时:%v", time.Since(start))
 	return &pb.DouyinRelationFollowListResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取关注列表成功",
@@ -63,7 +63,7 @@ func (s *RelationService) RelationFollowList(ctx context.Context, req *pb.Douyin
 	}, nil
 }
 func (s *RelationService) RelationFollowerList(ctx context.Context, req *pb.DouyinRelationFollowerListRequest) (*pb.DouyinRelationFollowerListResponse, error) {
-	s.log.Infof("RelationFollowerList start:%v", time.Now())
+	start := time.Now()
 	//粉丝列表
 	//获取user
 	userInfoList := make([]*pb.User, 5)
@@ -74,7 +74,7 @@ func (s *RelationService) RelationFollowerList(ctx context.Context, req *pb.Douy
 		return nil, err
 	}
 
-	s.log.Infof("RelationFollowerList end:%v", time.Now())
+	s.log.Infof("RelationFollowerList end ，RelationFollowerList耗时:%v", time.Since(start))
 	return &pb.DouyinRelationFollowerListResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取粉丝列表成功",
@@ -82,7 +82,7 @@ func (s *RelationService) RelationFollowerList(ctx context.Context, req *pb.Douy
 	}, nil
 }
 func (s *RelationService) FriendList(ctx context.Context, req *pb.DouyinRelationFriendListRequest) (*pb.DouyinRelationFriendListResponse, error) {
-	s.log.Infof("FriendList start:%v", time.Now())
+	start := time.Now()
 	//好友列表，关注和粉丝的交集
 	//获取user
 	friendList := make([]*pb.FriendUser, 5)
@@ -102,7 +102,7 @@ func (s *RelationService) FriendList(ctx context.Context, req *pb.DouyinRelation
 		return nil, err
 	}
 
-	s.log.Infof("FriendList end:%v", time.Now())
+	s.log.Infof("FriendList end ，FriendList耗时:%v", time.Since(start))
 	return &pb.DouyinRelationFriendListResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取朋友列表成功",
@@ -112,7 +112,7 @@ func (s *RelationService) FriendList(ctx context.Context, req *pb.DouyinRelation
 
 // 获取关注数和粉丝数
 func (s *RelationService) FollowCnt(ctx context.Context, req *pb.FollowCntRequest) (*pb.FollowCntResponse, error) {
-
+	start := time.Now()
 	//s.log.Debugf("FollowCnt request: %v", req)
 	//获取user
 	followCnt, followerCnt, err := s.ru.FollowCnt(ctx, req.UserId)
@@ -121,7 +121,8 @@ func (s *RelationService) FollowCnt(ctx context.Context, req *pb.FollowCntReques
 		return nil, err
 
 	}
-	//s.log.Debugf("followCnt response: %v followerCnt :%v", followCnt, followerCnt)
+
+	s.log.Infof("FollowCnt end ，FollowCnt耗时:%v", time.Since(start))
 	return &pb.FollowCntResponse{
 		FollowCnt:   followCnt,
 		FollowerCnt: followerCnt,
@@ -132,13 +133,14 @@ func (s *RelationService) FollowCnt(ctx context.Context, req *pb.FollowCntReques
 // rpc IsFollow (IsFollow_request) returns (IsFollow_response);
 func (s *RelationService) IsFollow(ctx context.Context, req *pb.IsFollowRequest) (*pb.IsFollowResponse, error) {
 
-	s.log.Debugf("IsFollow start:%v", time.Now())
+	start := time.Now()
 	flag, err := s.ru.IsFollow(ctx, req.UserId, req.AuthorId)
 	if err != nil {
 		s.log.Errorf("IsFollow error: %v", err)
 		return nil, err
 	}
-	s.log.Debugf("IsFollow  end:%v", time.Now())
+
+	s.log.Infof("IsFollow end ，IsFollow耗时:%v", time.Since(start))
 	return &pb.IsFollowResponse{
 		IsFollow: flag,
 	}, nil

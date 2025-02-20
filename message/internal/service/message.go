@@ -8,6 +8,7 @@ import (
 	"message/internal/pkg/model"
 	"message/pkg/token"
 	"strconv"
+	"time"
 
 	pb "message/api/message/v1"
 )
@@ -25,6 +26,7 @@ func NewMessageService(vc *biz.MessageUsecase, auth *conf.Auth, logger log.Logge
 
 func (s *MessageService) MessageRecord(ctx context.Context, req *pb.DouyinMessageRecordRequest) (*pb.DouyinMessageRecordResponse, error) {
 
+	start := time.Now()
 	//message douyin_message_record_request {
 	// string token = 1; // 用户鉴权token
 	//  int64 to_user_id = 2; // 对方用户id
@@ -45,6 +47,8 @@ func (s *MessageService) MessageRecord(ctx context.Context, req *pb.DouyinMessag
 		return nil, err
 
 	}
+
+	s.log.Infof("service.MessageRecord success , MessageRecord耗时=%v", time.Since(start))
 	return &pb.DouyinMessageRecordResponse{
 		StatusCode:  0,
 		StatusMsg:   "获取消息记录成功",
@@ -52,6 +56,7 @@ func (s *MessageService) MessageRecord(ctx context.Context, req *pb.DouyinMessag
 	}, nil
 }
 func (s *MessageService) MessageSend(ctx context.Context, req *pb.DouyinMessageSendRequest) (*pb.DouyinMessageSendResponse, error) {
+	start := time.Now()
 	user, err := token.ParseToken(req.Token, s.JwtKey)
 	if err != nil {
 		s.log.Errorf("token.ParseToken error: %v", err)
@@ -71,6 +76,7 @@ func (s *MessageService) MessageSend(ctx context.Context, req *pb.DouyinMessageS
 
 	}
 
+	s.log.Infof("service.MessageSend success , MessageSend耗时=%v", time.Since(start))
 	return &pb.DouyinMessageSendResponse{
 		StatusCode: 0,
 		StatusMsg:  "发送消息成功",
@@ -83,6 +89,7 @@ func (s *MessageService) MessageSend(ctx context.Context, req *pb.DouyinMessageS
 //  rpc GetNewMessages (GetNewMessages_request) returns (GetNewMessages_response);
 
 func (s *MessageService) GetNewMessages(ctx context.Context, req *pb.GetNewMessagesRequest) (*pb.GetNewMessagesResponse, error) {
+	start := time.Now()
 	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
 		s.log.Errorf("strconv.ParseInt error: %v", err)
@@ -95,6 +102,7 @@ func (s *MessageService) GetNewMessages(ctx context.Context, req *pb.GetNewMessa
 		return nil, err
 	}
 
+	s.log.Infof("service.GetNewMessages success , GetNewMessages耗时=%v", time.Since(start))
 	return &pb.GetNewMessagesResponse{
 		LatestMessageList: latestMessageList,
 	}, nil

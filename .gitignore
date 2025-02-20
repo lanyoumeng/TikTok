@@ -9,6 +9,8 @@ deply/nacos/logs
 
 deply/redis/data
 
+deply/jenkins/jenkins_home/*
+
 *.idea
 flink/flink-1.18.0/
 

@@ -33,10 +33,10 @@ func NewVdKafkaSender(k *conf.Kafka) (*kafka.Writer, error) {
 		// RequireOne只需要确保Leader写入成功就可以发送下一条消息；
 		// kafka.RequireAll需要确保Leader和所有Follower都写入成功才可以发送下一条消息。
 		AllowAutoTopicCreation: true, //Topic不存在时自动创建。生产环境中一般设为false，由运维管理员创建Topic并配置partition数目
-		// Async:                  true, // 异步,在后台发送消息，而不会阻塞主线程。
+		Async:                  true, // 异步,在后台发送消息，而不会阻塞主线程。
 		// Logger:      kafka.LoggerFunc(zap.NewExample().Sugar().Infof), //使用第三方日志库
 		// ErrorLogger: kafka.LoggerFunc(zap.NewExample().Sugar().Errorf),
-		// Compression: kafka.Snappy, //压缩
+		Compression: kafka.Snappy, //压缩
 	}
 	// defer writer.Close() //记得关闭连接
 

@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
+	"time"
 
 	messageV1 "relation/api/message/v1"
 	pb "relation/api/relation/v1"
@@ -36,7 +37,7 @@ func NewRelationUsecase(repo RelationRepo, logger log.Logger) *RelationUsecase {
 
 func (r *RelationUsecase) Follow(ctx context.Context, userId, targetUserId, actionType int64) error {
 
-	//if actionType == 1 关注操作
+	start := time.Now()
 
 	if actionType == 1 {
 		// 1. 判断是否已经关注
@@ -83,10 +84,12 @@ func (r *RelationUsecase) Follow(ctx context.Context, userId, targetUserId, acti
 		}
 	}
 
+	r.log.Infof("Follow success , userId=%v , targetUserId=%v , 耗时=%v", userId, targetUserId, time.Since(start))
 	return nil
 }
 
 func (r *RelationUsecase) FollowList(ctx context.Context, userId int64) ([]*pb.User, error) {
+	start := time.Now()
 	// 1. 获取关注列表
 	//获取关注用户的ids 然后rpc获取用户信息
 	//再获取每个用户的is_follow字段 即登录用户是否关注了该用户
@@ -108,10 +111,12 @@ func (r *RelationUsecase) FollowList(ctx context.Context, userId int64) ([]*pb.U
 		user.IsFollow = true
 	}
 
+	r.log.Infof("FollowList success , userId=%v , 耗时=%v", userId, time.Since(start))
 	return userInfoList, nil
 }
 
 func (r *RelationUsecase) FollowerList(ctx context.Context, userId int64) ([]*pb.User, error) {
+	start := time.Now()
 	// 1. 获取粉丝列表
 	//获取粉丝用户的ids 然后rpc获取用户信息
 	//再获取每个用户的is_follow字段 即登录用户是否关注了该用户
@@ -139,6 +144,7 @@ func (r *RelationUsecase) FollowerList(ctx context.Context, userId int64) ([]*pb
 		user.IsFollow = flag
 	}
 
+	r.log.Infof("FollowerList success , userId=%v , 耗时=%v", userId, time.Since(start))
 	return userInfoList, nil
 }
 
@@ -146,7 +152,7 @@ func (r *RelationUsecase) FollowerList(ctx context.Context, userId int64) ([]*pb
 // 2.获取好友信息
 // 3.获取好友最新消息和消息类型
 func (r *RelationUsecase) FriendList(ctx context.Context, userId int64) ([]*pb.FriendUser, error) {
-
+	start := time.Now()
 	// 1. 获取好友列表
 	//好友列表，关注和粉丝的交集
 
@@ -221,10 +227,12 @@ func (r *RelationUsecase) FriendList(ctx context.Context, userId int64) ([]*pb.F
 		}
 	}
 
+	r.log.Infof("FriendList success , userId=%v , 耗时=%v", userId, time.Since(start))
 	return friendList, nil
 }
 
 func (r *RelationUsecase) IsFollow(ctx context.Context, userId, toUserId int64) (bool, error) {
+	start := time.Now()
 	// 判断是否已经关注
 	isFollow, err := r.repo.IsFollow(ctx, userId, toUserId)
 	if err != nil {
@@ -232,26 +240,27 @@ func (r *RelationUsecase) IsFollow(ctx context.Context, userId, toUserId int64) 
 		return false, err
 	}
 
+	r.log.Infof("IsFollow success , userId=%v , toUserId=%v , 耗时=%v", userId, toUserId, time.Since(start))
 	return isFollow, nil
 
 }
 
 func (r *RelationUsecase) FollowCnt(ctx context.Context, userId int64) (int64, int64, error) {
+	start := time.Now()
 
-	//r.log.Debug("biz/FollowCnt start")
 	// 1. 获取关注数和粉丝数
 	followUserIdList, err := r.repo.FollowUserIdList(ctx, userId)
 	if err != nil {
 		r.log.Error("FollowUserIdList err:", err)
 		return 0, 0, err
 	}
-	//r.log.Debug("biz/FollowUserIdList end")
 
 	followerUserIdList, err := r.repo.FollowerUserIdList(ctx, userId)
 	if err != nil {
 		r.log.Error("FollowerUserIdList err:", err)
 		return 0, 0, err
 	}
-	//r.log.Debug("biz/FollowerUserIdList end")
+
+	r.log.Infof("FollowCnt success , userId=%v , 耗时=%v", userId, time.Since(start))
 	return int64(len(followUserIdList)), int64(len(followerUserIdList)), nil
 }

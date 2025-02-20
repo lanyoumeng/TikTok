@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/log"
 	"strconv"
 	"time"
 	pb "user/api/user/v1"
 	"user/internal/biz"
 	"user/internal/pkg/model"
-
-	"github.com/go-kratos/kratos/v2/log"
+	token "user/pkg/token"
 )
 
 type UserService struct {
@@ -76,19 +76,28 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 	start := time.Now()
 	s.log.Infof("service.UserInfo/  req.UserId=:%v", req.UserId)
 
-	userId, err := strconv.ParseInt(req.UserId, 10, 64)
+	//这里前端返回的req.UserId 是0 ，所以这里直接用token解析出来的userId
+	//userId, err := strconv.ParseInt(req.UserId, 10, 64)
+	//if err != nil {
+	//	s.log.Error("err:", err)
+	//	return &pb.UserResponse{
+	//		StatusCode: -1,
+	//		StatusMsg:  "ParseInt函数失败",
+	//	}, err
+	//}
+	UserClaims, err := token.ParseToken(req.Token, s.uc.JwtKey)
 	if err != nil {
 		s.log.Error("err:", err)
 		return &pb.UserResponse{
 			StatusCode: -1,
-			StatusMsg:  "ParseInt函数失败",
+			StatusMsg:  "ParseToken函数失败",
 		}, err
 	}
 
 	end1 := time.Now()
-	s.log.Infof("service.UserInfo/  userId=%v , strconv.ParseInt耗时=:%v", userId, end1.Sub(start))
+	s.log.Infof("service.UserInfo/  userId=%v , strconv.ParseInt耗时=:%v", UserClaims.UserId, end1.Sub(start))
 
-	user, err := s.uc.UserInfo(ctx, userId)
+	user, err := s.uc.UserInfo(ctx, UserClaims.UserId)
 	if err != nil {
 		s.log.Error("err:", err)
 		return &pb.UserResponse{
@@ -97,7 +106,7 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 		}, err
 	}
 
-	s.log.Infof("service.UserInfo success , userId=%v , UserInfo耗时=%v", userId, time.Since(start))
+	s.log.Infof("service.UserInfo success , userId=%v , UserInfo耗时=%v", UserClaims.UserId, time.Since(start))
 	return &pb.UserResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取用户信息成功",
