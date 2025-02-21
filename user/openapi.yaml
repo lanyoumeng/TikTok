@@ -1095,12 +1095,12 @@ components:
         user.v1.UserRegisterResponse:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                userId:
+                user_id:
                     type: string
                 token:
                     type: string
