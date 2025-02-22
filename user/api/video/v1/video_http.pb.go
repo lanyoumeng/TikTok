@@ -74,7 +74,6 @@ func _VideoService_Feed0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.
 		return ctx.Result(200, reply)
 	}
 }
-
 func _VideoService_Publish0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		// 解析 multipart/form-data 请求
@@ -117,7 +116,6 @@ func _VideoService_Publish0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx ht
 		return ctx.Result(200, reply)
 	}
 }
-
 func _VideoService_PublishList0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in DouyinPublishListRequest

@@ -171,7 +171,7 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 			return nil, err
 		}
 
-		r.log.Infof("mysql----commentList[0]: %v  ,len(commentList):%v", commentList[0], len(commentList))
+		r.log.Infof("mysql----len(commentList):%v", len(commentList))
 		//格式对 直接返回
 		return commentList, nil
 
@@ -193,7 +193,7 @@ func (r *commentRepo) CommentList(ctx context.Context, videoId int64) ([]*model.
 
 		commentList = append(commentList, comment)
 	}
-	r.log.Infof("redis----commentList[0]: %v ,len(commentList):%v", commentList[0], len(commentList))
+	r.log.Infof("redis----len(commentList):%v", len(commentList))
 
 	r.log.Infof("CommentList success , 耗时=%v", time.Since(start))
 	return commentList, nil

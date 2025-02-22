@@ -66,9 +66,19 @@ message User {
 
 
 message FriendUser {
-  User user = 1; // 嵌套User消息
-  string message = 2; // 和该好友的最新聊天消息
-  int64 msgType = 3; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
+  int64 id = 1 [json_name = "id"]; // 用户id
+  string name = 2 [json_name = "name"]; // 用户名称
+  int64 follow_count = 3 [json_name = "follow_count"]; // 关注总数
+  int64 follower_count = 4 [json_name = "follower_count"]; // 粉丝总数
+  bool is_follow = 5 [json_name = "is_follow"]; // true-已关注，false-未关注
+  string avatar = 6 [json_name = "avatar"]; // 用户头像
+  string background_image = 7 [json_name = "background_image"]; // 用户个人页顶部大图
+  string signature = 8 [json_name = "signature"]; // 个人简介
+  int64 total_favorited = 9 [json_name = "total_favorited"]; // 获赞数量
+  int64 work_count = 10 [json_name = "work_count"]; // 作品数量
+  int64 favorite_count = 11 [json_name = "favorite_count"]; // 点赞数量
+  string message = 12[json_name = "message"]; // 和该好友的最新聊天消息
+  int64 msgType = 13[json_name = "msgType"]; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
 message douyin_relation_action_request {

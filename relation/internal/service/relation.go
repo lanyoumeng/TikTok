@@ -27,13 +27,19 @@ func (s *RelationService) Relation(ctx context.Context, req *pb.DouyinRelationAc
 	user, err := token.ParseToken(req.Token, s.JwtKey)
 	if err != nil {
 		s.log.Errorf("token.ParseToken error: %v", err)
-		return nil, err
+		return &pb.DouyinRelationActionResponse{
+			StatusCode: 1,
+			StatusMsg:  "token解析失败",
+		}, err
 	}
 
 	err = s.ru.Follow(ctx, user.UserId, req.ToUserId, int64(req.ActionType))
 	if err != nil {
 		s.log.Errorf("Follow error: %v", err)
-		return nil, err
+		return &pb.DouyinRelationActionResponse{
+			StatusCode: 1,
+			StatusMsg:  "操作失败",
+		}, err
 
 	}
 

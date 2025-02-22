@@ -2,6 +2,8 @@ package data
 
 import (
 	"context"
+	"errors"
+	"gorm.io/gorm"
 	pb "message/api/message/v1"
 	"message/internal/biz"
 	"message/internal/pkg/model"
@@ -43,7 +45,9 @@ func (r *messageRepo) GetMessageRecord(ctx context.Context, userId, toUserId, pr
 
 	//preMsgTime字段还没有用到
 	//err := r.data.db.Where("from_user_id = ? AND to_user_id = ? AND create_time < ?", userId, toUserId, preMsgTime).Order("create_time desc").Limit(10).Find(&messageList).Error
-	err := r.data.db.Where("from_user_id = ? AND to_user_id = ? ", userId, toUserId).Order("create_time desc").Find(&messageList).Error
+
+	//查询用户和好友的消息记录,然后按照时间倒序排列
+	err := r.data.db.Where("(from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)", userId, toUserId, toUserId, userId).Order("create_time desc").Limit(10).Find(&messageList).Error
 
 	if err != nil {
 		r.log.Error("GetMessageRecord err:", err)
@@ -63,15 +67,15 @@ func (r *messageRepo) GetLatestMessage(ctx context.Context, userId, friendId int
 	latestMessage := &pb.LatestMessage{}
 
 	//查询好友发送的消息
-	err := r.data.db.Where("from_user_id = ? AND to_user_id = ? ", friendId, userId).Order("create_time desc").Count(&cnt1).First(&message1).Error
-	if err != nil {
+	err := r.data.db.Model(&model.Message{}).Where("from_user_id = ? AND to_user_id = ? ", friendId, userId).Order("create_time desc").Count(&cnt1).First(&message1).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		r.log.Errorf("GetLatestMessage err: %v", err)
 		return nil, err
 	}
 
 	//查询用户发送的消息
-	err = r.data.db.Where("from_user_id = ? AND to_user_id = ? ", userId, friendId).Order("create_time desc").Count(&cnt2).First(&message2).Error
-	if err != nil {
+	err = r.data.db.Model(&model.Message{}).Where("from_user_id = ? AND to_user_id = ? ", userId, friendId).Order("create_time desc").Count(&cnt2).First(&message2).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		r.log.Errorf("GetLatestMessage err: %v", err)
 		return nil, err
 	}

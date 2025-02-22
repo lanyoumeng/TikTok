@@ -93,9 +93,9 @@ message douyin_feed_request {
 
 message douyin_feed_response {
   int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
-  string status_msg = 2 [json_name = "status_code"]; // 返回状态描述
-  repeated Video video_list = 3 [json_name = "status_code"]; // 视频列表
-  int64 next_time = 4 [json_name = "status_code"]; // 本次返回的视频中，发布最早的时间，作为下次请求时的 latest_time
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  repeated Video video_list = 3 [json_name = "video_list"]; // 视频列表
+  int64 next_time = 4 [json_name = "next_time"]; // 本次返回的视频中，发布最早的时间，作为下次请求时的 latest_time
 }
 
 message douyin_publish_action_request {
@@ -106,7 +106,7 @@ message douyin_publish_action_request {
 
 message douyin_publish_action_response {
   int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
-  string status_msg = 2 [json_name = "status_code"]; // 返回状态描述
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
 }
 
 message douyin_publish_list_request {
@@ -116,8 +116,8 @@ message douyin_publish_list_request {
 
 message douyin_publish_list_response {
   int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
-  string status_msg = 2 [json_name = "status_code"]; // 返回状态描述
-  repeated Video video_list = 3 [json_name = "status_code"]; // 用户发布的视频列表
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  repeated Video video_list = 3 [json_name = "video_list"]; // 用户发布的视频列表
 }
 
 message WorkCnt_request {

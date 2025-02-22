@@ -63,8 +63,8 @@ message douyin_comment_send_request {
 
 message douyin_comment_send_response {
   int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
-  string status_msg = 2 [json_name = "status_code"]; // 返回状态描述
-  Comment comment = 3 [json_name = "status_code"]; // 评论成功返回评论内容，不需要重新拉取整个列表
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  Comment comment = 3 [json_name = "comment"]; // 评论成功返回评论内容，不需要重新拉取整个列表
 }
 
 message douyin_comment_list_request {
@@ -74,8 +74,8 @@ message douyin_comment_list_request {
 
 message douyin_comment_list_response {
   int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
-  string status_msg = 2 [json_name = "status_code"]; // 返回状态描述
-  repeated Comment comment_list = 3 [json_name = "status_code"]; // 评论列表
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  repeated Comment comment_list = 3 [json_name = "comment_list"]; // 评论列表
 }
 
 message GetCommentCntByVIdReq {

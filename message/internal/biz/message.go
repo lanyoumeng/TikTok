@@ -53,14 +53,12 @@ func (m *MessageUsecase) GetMessageRecord(ctx context.Context, userId, toUserId,
 	// 2. 转换为pb.Message
 	var pbMessageList []*pb.Message
 	for _, message := range messageList {
-		// 将 CreateTime 转换为字符串
-		createdAtStr := message.CreateTime.Format(time.RFC3339)
 		pbMessage := &pb.Message{
 			Id:         message.Id,
 			FromUserId: message.FromUserId,
 			ToUserId:   message.ToUserId,
 			Content:    message.Content,
-			CreateTime: createdAtStr,
+			CreateTime: message.CreateTime.Unix(),
 		}
 		pbMessageList = append(pbMessageList, pbMessage)
 	}

@@ -658,9 +658,9 @@ components:
                 status_code:
                     type: integer
                     format: int32
-                status_code:
+                status_msg:
                     type: string
-                status_code:
+                comment_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/comment.api.comment.v1.Comment'
@@ -683,9 +683,9 @@ components:
                 status_code:
                     type: integer
                     format: int32
-                status_code:
+                status_msg:
                     type: string
-                status_code:
+                comment:
                     $ref: '#/components/schemas/comment.api.comment.v1.Comment'
         comment.api.comment.v1.GetCommentCntByVIdResp:
             type: object
@@ -933,8 +933,28 @@ components:
         relation.api.relation.v1.FriendUser:
             type: object
             properties:
-                user:
-                    $ref: '#/components/schemas/relation.api.relation.v1.User'
+                id:
+                    type: string
+                name:
+                    type: string
+                follow_count:
+                    type: string
+                follower_count:
+                    type: string
+                is_follow:
+                    type: boolean
+                avatar:
+                    type: string
+                background_image:
+                    type: string
+                signature:
+                    type: string
+                total_favorited:
+                    type: string
+                work_count:
+                    type: string
+                favorite_count:
+                    type: string
                 message:
                     type: string
                 msgType:
@@ -1076,12 +1096,12 @@ components:
         user.v1.UserLoginResponse:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                userId:
+                user_id:
                     type: string
                 token:
                     type: string
@@ -1120,13 +1140,13 @@ components:
                 status_code:
                     type: integer
                     format: int32
-                status_code:
+                status_msg:
                     type: string
-                status_code:
+                video_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/video.api.video.v1.Video'
-                status_code:
+                next_time:
                     type: string
         video.api.video.v1.Douyin_publish_action_request:
             type: object
@@ -1144,7 +1164,7 @@ components:
                 status_code:
                     type: integer
                     format: int32
-                status_code:
+                status_msg:
                     type: string
         video.api.video.v1.Douyin_publish_list_response:
             type: object
@@ -1152,9 +1172,9 @@ components:
                 status_code:
                     type: integer
                     format: int32
-                status_code:
+                status_msg:
                     type: string
-                status_code:
+                video_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/video.api.video.v1.Video'

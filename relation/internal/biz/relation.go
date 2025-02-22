@@ -191,17 +191,29 @@ func (r *RelationUsecase) FriendList(ctx context.Context, userId int64) ([]*pb.F
 
 	friendList := make([]*pb.FriendUser, 0)
 	for _, user := range userInfoList {
-		friendList = append(friendList, &pb.FriendUser{User: user})
+		friendList = append(friendList, &pb.FriendUser{
+			Id:              user.Id,
+			Name:            user.Name,
+			FollowCount:     user.FollowCount,
+			FollowerCount:   user.FollowerCount,
+			IsFollow:        user.IsFollow,
+			Avatar:          user.Avatar,
+			BackgroundImage: user.BackgroundImage,
+			Signature:       user.Signature,
+			TotalFavorited:  user.TotalFavorited,
+			WorkCount:       user.WorkCount,
+			FavoriteCount:   user.FavoriteCount,
+		})
 	}
 
 	for _, friend := range friendList {
 		//再获取每个用户的is_follow字段 登录用户是否关注了该用户
-		flag, err := r.repo.IsFollow(ctx, userId, friend.User.Id)
+		flag, err := r.repo.IsFollow(ctx, userId, friend.Id)
 		if err != nil {
 			r.log.Error("IsFollow err:", err)
 			return nil, err
 		}
-		friend.User.IsFollow = flag
+		friend.IsFollow = flag
 	}
 
 	//3.rpc  获取好友最新消息和消息类型
@@ -219,7 +231,7 @@ func (r *RelationUsecase) FriendList(ctx context.Context, userId int64) ([]*pb.F
 
 	for _, message := range newMessages {
 		for _, friend := range friendList {
-			if message.FriendId == friend.User.Id {
+			if message.FriendId == friend.Id {
 				friend.Message = message.Content
 				friend.MsgType = message.MsgType
 			}

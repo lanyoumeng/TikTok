@@ -100,10 +100,10 @@ message UserLoginRequest {
 }
 
 message UserLoginResponse {
-    int32 status_code = 1; // 状态码，0-成功，其他值-失败
-    string status_msg = 2; // 返回状态描述
-    int64 user_id = 3; // 用户id
-    string token = 4; // 用户鉴权token
+    int32 status_code = 1 [json_name = "status_code"] ; // 状态码，0-成功，其他值-失败
+    string status_msg = 2[json_name = "status_msg"] ; // 返回状态描述
+    int64 user_id = 3[json_name = "user_id"] ; // 用户id
+    string token = 4[json_name = "token"] ; // 用户鉴权token
 }
 
 message UserRequest {
@@ -112,7 +112,7 @@ message UserRequest {
 }
 
 message UserResponse {
-    int32 status_code = 1  [json_name = "status_code"]; ;  // 状态码，0-成功，其他值-失败
+    int32 status_code = 1  [json_name = "status_code"] ;  // 状态码，0-成功，其他值-失败
     string status_msg = 2 [json_name = "status_msg"]     ; // 返回状态描述
     User user = 3 [json_name = "user"]; // 用户信息
 }
