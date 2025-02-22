@@ -95,6 +95,7 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, commen
 func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
+	whiteList["/comment.api.comment.v1.CommentService/Comment"] = struct{}{}
 
 	whiteList["/comment.api.comment.v1.CommentService/CommentList"] = struct{}{}
 	whiteList["/comment.api.comment.v1.CommentService/GetCommentCntByVId"] = struct{}{}

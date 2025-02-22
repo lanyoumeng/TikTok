@@ -650,17 +650,17 @@ components:
                     $ref: '#/components/schemas/comment.api.comment.v1.User'
                 content:
                     type: string
-                createDate:
+                create_date:
                     type: string
         comment.api.comment.v1.Douyin_comment_list_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_code:
                     type: string
-                commentList:
+                status_code:
                     type: array
                     items:
                         $ref: '#/components/schemas/comment.api.comment.v1.Comment'
@@ -680,12 +680,12 @@ components:
         comment.api.comment.v1.Douyin_comment_send_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_code:
                     type: string
-                comment:
+                status_code:
                     $ref: '#/components/schemas/comment.api.comment.v1.Comment'
         comment.api.comment.v1.GetCommentCntByVIdResp:
             type: object
@@ -699,23 +699,23 @@ components:
                     type: string
                 name:
                     type: string
-                followCount:
+                follow_count:
                     type: string
-                followerCount:
+                follower_count:
                     type: string
-                isFollow:
+                is_follow:
                     type: boolean
                 avatar:
                     type: string
-                backgroundImage:
+                background_image:
                     type: string
                 signature:
                     type: string
-                totalFavorited:
+                total_favorited:
                     type: string
-                workCount:
+                work_count:
                     type: string
-                favoriteCount:
+                favorite_count:
                     type: string
         favorite.api.favorite.v1.Douyin_favorite_action_request:
             type: object
@@ -730,20 +730,20 @@ components:
         favorite.api.favorite.v1.Douyin_favorite_action_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
         favorite.api.favorite.v1.Douyin_favorite_list_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                videoList:
+                video_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/favorite.api.favorite.v1.Video'
@@ -771,23 +771,23 @@ components:
                     type: string
                 name:
                     type: string
-                followCount:
+                follow_count:
                     type: string
-                followerCount:
+                follower_count:
                     type: string
-                isFollow:
+                is_follow:
                     type: boolean
                 avatar:
                     type: string
-                backgroundImage:
+                background_image:
                     type: string
                 signature:
                     type: string
-                totalFavorited:
+                total_favorited:
                     type: string
-                workCount:
+                work_count:
                     type: string
-                favoriteCount:
+                favorite_count:
                     type: string
         favorite.api.favorite.v1.Video:
             type: object
@@ -796,27 +796,27 @@ components:
                     type: string
                 author:
                     $ref: '#/components/schemas/favorite.api.favorite.v1.User'
-                playUrl:
+                play_url:
                     type: string
-                coverUrl:
+                cover_url:
                     type: string
-                favoriteCount:
+                favorite_count:
                     type: string
-                commentCount:
+                comment_count:
                     type: string
-                isFavorite:
+                is_favorite:
                     type: boolean
                 title:
                     type: string
         message.api.message.v1.Douyin_message_record_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                messageList:
+                message_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/message.api.message.v1.Message'
@@ -835,10 +835,10 @@ components:
         message.api.message.v1.Douyin_message_send_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
         message.api.message.v1.GetNewMessages_response:
             type: object
@@ -861,13 +861,13 @@ components:
             properties:
                 id:
                     type: string
-                toUserId:
+                to_user_id:
                     type: string
-                fromUserId:
+                from_user_id:
                     type: string
                 content:
                     type: string
-                createTime:
+                create_time:
                     type: string
         relation.api.relation.v1.Douyin_relation_action_request:
             type: object
@@ -882,44 +882,44 @@ components:
         relation.api.relation.v1.Douyin_relation_action_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
         relation.api.relation.v1.Douyin_relation_follow_list_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                userList:
+                user_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/relation.api.relation.v1.User'
         relation.api.relation.v1.Douyin_relation_follower_list_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                userList:
+                user_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/relation.api.relation.v1.User'
         relation.api.relation.v1.Douyin_relation_friend_list_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                userList:
+                user_list:
                     type: array
                     items:
                         $ref: '#/components/schemas/relation.api.relation.v1.FriendUser'
@@ -951,23 +951,23 @@ components:
                     type: string
                 name:
                     type: string
-                followCount:
+                follow_count:
                     type: string
-                followerCount:
+                follower_count:
                     type: string
-                isFollow:
+                is_follow:
                     type: boolean
                 avatar:
                     type: string
-                backgroundImage:
+                background_image:
                     type: string
                 signature:
                     type: string
-                totalFavorited:
+                total_favorited:
                     type: string
-                workCount:
+                work_count:
                     type: string
-                favoriteCount:
+                favorite_count:
                     type: string
         user.v1.UpdateFavoriteCntRequest:
             type: object
@@ -1029,23 +1029,23 @@ components:
                     type: string
                 name:
                     type: string
-                followCount:
+                follow_count:
                     type: string
-                followerCount:
+                follower_count:
                     type: string
-                isFollow:
+                is_follow:
                     type: boolean
                 avatar:
                     type: string
-                backgroundImage:
+                background_image:
                     type: string
                 signature:
                     type: string
-                totalFavorited:
+                total_favorited:
                     type: string
-                workCount:
+                work_count:
                     type: string
-                favoriteCount:
+                favorite_count:
                     type: string
         user.v1.UserInfoListResponse:
             type: object
@@ -1095,38 +1095,38 @@ components:
         user.v1.UserRegisterResponse:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
-                userId:
+                user_id:
                     type: string
                 token:
                     type: string
         user.v1.UserResponse:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_msg:
                     type: string
                 user:
                     $ref: '#/components/schemas/user.v1.User'
         video.api.video.v1.Douyin_feed_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_code:
                     type: string
-                videoList:
+                status_code:
                     type: array
                     items:
                         $ref: '#/components/schemas/video.api.video.v1.Video'
-                nextTime:
+                status_code:
                     type: string
         video.api.video.v1.Douyin_publish_action_request:
             type: object
@@ -1141,20 +1141,20 @@ components:
         video.api.video.v1.Douyin_publish_action_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_code:
                     type: string
         video.api.video.v1.Douyin_publish_list_response:
             type: object
             properties:
-                statusCode:
+                status_code:
                     type: integer
                     format: int32
-                statusMsg:
+                status_code:
                     type: string
-                videoList:
+                status_code:
                     type: array
                     items:
                         $ref: '#/components/schemas/video.api.video.v1.Video'
@@ -1191,23 +1191,23 @@ components:
                     type: string
                 name:
                     type: string
-                followCount:
+                follow_count:
                     type: string
-                followerCount:
+                follower_count:
                     type: string
-                isFollow:
+                is_follow:
                     type: boolean
                 avatar:
                     type: string
-                backgroundImage:
+                background_image:
                     type: string
                 signature:
                     type: string
-                totalFavorited:
+                total_favorited:
                     type: string
-                workCount:
+                work_count:
                     type: string
-                favoriteCount:
+                favorite_count:
                     type: string
         video.api.video.v1.Video:
             type: object
@@ -1216,15 +1216,15 @@ components:
                     type: string
                 author:
                     $ref: '#/components/schemas/video.api.video.v1.User'
-                playUrl:
+                play_url:
                     type: string
-                coverUrl:
+                cover_url:
                     type: string
-                favoriteCount:
+                favorite_count:
                     type: string
-                commentCount:
+                comment_count:
                     type: string
-                isFavorite:
+                is_favorite:
                     type: boolean
                 title:
                     type: string

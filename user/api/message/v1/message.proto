@@ -30,11 +30,11 @@ service MessageService {
 }
 
 message Message {
-  int64 id = 1; // 消息id
-  int64 to_user_id = 2; // 该消息接收者的id
-  int64 from_user_id = 3; // 该消息发送者的id
-  string content = 4; // 消息内容
-  string create_time = 5; // 消息创建时间
+  int64 id = 1 [json_name = "id"]; // 消息id
+  int64 to_user_id = 2 [json_name = "to_user_id"]; // 该消息接收者的id
+  int64 from_user_id = 3 [json_name = "from_user_id"]; // 该消息发送者的id
+  string content = 4 [json_name = "content"]; // 消息内容
+  string create_time = 5 [json_name = "create_time"]; // 消息创建时间
 }
 
 message LatestMessage {
@@ -50,9 +50,9 @@ message douyin_message_record_request {
 }
 
 message douyin_message_record_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
-  repeated Message message_list = 3; // 消息列表
+  int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  repeated Message message_list = 3 [json_name = "message_list"]; // 消息列表
 }
 
 message douyin_message_send_request {
@@ -63,8 +63,8 @@ message douyin_message_send_request {
 }
 
 message douyin_message_send_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
+  int32 status_code = 1  [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
 }
 
 message GetNewMessages_request {

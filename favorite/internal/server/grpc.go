@@ -100,6 +100,9 @@ func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
 
+	whiteList["/favorite.api.favorite.v1.FavoriteService/Favorite"] = struct{}{}
+	whiteList["/favorite.api.favorite.v1.FavoriteService/FavoriteList"] = struct{}{}
+
 	whiteList["/favorite.api.favorite.v1.FavoriteService/GetFavoriteCntByVId"] = struct{}{}
 	whiteList["/favorite.api.favorite.v1.FavoriteService/GetIsFavorite"] = struct{}{}
 	whiteList["/favorite.api.favorite.v1.FavoriteService/GetFavoriteCntByUId"] = struct{}{}

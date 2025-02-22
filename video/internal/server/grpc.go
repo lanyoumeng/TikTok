@@ -97,6 +97,8 @@ func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
 	whiteList["/video.api.video.v1.VideoService/Feed"] = struct{}{}
+	whiteList["/video.api.video.v1.VideoService/Publish"] = struct{}{}
+	whiteList["/video.api.video.v1.VideoService/PublishList"] = struct{}{}
 
 	whiteList["/video.api.video.v1.VideoService/WorkCnt"] = struct{}{}
 	whiteList["/video.api.video.v1.VideoService/FavoriteListByVId"] = struct{}{}

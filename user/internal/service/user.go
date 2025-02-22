@@ -76,28 +76,31 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 	start := time.Now()
 	s.log.Infof("service.UserInfo/  req.UserId=:%v", req.UserId)
 
-	//这里前端返回的req.UserId 是0 ，所以这里直接用token解析出来的userId
-	//userId, err := strconv.ParseInt(req.UserId, 10, 64)
-	//if err != nil {
-	//	s.log.Error("err:", err)
-	//	return &pb.UserResponse{
-	//		StatusCode: -1,
-	//		StatusMsg:  "ParseInt函数失败",
-	//	}, err
-	//}
-	UserClaims, err := token.ParseToken(req.Token, s.uc.JwtKey)
+	//这里app前端返回的req.UserId 是0，需要使用用token解析出来的userId
+	//但是微服务通信时使用 userId
+	userId, err := strconv.ParseInt(req.UserId, 10, 64)
 	if err != nil {
 		s.log.Error("err:", err)
 		return &pb.UserResponse{
 			StatusCode: -1,
-			StatusMsg:  "ParseToken函数失败",
+			StatusMsg:  "ParseInt函数失败",
 		}, err
 	}
-
+	if userId == 0 {
+		UserClaims, err := token.ParseToken(req.Token, s.uc.JwtKey)
+		if err != nil {
+			s.log.Error("err:", err)
+			return &pb.UserResponse{
+				StatusCode: -1,
+				StatusMsg:  "ParseToken函数失败",
+			}, err
+		}
+		userId = UserClaims.UserId
+	}
 	end1 := time.Now()
-	s.log.Infof("service.UserInfo/  userId=%v , strconv.ParseInt耗时=:%v", UserClaims.UserId, end1.Sub(start))
+	s.log.Infof("service.UserInfo/  userId=%v , strconv.ParseInt耗时=:%v", userId, end1.Sub(start))
 
-	user, err := s.uc.UserInfo(ctx, UserClaims.UserId)
+	user, err := s.uc.UserInfo(ctx, userId)
 	if err != nil {
 		s.log.Error("err:", err)
 		return &pb.UserResponse{
@@ -106,7 +109,7 @@ func (s *UserService) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.Us
 		}, err
 	}
 
-	s.log.Infof("service.UserInfo success , userId=%v , UserInfo耗时=%v", UserClaims.UserId, time.Since(start))
+	s.log.Infof("service.UserInfo success , userId=%v , UserInfo耗时=%v", userId, time.Since(start))
 	return &pb.UserResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取用户信息成功",

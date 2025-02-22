@@ -98,7 +98,7 @@ func (v *VideoService) PublishList(ctx context.Context, req *pb.DouyinPublishLis
 		return nil, err
 	}
 
-	v.log.Infof("service.PublishList success , PublishList耗时=%v", time.Since(start))
+	v.log.Infof("service.PublishList success , PublishList耗时=%v , publishList =%v", time.Since(start), publishList)
 	return &pb.DouyinPublishListResponse{
 		StatusCode: 0,
 		StatusMsg:  "获取发布视频列表成功",

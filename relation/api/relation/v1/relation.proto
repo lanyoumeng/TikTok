@@ -51,18 +51,19 @@ service RelationService {
 }
 
 message User {
-  int64 id = 1; // 用户id
-  string name = 2; // 用户名称
-  int64 follow_count = 3; // 关注总数
-  int64 follower_count = 4; // 粉丝总数
-  bool is_follow = 5; // true-已关注，false-未关注 即登录用户是否关注了该用户
-  string avatar = 6; //用户头像
-  string background_image = 7; //用户个人页顶部大图
-  string signature = 8; //个人简介
-  int64 total_favorited = 9; //获赞数量
-  int64 work_count = 10; //作品数量
-  int64 favorite_count = 11; //点赞数量
+  int64 id = 1 [json_name = "id"]; // 用户id
+  string name = 2 [json_name = "name"]; // 用户名称
+  int64 follow_count = 3 [json_name = "follow_count"]; // 关注总数
+  int64 follower_count = 4 [json_name = "follower_count"]; // 粉丝总数
+  bool is_follow = 5 [json_name = "is_follow"]; // true-已关注，false-未关注
+  string avatar = 6 [json_name = "avatar"]; // 用户头像
+  string background_image = 7 [json_name = "background_image"]; // 用户个人页顶部大图
+  string signature = 8 [json_name = "signature"]; // 个人简介
+  int64 total_favorited = 9 [json_name = "total_favorited"]; // 获赞数量
+  int64 work_count = 10 [json_name = "work_count"]; // 作品数量
+  int64 favorite_count = 11 [json_name = "favorite_count"]; // 点赞数量
 }
+
 
 message FriendUser {
   User user = 1; // 嵌套User消息
@@ -77,8 +78,8 @@ message douyin_relation_action_request {
 }
 
 message douyin_relation_action_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
+  int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_msg"] ; // 返回状态描述
 }
 
 message douyin_relation_follow_list_request {
@@ -87,9 +88,9 @@ message douyin_relation_follow_list_request {
 }
 
 message douyin_relation_follow_list_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
-  repeated User user_list = 3; // 用户信息列表
+  int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  repeated User user_list = 3 [json_name = "user_list"]; // 用户信息列表
 }
 
 message douyin_relation_follower_list_request {
@@ -98,9 +99,9 @@ message douyin_relation_follower_list_request {
 }
 
 message douyin_relation_follower_list_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
-  repeated User user_list = 3; // 用户列表
+  int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  repeated User user_list = 3 [json_name = "user_list"]; // 用户列表
 }
 
 message douyin_relation_friend_list_request {
@@ -109,9 +110,9 @@ message douyin_relation_friend_list_request {
 }
 
 message douyin_relation_friend_list_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
-  repeated FriendUser user_list = 3; // 用户列表
+  int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_msg"]; // 返回状态描述
+  repeated FriendUser user_list = 3 [json_name = "user_list"]; // 用户列表
 }
 
 message FollowCnt_request {

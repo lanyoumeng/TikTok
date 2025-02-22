@@ -95,6 +95,10 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, relati
 func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
+	whiteList["/relation.api.relation.v1.RelationService/Relation"] = struct{}{}
+	whiteList["/relation.api.relation.v1.RelationService/RelationFollowList"] = struct{}{}
+	whiteList["/relation.api.relation.v1.RelationService/RelationFollowerList"] = struct{}{}
+	whiteList["/relation.api.relation.v1.RelationService/FriendList"] = struct{}{}
 
 	whiteList["/relation.api.relation.v1.RelationService/FollowCnt"] = struct{}{}
 	whiteList["/relation.api.relation.v1.RelationService/IsFollow"] = struct{}{}

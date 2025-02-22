@@ -95,8 +95,9 @@ func NewGRPCServer(pro *conf.Prometheus, c *conf.Server, Auth *conf.Auth, messag
 func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
-
-	whiteList["/message.api.message.v1.GetNewMessages"] = struct{}{}
+	whiteList["/message.api.message.v1.MessageService/MessageRecord"] = struct{}{}
+	whiteList["/message.api.message.v1.MessageService/MessageSend"] = struct{}{}
+	whiteList["/message.api.message.v1.MessageService/GetNewMessages"] = struct{}{}
 
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {

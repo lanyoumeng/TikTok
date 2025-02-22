@@ -31,25 +31,27 @@ service CommentService {
 }
 
 message Comment {
-  int64 id = 1; // 视频评论id
-  User user = 2; // 评论用户信息
-  string content = 3; // 评论内容
-  string create_date = 4; // 评论发布日期，格式 mm-dd
+  int64 id = 1  [json_name = "id"]; // 视频评论id
+  User user = 2 [json_name = "user"]; // 评论用户信息
+  string content = 3 [json_name = "content"]; // 评论内容
+  string create_date = 4 [json_name = "create_date"]; // 评论发布日期，格式 mm-dd
 }
 
+
 message User {
-  int64 id = 1; // 用户id
-  string name = 2; // 用户名称
-  int64 follow_count = 3; // 关注总数
-  int64 follower_count = 4; // 粉丝总数
-  bool is_follow = 5; // true-已关注，false-未关注
-  string avatar = 6; // 用户头像
-  string background_image = 7; // 用户个人页顶部大图
-  string signature = 8; // 个人简介
-  int64 total_favorited = 9; // 获赞数量
-  int64 work_count = 10; // 作品数量
-  int64 favorite_count = 11; // 点赞数量
+  int64 id = 1 [json_name = "id"]; // 用户id
+  string name = 2 [json_name = "name"]; // 用户名称
+  int64 follow_count = 3 [json_name = "follow_count"]; // 关注总数
+  int64 follower_count = 4 [json_name = "follower_count"]; // 粉丝总数
+  bool is_follow = 5 [json_name = "is_follow"]; // true-已关注，false-未关注
+  string avatar = 6 [json_name = "avatar"]; // 用户头像
+  string background_image = 7 [json_name = "background_image"]; // 用户个人页顶部大图
+  string signature = 8 [json_name = "signature"]; // 个人简介
+  int64 total_favorited = 9 [json_name = "total_favorited"]; // 获赞数量
+  int64 work_count = 10 [json_name = "work_count"]; // 作品数量
+  int64 favorite_count = 11 [json_name = "favorite_count"]; // 点赞数量
 }
+
 
 message douyin_comment_send_request {
   string token = 1; // 用户鉴权token
@@ -60,9 +62,9 @@ message douyin_comment_send_request {
 }
 
 message douyin_comment_send_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
-  Comment comment = 3; // 评论成功返回评论内容，不需要重新拉取整个列表
+  int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_code"]; // 返回状态描述
+  Comment comment = 3 [json_name = "status_code"]; // 评论成功返回评论内容，不需要重新拉取整个列表
 }
 
 message douyin_comment_list_request {
@@ -71,9 +73,9 @@ message douyin_comment_list_request {
 }
 
 message douyin_comment_list_response {
-  int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
-  repeated Comment comment_list = 3; // 评论列表
+  int32 status_code = 1 [json_name = "status_code"]; // 状态码，0-成功，其他值-失败
+  string status_msg = 2 [json_name = "status_code"]; // 返回状态描述
+  repeated Comment comment_list = 3 [json_name = "status_code"]; // 评论列表
 }
 
 message GetCommentCntByVIdReq {

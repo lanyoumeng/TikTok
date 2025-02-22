@@ -68,7 +68,7 @@ service UserService {
 }
 
 message User {
-    int64 id = 1 [json_name = "id ="]; // 用户id
+    int64 id = 1 [json_name = "id"]; // 用户id
     string name = 2 [json_name = "name"]; // 用户名称
     int64 follow_count = 3 [json_name = "follow_count"]; // 关注总数
     int64 follower_count = 4 [json_name = "follower_count"]; // 粉丝总数

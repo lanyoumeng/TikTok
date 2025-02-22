@@ -372,179 +372,101 @@ func (v *VideoUsecase) GetRespVideo(ctx context.Context, videoList []*model.Vide
 	var m sync.Map
 	eg, ctx := errgroup.WithContext(ctx)
 
-	// 使用 goroutine 提高接口性能
-	// 并发RPC调用获取author信息、favoriteCount、commentCount和isFavorite
+	// 对每个视频启动一个 goroutine 并在内部并发获取各项数据
 	for _, video := range videoList {
-
-		//获取作者信息  video 的redis没有缓存
+		video := video // 捕获循环变量
 		eg.Go(func() error {
-			select {
-			case <-ctx.Done():
-				return nil
-			default:
-				author, err := v.repo.GetAuthorInfoById(ctx, video.AuthorId)
+			// 使用子 errgroup 并发获取各数据项
+			var (
+				author        *vpb.User
+				favoriteCount int64
+				commentCount  int64
+				isFavorite    bool
+			)
+			eg2, ctx2 := errgroup.WithContext(ctx)
+
+			// 获取作者信息
+			eg2.Go(func() error {
+				a, err := v.repo.GetAuthorInfoById(ctx2, video.AuthorId)
 				if err != nil {
-					v.log.Errorw("Failed to list posts", "err", err)
+					v.log.Errorw("Failed to get author info", "videoId", video.Id, "err", err)
 					return err
 				}
-
-				// 读取数据
-				value, exists := m.Load(video.Id)
-				if exists {
-					// 数据存在，进行修改并再次写入
-					if existVideo, ok := value.(*vpb.Video); ok {
-						// 在现有数据的基础上修改
-						existVideo.Id = video.Id
-						existVideo.PlayUrl = video.PlayUrl
-						existVideo.CoverUrl = video.CoverUrl
-						existVideo.Title = video.Title
-						existVideo.Author = author
-
-						// 将修改后的数据重新存储到 sync.Map 中
-						m.Store(video.Id, existVideo)
-					} else {
-						// 类型断言失败，记录错误并处理
-						v.log.Errorw("Failed to assert type for video ID", "id", video.Id, "value", value)
-						return errors.New("类型断言失败")
-					}
-				} else {
-					// 数据不存在，进行初始化并存储
-					m.Store(video.Id, &vpb.Video{
-						Id:       video.Id,
-						PlayUrl:  video.PlayUrl,
-						CoverUrl: video.CoverUrl,
-						Title:    video.Title,
-						Author:   author,
-					})
-				}
-
+				author = a
 				return nil
-			}
-		})
+			})
 
-		//获取视频喜欢数目
-		eg.Go(func() error {
-			select {
-			case <-ctx.Done():
-				return nil
-			default:
-				favorCount, err := v.repo.GetFavoriteCntByVId(ctx, video.AuthorId)
+			// 获取视频喜欢数目
+			eg2.Go(func() error {
+				fc, err := v.repo.GetFavoriteCntByVId(ctx2, video.AuthorId)
 				if err != nil {
-					v.log.Errorw("v.repo.GetFavoriteCntByVId(ctx, video.AuthorId)", "err", err)
+					v.log.Errorw("Failed to get favorite count", "videoId", video.Id, "err", err)
 					return err
 				}
-				// 读取数据
-				value, exists := m.Load(video.Id)
-				if exists {
-					// 数据存在，进行修改并再次写入
-					if existVideo, ok := value.(*vpb.Video); ok {
-						// 在现有数据的基础上修改
-						existVideo.FavoriteCount = favorCount
-						// 将修改后的数据重新存储到 sync.Map 中
-						m.Store(video.Id, existVideo)
-					} else {
-						// 类型断言失败，记录错误并处理
-						v.log.Errorw("Failed to assert type for video ID", "id", video.Id, "value", value)
-						return errors.New("类型断言失败")
-					}
-				} else {
-					// 数据不存在，进行初始化并存储
-					m.Store(video.Id, &vpb.Video{
-						FavoriteCount: favorCount,
-					})
-				}
+				favoriteCount = fc
+				return nil
+			})
 
-				return nil
-			}
-		})
-		//获取视频评论数量
-		eg.Go(func() error {
-			select {
-			case <-ctx.Done():
-				return nil
-			default:
-				commentCount, err := v.repo.GetCommentCntByVId(ctx, video.AuthorId)
+			// 获取视频评论数量
+			eg2.Go(func() error {
+				cc, err := v.repo.GetCommentCntByVId(ctx2, video.AuthorId)
 				if err != nil {
-					v.log.Errorw("v.repo.GetFavoriteCntByVId(ctx, video.AuthorId)", "err", err)
+					v.log.Errorw("Failed to get comment count", "videoId", video.Id, "err", err)
 					return err
 				}
-				// 读取数据
-				value, exists := m.Load(video.Id)
-				if exists {
-					// 数据存在，进行修改并再次写入
-					if existVideo, ok := value.(*vpb.Video); ok {
-						// 在现有数据的基础上修改
-						existVideo.CommentCount = commentCount
-						// 将修改后的数据重新存储到 sync.Map 中
-						m.Store(video.Id, existVideo)
-					} else {
-						// 类型断言失败，记录错误并处理
-						v.log.Errorw("Failed to assert type for video ID", "id", video.Id, "value", value)
-						return errors.New("类型断言失败")
-					}
-				} else {
-					// 数据不存在，进行初始化并存储
-					m.Store(video.Id, &vpb.Video{
-						CommentCount: commentCount,
-					})
-				}
+				commentCount = cc
+				return nil
+			})
 
-				return nil
-			}
-		})
-		//获取用户对视频是否喜欢
-		eg.Go(func() error {
-			select {
-			case <-ctx.Done():
-				return nil
-			default:
-				isFavorite, err := v.repo.GetIsFavorite(ctx, video.Id, userId)
+			// 获取用户对视频是否喜欢
+			eg2.Go(func() error {
+				fav, err := v.repo.GetIsFavorite(ctx2, video.Id, userId)
 				if err != nil {
-					v.log.Errorw("v.repo.GetIsFavorite(ctx, video.AuthorId, userId)", "err", err)
+					v.log.Errorw("Failed to get isFavorite", "videoId", video.Id, "err", err)
 					return err
 				}
-				// 读取数据
-				value, exists := m.Load(video.Id)
-				if exists {
-					// 数据存在，进行修改并再次写入
-					if existVideo, ok := value.(*vpb.Video); ok {
-						// 在现有数据的基础上修改
-						existVideo.IsFavorite = isFavorite
-						// 将修改后的数据重新存储到 sync.Map 中
-						m.Store(video.Id, existVideo)
-					} else {
-						// 类型断言失败，记录错误并处理
-						v.log.Errorw("Failed to assert type for video ID", "id", video.Id, "value", value)
-						return errors.New("类型断言失败")
-					}
-				} else {
-					// 数据不存在，进行初始化并存储
-					m.Store(video.Id, &vpb.Video{
-						IsFavorite: isFavorite,
-					})
-				}
+				isFavorite = fav
 				return nil
-			}
-		})
+			})
 
+			// 等待所有子任务完成
+			if err := eg2.Wait(); err != nil {
+				return err
+			}
+
+			// 构造最终的响应数据，一次性更新
+			finalVideo := &vpb.Video{
+				Id:            video.Id,
+				PlayUrl:       video.PlayUrl,
+				CoverUrl:      video.CoverUrl,
+				Title:         video.Title,
+				Author:        author,
+				FavoriteCount: favoriteCount,
+				CommentCount:  commentCount,
+				IsFavorite:    isFavorite,
+			}
+			m.Store(video.Id, finalVideo)
+			return nil
+		})
 	}
 
+	// 等待所有视频任务完成
 	if err := eg.Wait(); err != nil {
-		v.log.Errorw("Failed to wait all function calls returned", "err", err)
+		v.log.Errorw("Failed to wait for all video tasks", "err", err)
 		return nil, err
 	}
 
+	// 从 sync.Map 中一次性构造响应列表
 	resp := make([]*vpb.Video, 0, len(videoList))
-
 	for _, val := range videoList {
-		video, ok := m.Load(val.Id)
+		videoData, ok := m.Load(val.Id)
 		if !ok {
-			v.log.Error("Failed to load video from sync.Map  video_id:", val.Id)
-			return nil, errors.New("Failed to load video from sync Map")
+			v.log.Error("Failed to load video from sync.Map", "video_id", val.Id)
+			return nil, errors.New("failed to load video from sync.Map")
 		}
-		resp = append(resp, video.(*vpb.Video))
+		resp = append(resp, videoData.(*vpb.Video))
 	}
 
-	v.log.Infof("biz.GetRespVideo success , biz.GetRespVideo耗时=%v", time.Since(start))
+	v.log.Infof("biz.GetRespVideo success, 耗时=%v", time.Since(start))
 	return resp, nil
 }
