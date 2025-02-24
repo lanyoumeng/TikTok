@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: logstash
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: logstash
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: logstash
+    spec:
+      containers:
+        - env:
+            - name: LS_JAVA_OPTS
+              value: -Xms1024m -Xmx1024m
+            - name: MONITORING_ENABLED
+              value: "false"
+            - name: TZ
+              value: Asia/Shanghai
+          image: logstash:8.6.0
+          imagePullPolicy: IfNotPresent
+          name: logstash
+          ports:
+            - containerPort: 5044
+              protocol: TCP
+            - containerPort: 50000
+              protocol: TCP
+            - containerPort: 9600
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /usr/share/logstash/pipeline/
+              name: logstash-hostpath
+
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /home/lanmengyou/code/go_code/TikTok/deply/logstash/
+          name: logstash-hostpath
+

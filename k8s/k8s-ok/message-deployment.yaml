@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: message
+  name: message
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: message
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: message
+    spec:
+      containers:
+        - image: lanmengyou/tiktok-message:v1.0.0
+          imagePullPolicy: IfNotPresent
+          name: message
+          ports:
+            - containerPort: 8006
+              protocol: TCP
+            - containerPort: 8886
+              protocol: TCP
+      restartPolicy: Always

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: apisix
+  name: apisix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: apisix
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: apisix
+    spec:
+      containers:
+        - image: apache/apisix:3.5.0-debian
+          imagePullPolicy: IfNotPresent
+          name: apisix
+          ports:
+            - containerPort: 9180
+              protocol: TCP
+            - containerPort: 9080
+              protocol: TCP
+            - containerPort: 9091
+              protocol: TCP
+            - containerPort: 9443
+              protocol: TCP
+            - containerPort: 9092
+              protocol: TCP
+            - containerPort: 80
+              protocol: TCP
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 443
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /usr/local/apisix/conf/config.yaml
+              subPath: config.yaml
+              name: config
+          command: ["/bin/sh", "-c"]
+          args: ["apisix reload -c /usr/local/apisix/conf/config.yaml && exec /usr/local/bin/apisix reload -c /usr/local/apisix/conf/config.yaml"]
+      restartPolicy: Always
+      volumes:
+        - name: config
+          configMap:
+            name: apisix-config

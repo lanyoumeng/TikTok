@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: zoo
+  name: zoo
+spec:
+  ports:
+    - name: "2181"
+      port: 2181
+      targetPort: 2181
+  selector:
+    io.kompose.service: zoo

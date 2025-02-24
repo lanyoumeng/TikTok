@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: etcd-node2
+  name: etcd-node2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: etcd-node2
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: etcd-node2
+    spec:
+      containers:
+        - env:
+            - name: ALLOW_NONE_AUTHENTICATION
+              value: "yes"
+            - name: ETCD_ADVERTISE_CLIENT_URLS
+              value: http://etcd-node2:2379
+            - name: ETCD_DATA_DIR
+              value: /etcd-data
+            - name: ETCD_ENABLE_V2
+              value: "true"
+            - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+              value: http://etcd-node2:2380
+            - name: ETCD_INITIAL_CLUSTER
+              value: etcd-node=http://etcd-node:2380,etcd-node2=http://etcd-node2:2380,etcd-node3=http://etcd-node3:2380
+            - name: ETCD_INITIAL_CLUSTER_STATE
+              value: new
+            - name: ETCD_INITIAL_CLUSTER_TOKEN
+              value: etcd-cluster
+            - name: ETCD_LISTEN_CLIENT_URLS
+              value: http://0.0.0.0:2379
+            - name: ETCD_LISTEN_PEER_URLS
+              value: http://0.0.0.0:2380
+            - name: ETCD_NAME
+              value: etcd-node2
+          image: quay.io/coreos/etcd:v3.5.0
+          imagePullPolicy: IfNotPresent
+          name: etcd-node2
+          ports:
+            - containerPort: 2379
+              protocol: TCP
+            - containerPort: 2380
+              protocol: TCP
+      restartPolicy: Always

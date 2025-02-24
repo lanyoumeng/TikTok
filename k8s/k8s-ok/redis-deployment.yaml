@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redis
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: redis
+    spec:
+      containers:
+        - args:
+            - redis-server
+            - /etc/redis/redis.conf
+          image: redis:6.2.7
+          imagePullPolicy: IfNotPresent
+          name: redis
+          ports:
+            - containerPort: 6379
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: redis-hostpath0
+            - mountPath: /etc/redis/redis.conf
+              name: redis-hostpath1
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /home/lanmengyou/code/go_code/TikTok/deply/redis/data
+          name: redis-hostpath0
+        - hostPath:
+            path: /home/lanmengyou/code/go_code/TikTok/deply/redis/redis.conf
+          name: redis-hostpath1

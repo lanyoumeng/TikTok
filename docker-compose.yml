@@ -1,3 +1,4 @@
+version: '3.8'
 services:
 
   etcd-node:
@@ -322,15 +323,12 @@ services:
     environment:
       - JAVA_OPTS=-Duser.timezone=Asia/Shanghai
 
-
   user:
-    build: ./user
+    image: lanmengyou/tiktok-user:v1.0.0
     container_name: user
-    #    network_mode: host
-    #    ports:
-    #      - "8001:8001"
-    #      - "8881:8881"
-    #      - "7271:7271"
+    ports:
+      - "8001:8001"
+      - "8881:8881"
     depends_on:
       - mysql
       - Redis
@@ -350,9 +348,11 @@ services:
       - TikTok-net
 
   video:
-    build: ./video
+    image: lanmengyou/tiktok-video:v1.0.0
     container_name: video
-    #    network_mode: host
+    ports:
+      - "8002:8002"
+      - "8882:8882"
     depends_on:
       - mysql
       - Redis
@@ -371,10 +371,12 @@ services:
     networks:
       - TikTok-net
 
-
   favorite:
-    build: ./favorite
+    image: lanmengyou/tiktok-favorite:v1.0.0
     container_name: favorite
+    ports:
+      - "8003:8003"
+      - "8883:8883"
     depends_on:
       - mysql
       - Redis
@@ -394,8 +396,11 @@ services:
       - TikTok-net
 
   comment:
-    build: ./comment
+    image: lanmengyou/tiktok-comment:v1.0.0
     container_name: comment
+    ports:
+      - "8004:8004"
+      - "8884:8884"
     depends_on:
       - mysql
       - Redis
@@ -415,12 +420,11 @@ services:
       - TikTok-net
 
   relation:
-    build: ./relation
+    image: lanmengyou/tiktok-relation:v1.0.0
     container_name: relation
     ports:
       - "8005:8005"
       - "8885:8885"
-      - "7275:7275"
     depends_on:
       - mysql
       - Redis
@@ -439,9 +443,8 @@ services:
     networks:
       - TikTok-net
 
-
   message:
-    build: ./message
+    image: lanmengyou/tiktok-message:v1.0.0
     container_name: message
     ports:
       - "8006:8006"
@@ -463,7 +466,6 @@ services:
       - zoo
     networks:
       - TikTok-net
-
 
 
 networks:

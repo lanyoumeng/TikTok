@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: comment
+  name: comment
+spec:
+  ports:
+    - name: "8004"
+      port: 8004
+      targetPort: 8004
+    - name: "8884"
+      port: 8884
+      targetPort: 8884
+  selector:
+    io.kompose.service: comment

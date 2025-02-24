@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: es
+  name: es
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: es
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: es
+    spec:
+      containers:
+        - env:
+            - name: ES_JAVA_OPTS
+              value: -Xms512m -Xmx512m
+            - name: TAKE_FILE_OWNERSHIP
+              value: "true"
+            - name: bootstrap.memory_lock
+              value: "true"
+            - name: cluster.name
+              value: elasticsearch
+            - name: discovery.type
+              value: single-node
+            - name: node.name
+              value: es
+            - name: xpack.security.enabled
+              value: "false"
+            - name: xpack.security.http.ssl.enabled
+              value: "false"
+            - name: xpack.security.transport.ssl.enabled
+              value: "false"
+          image: elasticsearch:8.6.0
+          imagePullPolicy: IfNotPresent
+          name: es
+          ports:
+            - containerPort: 9200
+              protocol: TCP
+            - containerPort: 9300
+              protocol: TCP
+          securityContext:
+            privileged: true
+#          volumeMounts:
+#            - mountPath: /usr/share/elasticsearch/logs
+#              name: es-hostpath1
+#      restartPolicy: Always
+#      volumes:
+#        - hostPath:
+#            path: /home/lanmengyou/code/go_code/TikTok/deply/es/logs
+#          name: es-hostpath1
+

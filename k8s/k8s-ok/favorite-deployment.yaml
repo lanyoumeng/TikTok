@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: favorite
+  name: favorite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: favorite
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: favorite
+    spec:
+      containers:
+        - image: lanmengyou/tiktok-favorite:v1.0.0
+          imagePullPolicy: IfNotPresent
+          name: favorite
+          ports:
+            - containerPort: 8003
+              protocol: TCP
+            - containerPort: 8883
+              protocol: TCP
+      restartPolicy: Always

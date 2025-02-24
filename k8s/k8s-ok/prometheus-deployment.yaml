@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: prometheus
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: prometheus
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /home/lanmengyou/code/go_code/kompose/kompose convert -f docker-compose.yml --volumes hostPath -o ./k8s
+        kompose.version: 1.21.0 (992df58d8)
+      labels:
+        io.kompose.service: prometheus
+    spec:
+      containers:
+        - image: prom/prometheus
+          imagePullPolicy: IfNotPresent
+          name: prometheus
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/prometheus/prometheus.yaml
+              name: prometheus-hostpath
+      hostname: prometheus
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /home/lanmengyou/code/go_code/TikTok/deply/prometheus/prometheus.yaml
+          name: prometheus-hostpath
